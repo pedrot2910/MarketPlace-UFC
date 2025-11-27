@@ -1,16 +1,22 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Lock, Mail } from "lucide-react";
-import { useAuth } from "../hooks/auth";
+import { useNavigate } from "react-router-dom";
+import { Mail, Lock, User } from "lucide-react";
 
-export default function Login() {
+export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const navigate = useNavigate();
+
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password);
+
+    // Simulação de cadastro
+    if (name && email && password) {
+      navigate("/login"); // volta para login após cadastrar
+    }
   };
 
   return (
@@ -34,13 +40,30 @@ export default function Login() {
             className="mx-auto w-24 h-24 object-contain"
           />
           <h1 className="text-3xl font-bold text-[#EAEFFE] drop-shadow-[0_0_10px_rgba(151,135,243,0.7)]">
-            Bem-vindo ao ReUse
+            Crie sua conta
           </h1>
-          <p className="text-[#EAEFFE]/80 mt-2">Entre para continuar</p>
+          <p className="text-[#EAEFFE]/80 mt-2">Comece a usar o ReUse</p>
         </motion.div>
 
-        {/* FORMULÁRIO */}
-        <form onSubmit={handleLogin} className="space-y-6">
+        {/* FORM */}
+        <form onSubmit={handleSignup} className="space-y-6">
+          {/* Nome */}
+          <div className="relative">
+            <User
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#EAEFFE]/70"
+            />
+            <input
+              type="text"
+              placeholder="Nome completo"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[#EAEFFE] placeholder-[#EAEFFE]/60 border border-white/20 focus:border-[#EAEFFE] focus:ring-2 focus:ring-[#9787F3] outline-none transition"
+              required
+            />
+          </div>
+
+          {/* Email */}
           <div className="relative">
             <Mail
               size={20}
@@ -56,6 +79,7 @@ export default function Login() {
             />
           </div>
 
+          {/* Senha */}
           <div className="relative">
             <Lock
               size={20}
@@ -71,6 +95,7 @@ export default function Login() {
             />
           </div>
 
+          {/* Botão */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
@@ -78,19 +103,19 @@ export default function Login() {
             type="submit"
             className="w-full py-3 bg-[#9878f3] hover:bg-[#7b6ccb] text-[#EAEFFE] font-semibold rounded-xl shadow-lg transition"
           >
-            Entrar
+            Criar conta
           </motion.button>
         </form>
 
         {/* LINKS */}
         <div className="text-center mt-6 text-[#EAEFFE]/80 text-sm">
           <p>
-            Não tem uma conta?{" "}
+            Já tem uma conta?{" "}
             <a
-              href="/register"
+              href="/login"
               className="text-[#EAEFFE] font-semibold hover:underline"
             >
-              Cadastre-se
+              Entrar
             </a>
           </p>
         </div>

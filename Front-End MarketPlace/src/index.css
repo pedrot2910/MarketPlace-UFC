@@ -1,2 +1,51 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
+html, body {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* GLOBAL: opcional — remover se não quiser aplicar em tudo */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #7b6ccb rgba(152, 120, 243, 0.5);
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+html::-webkit-scrollbar-thumb {
+  background: #7b6ccb;
+  border-radius: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: rgba(152, 120, 243, 0.5);
+}
+
+@layer utilities {
+
+  /* Sidebar ou áreas específicas */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #7b6ccb;
+    border-radius: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #6a5bb3;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: rgba(152, 120, 243, 0.5);
+  }
+
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: #7b6ccb rgba(152, 120, 243, 0.5);
+  }
+}
