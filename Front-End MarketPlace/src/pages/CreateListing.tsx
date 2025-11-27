@@ -21,15 +21,12 @@ export default function CreateListing() {
     <div className="min-h-[calc(100vh-4rem)] bg-[#EAEFFE] py-12 px-6 flex justify-center items-center">
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-10">
         <h2 className="text-3xl font-bold text-gray-900 text-center mb-6">
-          📢 Criar Novo Anúncio
+          Criar Novo Anúncio
         </h2>
 
         <p className="text-gray-600 text-center mb-8">
           Preencha as informações abaixo para publicar seu anúncio no{" "}
-          <span className="text-[#9878f3] font-semibold">
-            Marketplace Acadêmico
-          </span>
-          .
+          <span className="text-[#9878f3] font-semibold">Marketplace</span>.
         </p>
 
         <form onSubmit={handleSubmit} className="grid gap-5">
