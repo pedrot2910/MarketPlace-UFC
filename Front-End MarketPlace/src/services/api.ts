@@ -18,30 +18,30 @@ export const mockUsers: User[] = [
         name: 'Gustavo Vieira',
         email:'gustavodaabundinha24@alu.ufc.br',
         password: '123456',
-        role: 'student',
+        role: 'estudante',
         photoUrl: 'https://i.pinimg.com/736x/fc/e9/f5/fce9f51832af549137a90b98d741d522.jpg'
     },
     {
         id: '2',
-        name: 'TuaMãe',
+        name: 'Sarah Piaui',
         email:'tuamaemama6969@gmail.com',
         password: '12345678',
-        role: 'teacher'
+        role: 'Docente'
     },
     {
         id: '3',
         name: 'Davy Alves',
         email:'davyalvesteste@gmail.com',
         password: 'davyalves123',
-        role: 'student',
+        role: 'estudante',
         photoUrl: 'https://i.pinimg.com/236x/41/a3/04/41a304b960013dd34c8a653ca8247d14.jpg'
     },
     {
         id: '4',
         name: 'Heitor Alves',
-        email: 'heitorzaoduhgrauh@gmail.com',
-        password: 'mamacao123',
-        role: 'student',
+        email: 'heitorzaoduhgrau@gmail.com',
+        password: 'macaco123',
+        role: 'estudante',
         photoUrl: 'https://tse3.mm.bing.net/th/id/OIP.XUkfmfh7cOReMXwR5QsyfgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3'
     }
 ]
@@ -62,7 +62,7 @@ export const mockListings: Listing[] = [
         title: 'Livro de Cálculo',
         description: 'Livro de cálculo diferencial e integral, 7ª edição.',
         price: 20,
-        ownerName: 'TuaMãe',
+        ownerName: 'Sarah Piaui',
         type: 'trade',
         imageUrl: "https://www.quarto707.com.br/wp-content/uploads/2024/07/historia-do-calculo-diferencial-e-integral-9-scaled.jpg",
         ownerId: 2
@@ -71,7 +71,7 @@ export const mockListings: Listing[] = [
         id: '3',
         title: 'Caderno de Anotações',
         description: 'Caderno universitário preto com folhas pautadas.',
-        ownerName: 'Marcelo Castro',
+        ownerName: 'Davy Alves',
         price: 10,
         type: 'offer',
         imageUrl: "https://www.cadernosfilosoficos.com.br/cdn/shop/files/06_Preto-LosAngeles-min.jpg?v=1715019439&width=823",
@@ -81,8 +81,8 @@ export const mockListings: Listing[] = [
         id: '4',
         title: 'Notebook ASUS Vivobook 15',
         description: 'Notebook ASUS Vivobook 15 com 8GB de RAM e 512GB de SSD em bom estado.',
-        ownerName: 'TuaMãe',
-        price: 500,
+        ownerName: 'Sarah Piaui',
+        price: 5000,
         type: 'trade',
         imageUrl: "https://m.media-amazon.com/images/I/41iFGla9E5L._AC_SX679_.jpg",
         ownerId: 2
@@ -115,3 +115,7 @@ mock.onGet(/\/listings\/\d+/).reply((config) => {
     const listing = mockListings.find((l) => l.id === id);
     return listing ? [200, listing] : [404, { message: "Anúncio não encontrado" }];
 });
+
+export function getUserById(id: Number){
+    return mockUsers.find((u) => Number(u.id) === id) || null;
+}

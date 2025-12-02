@@ -37,7 +37,7 @@ export default function Sidebar() {
       {/* Botão do menu */}
       <button
         onClick={toggleSidebar}
-        className="top-4 left-4 z-50 p-2 text-[#eaeffe] rounded-lg hover:bg-[#7b6ccb] hover:text-[#EAEFFE] transition"
+        className="top-4 left-4 z-60 p-2 text-[#eaeffe] rounded-lg hover:bg-[#7b6ccb] hover:text-[#EAEFFE] transition"
       >
         {isOpen === false && <Menu size={24} />}
       </button>
@@ -100,7 +100,7 @@ export default function Sidebar() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 80, damping: 15 }}
-              className="fixed top-0 left-0 h-full w-72 bg-[#9878f3] text-white shadow-2xl z-40 flex flex-col overflow-y-auto scrollbar-custom"
+              className="fixed top-0 left-0 h-full w-72 bg-[#9878f3] text-white shadow-2xl z-60 flex flex-col overflow-y-auto scrollbar-custom"
             >
               {/* Cabeçalho com logo e nome */}
               <div className="flex items-center gap-3 mb-6 mt-12 px-8 py-3 bg-gradient-to-r from-[#7b6ccb] to-[#9878f3] rounded-r-3xl shadow-inner">
@@ -122,7 +122,7 @@ export default function Sidebar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Link to="/" onClick={() => setIsOpen(false)}>
+                  <Link to="/home" onClick={() => setIsOpen(false)}>
                     ReUse
                   </Link>
                 </motion.h2>
@@ -252,7 +252,7 @@ export default function Sidebar() {
 
             {/* Fundo com blur */}
             <motion.div
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50"
               onClick={toggleSidebar}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

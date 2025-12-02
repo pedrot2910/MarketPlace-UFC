@@ -4,6 +4,7 @@ export type Listing = {
     description: string;
     price?: number;
     imageUrl?: string;
-    owner: string;
+    ownerName: string;
+    ownerId: number;
     type: 'offer' | 'trade'
 }

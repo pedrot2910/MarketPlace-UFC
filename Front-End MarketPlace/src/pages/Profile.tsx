@@ -16,7 +16,9 @@ export default function Profile() {
         setLoading(true);
 
         const allListings = await fetchListings();
-        const userListings = allListings.filter((l) => l.owner === user.name);
+        const userListings = allListings.filter(
+          (l) => l.ownerName === user.name
+        );
 
         setListings(userListings);
       } catch (err) {

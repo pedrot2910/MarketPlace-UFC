@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { chatService, type Message } from "../services/chatservice";
 
-export function useChat(currentUserId: number, otherUserId: number) {
-  const [messages, setMessages] = useState<Message[]>(
-    chatService.getThread(currentUserId, otherUserId).messages
-  );
+export function useChat(currentUserId: number, otherUserId: number, productId: number) {
+  const thread = chatService.getOrCreateThread(currentUserId, otherUserId, productId);
+  const [messages, setMessages] = useState<Message[]>(thread.messages);
 
   const send = (text: string) => {
-    chatService.sendMessage(currentUserId, otherUserId, text);
-    setMessages([...chatService.getThread(currentUserId, otherUserId).messages]);
+    chatService.sendMessage(thread.id, currentUserId, text);
+    const updatedThread = chatService.getOrCreateThread(currentUserId, otherUserId, productId);
+    setMessages([...updatedThread.messages]);
   };
 
   const reload = () => {
-    setMessages(chatService.getThread(currentUserId, otherUserId).messages);
+    const updatedThread = chatService.getOrCreateThread(currentUserId, otherUserId, productId);
+    setMessages(updatedThread.messages);
   };
 
   return { messages, send, reload };

@@ -1,28 +1,59 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send } from "lucide-react";
+import { X, Send, Trash2 } from "lucide-react";
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
+import { useChatModal } from "../hooks/useChatModal";
+import { getUserById } from "../services/api";
 
-interface ChatModalProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export default function ChatModal({ open, onClose }: ChatModalProps) {
+export default function ChatModal() {
+  const { open, threadId, close } = useChatModal();
   const { user } = useAuth();
   const [chats, setChats] = useState<any[]>([]);
   const [selectedChat, setSelectedChat] = useState<any | null>(null);
   const [message, setMessage] = useState("");
+  const [otherUserName, setOtherUserName] = useState<string>("");
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Rolagem automática
+  const handleDeleteChat = (chatId: string) => {
+    chatService.deleteThread(chatId);
+
+    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+  };
+
+  useEffect(() => {
+    if (!open || !user) return;
+
+    const result = chatService.listUserChats(Number(user.id));
+    setChats(result);
+
+    if (threadId) {
+      const chat = result.find((c) => c.id === threadId);
+      if (chat) setSelectedChat(chat);
+    } else {
+      setSelectedChat(null);
+    }
+  }, [open, threadId, user]);
+
+  useEffect(() => {
+    if (!selectedChat || !user) return;
+
+    const currentUserId = Number(user.id);
+
+    const otherUserId =
+      selectedChat.buyerId === currentUserId
+        ? selectedChat.sellerId
+        : selectedChat.buyerId;
+
+    const other = getUserById(Number(otherUserId));
+    setOtherUserName(other ? other.name : `Usuário #${otherUserId}`);
+  }, [selectedChat, user]);
+
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [selectedChat?.messages]);
 
-  // Carregar chats do usuário logado
   useEffect(() => {
     if (open && user && typeof user.id === "number") {
       const result = chatService.listUserChats(user.id);
@@ -30,23 +61,14 @@ export default function ChatModal({ open, onClose }: ChatModalProps) {
     }
   }, [open, user]);
 
-  function handleSelectChat(otherUserId: number) {
-    if (!user) return;
-
-    const chat = chats.find(
-      (c) =>
-        c.users.includes(Number(user.id)) &&
-        c.users.includes(Number(otherUserId))
-    );
-    setSelectedChat(chat);
+  function handleSelectChat(chatId: string) {
+    const chat = chats.find((c) => c.id === chatId);
+    setSelectedChat(chat || null);
   }
 
   function handleSendMessage() {
     if (!selectedChat || !message.trim() || !user) return;
 
-    const otherUser = selectedChat.users.find(
-      (u: number) => u !== Number(user.id)
-    );
     const newMsg = chatService.sendMessage(
       selectedChat.id,
       Number(user.id),
@@ -70,7 +92,7 @@ export default function ChatModal({ open, onClose }: ChatModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={close}
           />
 
           <motion.div
@@ -88,7 +110,7 @@ export default function ChatModal({ open, onClose }: ChatModalProps) {
               </h2>
               <button
                 className="text-gray-500 hover:text-gray-700 transition"
-                onClick={onClose}
+                onClick={close}
               >
                 <X size={22} />
               </button>
@@ -103,26 +125,54 @@ export default function ChatModal({ open, onClose }: ChatModalProps) {
                   </p>
                 )}
 
-                {chats.map((chat, index) => {
-                  const otherUserId =
-                    chat.users.find((id: number) => id !== Number(user?.id)) ??
-                    -1;
+                <AnimatePresence>
+                  {chats.map((chat) => {
+                    const currentUserId = Number(user?.id);
+                    const otherUserId =
+                      chat.buyerId === currentUserId
+                        ? chat.sellerId
+                        : chat.buyerId;
 
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleSelectChat(otherUserId)}
-                      className="p-3 rounded-xl bg-[#EAEFFE] hover:bg-[#D7D0FF] transition text-left shadow-sm"
-                    >
-                      <p className="font-semibold text-[#4b3a91]">
-                        Conversa com usuário #{otherUserId}
-                      </p>
-                      <p className="text-sm text-gray-600 truncate">
-                        {chat.messages.at(-1)?.text || "Sem mensagens ainda"}
-                      </p>
-                    </button>
-                  );
-                })}
+                    const otherUser = getUserById(otherUserId);
+                    const chatName =
+                      otherUser?.name ?? `Usuário #${otherUserId}`;
+
+                    return (
+                      <motion.div
+                        key={chat.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.22 }}
+                      >
+                        <div
+                          onClick={() => handleSelectChat(chat.id)}
+                          className="p-3 rounded-xl bg-[#EAEFFE] hover:bg-[#D7D0FF] transition text-left shadow-sm flex justify-between items-center"
+                        >
+                          <div>
+                            <p className="font-semibold text-[#4b3a91]">
+                              Conversa com {chatName}
+                            </p>
+                            <p className="text-sm text-gray-600 truncate max-w-[220px]">
+                              {chat.messages.at(-1)?.text ||
+                                "Sem mensagens ainda"}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteChat(chat.id);
+                            }}
+                            className="text-red-500 hover:text-red-700 p-2 transition"
+                          >
+                            <Trash2 size={17} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               </div>
             )}
 
@@ -135,12 +185,14 @@ export default function ChatModal({ open, onClose }: ChatModalProps) {
                     <div
                       key={msg.id}
                       className={`mb-2 flex ${
-                        msg.from === user?.id ? "justify-end" : "justify-start"
+                        msg.from === Number(user?.id)
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
                       <div
                         className={`px-4 py-2 rounded-2xl max-w-[70%] shadow-sm ${
-                          msg.from === user?.id
+                          msg.from === Number(user?.id)
                             ? "bg-[#7C5CFA] text-white"
                             : "bg-white border text-[#4b3a91]"
                         }`}

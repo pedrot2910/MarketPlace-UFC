@@ -4,5 +4,5 @@ export type User = {
     email: string;
     password?: string;
     photoUrl?: string;
-    role?: 'student' | 'teacher' | 'TAE' | 'staff';
+    role?: 'estudante' | 'Docente' | 'TAE' | 'staff';
 }

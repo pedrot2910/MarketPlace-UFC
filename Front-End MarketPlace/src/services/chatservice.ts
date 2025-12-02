@@ -1,6 +1,4 @@
 
-// src/services/chatservice.ts
-
 export type Message = {
   id: string;
   from: number;
@@ -18,8 +16,6 @@ export type ChatThread = {
 
 const STORAGE_KEY = "mock_chat_db_marketplace";
 
-// ------- CARREGAR / SALVAR ---------
-
 function loadDB(): ChatThread[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -35,10 +31,8 @@ function saveDB(db: ChatThread[]) {
 
 let chatDB: ChatThread[] = loadDB();
 
-// --------- SERVIÇO PRINCIPAL ---------
 
 export const chatService = {
-  /** Retorna OU cria uma thread entre comprador, vendedor e anúncio */
   getOrCreateThread(
     buyerId: number,
     sellerId: number,
@@ -67,7 +61,6 @@ export const chatService = {
     return thread;
   },
 
-  /** Envia mensagem e salva */
   sendMessage(threadId: string, from: number, text: string) {
     const thread = chatDB.find((t) => t.id === threadId);
     if (!thread) return null;
@@ -91,6 +84,12 @@ export const chatService = {
       (t) => t.buyerId === userId || t.sellerId === userId
     );
   },
+
+  deleteThread(threadId: string) {
+  chatDB = chatDB.filter((t) => t.id !== threadId);
+  saveDB(chatDB);
+},
+
 
   clearAll() {
     chatDB = [];

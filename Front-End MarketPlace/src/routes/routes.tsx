@@ -12,14 +12,16 @@ import Signup from "../pages/Signup";
 export default function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/login" />} />
+
       {/* Layout principal (com Navbar e Sidebar) */}
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Route>
 
       {/* Layout de autenticação (sem Navbar/Sidebar) */}

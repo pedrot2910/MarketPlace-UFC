@@ -39,7 +39,7 @@ export function AuthContextProvider({ children }: ProviderProps) {
 
     localStorage.setItem("user", JSON.stringify(foundUser));
     setUser(foundUser);
-    navigate("/");
+    navigate("/home");
   }
 
   function logout() {

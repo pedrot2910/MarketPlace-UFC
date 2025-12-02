@@ -37,7 +37,7 @@ export default function ListingDetails() {
     chatModal.openWithThread({
       buyerId: Number(user.id),
       sellerId: listing.ownerId,
-      productId: listing.id,
+      productId: Number(listing.id),
     });
   }
   if (loading) {
@@ -77,12 +77,14 @@ export default function ListingDetails() {
           {listing.type === "offer" ? "Venda" : "Troca"}
         </h2>
 
-        <button
-          onClick={handleChat}
-          className="w-full mt-4 bg-[#9878f3] text-white font-semibold py-3 rounded-xl shadow"
-        >
-          Conversar com o vendedor
-        </button>
+        {Number(user?.id) !== listing.ownerId && (
+          <button
+            onClick={handleChat}
+            className="w-full mt-4 bg-[#9878f3] text-white font-semibold py-3 rounded-xl shadow"
+          >
+            Conversar com o vendedor
+          </button>
+        )}
       </div>
     </div>
   );
