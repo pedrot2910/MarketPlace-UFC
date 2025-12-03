@@ -2,11 +2,17 @@ import { MessageSquareMore, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../hooks/auth";
 import Sidebar from "./Sidebar";
+import { useChatModal } from "../hooks/useChatModal";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { openModal } = useChatModal();
   const ref = useRef<HTMLDivElement>(null);
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { logout } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -21,23 +27,38 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-[#9878f3] shadow p-3 flex justify-between items-center">
+    <nav className="sticky top-0 z-40 bg-[#9878f3] shadow p-3 flex justify-between items-center">
       <div className="flex justify-center items-center">
         <Sidebar />
       </div>
       <div className="flex gap-4">
-        <div>
-          <button className="top-4 left-4 z-50 p-2 text-[#eaeffe] rounded-lg hover:bg-[#7b6ccb] hover:text-[#EAEFFE] transition">
-            <MessageSquareMore size={24} />
-          </button>
-        </div>
+        {/* Botão de mensagens */}
+        <button
+          onClick={() => {
+            openModal();
+          }}
+          className="top-4 left-4 z-30 p-2 text-[#eaeffe] rounded-lg hover:bg-[#7b6ccb] hover:text-[#EAEFFE] transition"
+        >
+          <MessageSquareMore size={24} />
+        </button>
 
+        {/* Menu do usuário */}
         <div className="relative" ref={ref}>
           <button
             onClick={() => setOpen((prev) => !prev)}
-            className="p-2 rounded-full bg-[#9878f3] hover:bg-[#7b6ccb] text-[#EAEFFE] transition"
+            className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:scale-105 transition"
           >
-            <User size={24} />
+            {user?.photoUrl ? (
+              <img
+                src={user.photoUrl}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[#7b6ccb]">
+                <User size={24} className="text-white" />
+              </div>
+            )}
           </button>
 
           <AnimatePresence>
@@ -67,8 +88,9 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       setOpen(false);
-                      // Simulação de logout
-                      window.location.href = "/login";
+                      {
+                        logout();
+                      }
                     }}
                     className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition"
                   >

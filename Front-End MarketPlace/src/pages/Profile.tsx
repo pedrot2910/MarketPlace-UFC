@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
-import type { User } from "../types/user";
 import type { Listing } from "../types/listing";
-import { fetchUser } from "../services/user";
 import { fetchListings } from "../services/listings";
+import { useAuth } from "../hooks/auth";
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth(); // <-- PEGA O USUÁRIO LOGADO
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadProfile() {
       try {
-        const userData = await fetchUser("1");
-        setUser(userData);
+        if (!user) return; // se não tiver user, não busca nada
+
+        setLoading(true);
 
         const allListings = await fetchListings();
         const userListings = allListings.filter(
-          (l) => l.owner === userData.name
+          (l) => l.ownerName === user.name
         );
+
         setListings(userListings);
       } catch (err) {
         console.error("Erro ao carregar o perfil:", err);
@@ -28,18 +29,21 @@ export default function Profile() {
     }
 
     loadProfile();
-  }, []);
+  }, [user]);
+
+  if (!user) {
+    return (
+      <p className="text-center text-red-500 mt-10">
+        Você precisa estar logado para ver seu perfil.
+      </p>
+    );
+  }
 
   if (loading)
     return (
       <p className="text-center text-gray-500 mt-10 animate-pulse">
         Carregando perfil...
       </p>
-    );
-
-  if (!user)
-    return (
-      <p className="text-center text-red-500 mt-10">Usuário não encontrado.</p>
     );
 
   return (
@@ -75,6 +79,8 @@ export default function Profile() {
                 <li
                   key={item.id}
                   className="border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all bg-gray-50"
+                  onClick={() => (window.location.href = `/listing/${item.id}`)}
+                  style={{ cursor: "pointer" }}
                 >
                   <h3 className="font-bold text-gray-900 text-lg">
                     {item.title}
@@ -89,8 +95,8 @@ export default function Profile() {
                   <span
                     className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
                       item.type === "offer"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-indigo-100 text-indigo-700"
+                        ? "bg-purple-50 text-[#9878f3]"
+                        : "bg-[#b6acf3] text-white"
                     } uppercase`}
                   >
                     {item.type}

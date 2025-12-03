@@ -11,3 +11,8 @@ export async function createListing(listing: Partial<Listing>): Promise<Listing>
     return res.data;
 }
 
+export async function getListingById(id: string): Promise<Listing> {
+    const res = await api.get<Listing>(`/listings/${id}`);
+    return res.data;
+}
+
