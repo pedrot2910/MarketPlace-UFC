@@ -42,6 +42,32 @@ getProductById: async (id) => {
     return data;
 },
 
+deleteProductById: async (id) => {
+    const {error} = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    return true;
+},
+
+updateProductById: async (id, updatedData) => {
+    const {data, error} = await supabase
+        .from('products')
+        .update(updatedData)
+        .eq('id', id);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    return data;
+},
+
 };
 
 export { productService };
