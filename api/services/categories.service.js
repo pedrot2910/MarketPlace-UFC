@@ -1,12 +1,12 @@
 import supabase from '../supabase.js'; 
 
-const productService = {
+const categoriesService = {
 
-createProduct: async (productData) => { 
+    createCategory: async (categoryData) => { 
     
     const { data, error } = await supabase 
-        .from('products') 
-        .insert([productData]) 
+        .from('categories') 
+        .insert([categoryData]) 
         .select(); 
 
     if (error) { 
@@ -16,9 +16,9 @@ createProduct: async (productData) => {
     return data;  
 },
 
-getAllProducts: async () => {
+getAllCategories: async () => {
     const {data, error} = await supabase
-        .from('products')
+        .from('categories')
         .select('*');
 
     if (error) {
@@ -28,9 +28,9 @@ getAllProducts: async () => {
     return data;
 },
 
-getProductById: async (id) => {
+getCategoryById: async (id) => {
     const {data, error} = await supabase
-        .from('products')
+        .from('categories')
         .select('*')
         .eq('id', id)
         .single();
@@ -42,9 +42,9 @@ getProductById: async (id) => {
     return data;
 },
 
-deleteProductById: async (id) => {
+deleteCategoryById: async (id) => {
     const {error} = await supabase
-        .from('products')
+        .from('categories')
         .delete()
         .eq('id', id);
 
@@ -55,11 +55,12 @@ deleteProductById: async (id) => {
     return true;
 },
 
-updateProductById: async (id, updatedData) => {
+updateCategoryById: async (id, updatedData) => {
     const {data, error} = await supabase
-        .from('products')
+        .from('categories')
         .update(updatedData)
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
     if (error) {
         throw new Error(error.message);
@@ -70,4 +71,4 @@ updateProductById: async (id, updatedData) => {
 
 };
 
-export { productService };
+export { categoriesService };
