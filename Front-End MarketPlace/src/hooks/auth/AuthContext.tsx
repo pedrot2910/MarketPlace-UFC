@@ -1,16 +1,8 @@
-import { createContext, useState, useEffect, type ReactNode } from "react";
-import { mockUsers } from "../../services/api";
+import { useState, useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User } from "../../types/user";
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => void;
-  logout: () => void;
-}
-
-// Criar o contexto tipado
-export const AuthContext = createContext<AuthContextType | null>(null);
+import { authService } from "../../services/auth.service";
+import { AuthContext } from "./AuthContext";
 
 interface ProviderProps {
   children: ReactNode;
@@ -18,38 +10,44 @@ interface ProviderProps {
 
 export function AuthContextProvider({ children }: ProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
+      setToken(storedToken);
     }
   }, []);
 
-  function login(email: string, password: string) {
-    const foundUser = mockUsers.find(
-      (user) => user.email === email && user.password === password
-    );
+  async function login(email: string, password: string) {
+    try {
+      const { token, user } = await authService.signIn(email, password);
 
-    if (!foundUser) {
-      alert("Usuário ou senha incorretos");
-      return;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setToken(token);
+      setUser(user);
+
+      navigate("/home");
+    } catch {
+      alert("Erro ao fazer login");
     }
-
-    localStorage.setItem("user", JSON.stringify(foundUser));
-    setUser(foundUser);
-    navigate("/home");
   }
 
   function logout() {
     setUser(null);
-    localStorage.removeItem("user");
+    setToken(null);
+    localStorage.clear();
     navigate("/login");
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

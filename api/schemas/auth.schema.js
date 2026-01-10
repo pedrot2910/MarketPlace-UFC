@@ -1,40 +1,32 @@
-import z from 'zod';
+import { z } from "zod";
 
+const signUpSchema = z.object({
+  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").max(100),
 
-const baseSchema = z.object({
-    name: z.string({ required_error: "O nome é obrigatório" })
-    .min(3, "O nome deve ter pelo menos 3 caracteres")
-    .max(100, "O nome deve ter no máximo 100 caracteres"),
+  email: z.string().email("Formato de email inválido"),
 
-    email: z.string({ required_error: "O email é obrigatório" })
-    .email("Formato de email inválido"),
-
-    password: z.string({ required_error: "A senha é obrigatória" })
+  password: z
+    .string()
     .min(6, "A senha deve ter pelo menos 6 caracteres")
-    .max(100, "A senha deve ter no máximo 100 caracteres"),
+    .max(100),
 
-    matricula: z.string({ required_error: "A matrícula é obrigatória" })
-    .min(3, "A matrícula deve ter pelo menos 3 caracteres")
-    .max(20, "A matrícula deve ter no máximo 20 caracteres"),
+  matricula: z.string().min(3).max(20),
 
-    role : z.enum(['student', 'tae', 'professor', 'employee'], {
-        errorMap: () => ({ message: "Função deve ser: student, tae, professor ou employee" })
-    })
+  role: z.enum(["student", "tae", "professor", "employee"]),
 });
 
+const signInSchema = z.object({
+  email: z.string().email("Formato de email inválido"),
 
-const authSchema = {
+  password: z.string().min(1, "Senha obrigatória"),
+});
 
-    signUp: z.object({
-        body: baseSchema
-    }),
+export const authSchema = {
+  signUp: z.object({
+    body: signUpSchema,
+  }),
 
-    signIn: z.object({
-        body: baseSchema.pick({ email: true, password: true })
-    })
-
-
-}
-
-export { authSchema };
-
+  signIn: z.object({
+    body: signInSchema,
+  }),
+};

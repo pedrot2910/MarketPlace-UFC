@@ -1,98 +1,65 @@
+import { io, Socket } from "socket.io-client";
+import type { Message } from "../types/message";
 
-export type Message = {
-  id: string;
-  from: number;
-  text: string;
-  timestamp: number;
-};
+let socket: Socket | null = null;
 
-export type ChatThread = {
-  id: string;
-  buyerId: number;
-  sellerId: number;
-  productId: number;
-  messages: Message[];
-};
-
-const STORAGE_KEY = "mock_chat_db_marketplace";
-
-function loadDB(): ChatThread[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveDB(db: ChatThread[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-}
-
-let chatDB: ChatThread[] = loadDB();
-
+type MessageListener = (msg: Message) => void;
 
 export const chatService = {
-  getOrCreateThread(
-    buyerId: number,
-    sellerId: number,
-    productId: number
-  ): ChatThread {
-    let thread = chatDB.find(
-      (t) =>
-        t.buyerId === buyerId &&
-        t.sellerId === sellerId &&
-        t.productId === productId
-    );
+  connect(token: string) {
+    if (socket) return;
 
-    if (!thread) {
-      thread = {
-        id: crypto.randomUUID(),
-        buyerId,
-        sellerId,
-        productId,
-        messages: [],
-      };
+    socket = io(import.meta.env.VITE_API_URL ?? "http://localhost:3333", {
+      auth: {
+        token,
+      },
+    });
 
-      chatDB.push(thread);
-      saveDB(chatDB);
-    }
+    socket.on("connect", () => {
+      console.log("Socket conectado:", socket?.id);
+    });
 
-    return thread;
+    socket.on("disconnect", () => {
+      console.log("Socket desconectado");
+    });
   },
 
-  sendMessage(threadId: string, from: number, text: string) {
-    const thread = chatDB.find((t) => t.id === threadId);
-    if (!thread) return null;
-
-    const msg: Message = {
-      id: crypto.randomUUID(),
-      from,
-      text,
-      timestamp: Date.now(),
-    };
-
-    thread.messages.push(msg);
-    saveDB(chatDB);
-
-    return msg;
+  disconnect() {
+    socket?.disconnect();
+    socket = null;
   },
 
-  /** Lista todas as conversas do usuário (buyer ou seller) */
-  listUserChats(userId: number) {
-    return chatDB.filter(
-      (t) => t.buyerId === userId || t.sellerId === userId
-    );
+  /**
+   * Entrar na sala
+   */
+  joinChat(payload: {
+    sender_id: string | number;
+    receiver_id: string | number;
+    product_id: string | number;
+  }) {
+    socket?.emit("join-chat", payload);
   },
 
-  deleteThread(threadId: string) {
-  chatDB = chatDB.filter((t) => t.id !== threadId);
-  saveDB(chatDB);
-},
+  /**
+   * Enviar mensagem
+   */
+  sendMessage(payload: {
+    receiver_id: string | number;
+    product_id: string | number;
+    message: string;
+    image_url?: string;
+  }) {
+    socket?.emit("send-message", payload);
+  },
 
+  /**
+   * Receber mensagens
+   */
+  onMessage(callback: MessageListener) {
+    socket?.on("new-message", callback);
+  },
 
-  clearAll() {
-    chatDB = [];
-    saveDB(chatDB);
+  offMessage(callback: MessageListener) {
+    socket?.off("new-message", callback);
   },
 };

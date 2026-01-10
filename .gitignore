@@ -35,6 +35,7 @@ coverage/
 *.ntvs*
 *.njsproj
 *.sln
+*.json?
 
 # OS files
 .DS_Store

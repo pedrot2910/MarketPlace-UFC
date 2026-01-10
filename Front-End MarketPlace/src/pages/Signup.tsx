@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
+import { authService } from "../services/auth.service";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -10,12 +11,21 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simulação de cadastro
-    if (name && email && password) {
-      navigate("/login"); // volta para login após cadastrar
+    try {
+      await authService.signUp({
+        name,
+        email,
+        password,
+        matricula: "000000",
+        role: "student",
+      });
+
+      navigate("/login");
+    } catch (error: any) {
+      alert(error.response?.data?.error || "Erro ao cadastrar");
     }
   };
 

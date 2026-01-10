@@ -1,33 +1,58 @@
 import { create } from "zustand";
-import { chatService } from "../services/chatservice";  // ← IMPORTE AQUI
 
 interface ChatModalStore {
   open: boolean;
+
+  /**
+   * Usuário com quem estou conversando
+   */
+  receiverId: string | number | null;
+
+  /**
+   * Produto relacionado ao chat
+   */
+  productId: string | number | null;
+
+  /**
+   * Abre o modal diretamente
+   */
   openModal: () => void;
-  threadId: string | null;
-  openWithThread: (data: { buyerId: number; sellerId: number; productId: number }) => void;
+
+  /**
+   * Abre o modal já com contexto do chat
+   */
+  openChat: (data: {
+    receiverId: string | number;
+    productId: string | number;
+  }) => void;
+
+  /**
+   * Fecha o modal e limpa estado
+   */
   close: () => void;
 }
 
 export const useChatModal = create<ChatModalStore>((set) => ({
   open: false,
-  threadId: null,
+  receiverId: null,
+  productId: null,
 
   openModal: () =>
     set({
       open: true,
-      threadId: null,
     }),
 
-  openWithThread: ({ buyerId, sellerId, productId }) => {
-
-    const thread = chatService.getOrCreateThread(buyerId, sellerId, productId);
-
+  openChat: ({ receiverId, productId }) =>
     set({
       open: true,
-      threadId: thread.id,
-    });
-  },
+      receiverId,
+      productId,
+    }),
 
-  close: () => set({ open: false, threadId: null }),
+  close: () =>
+    set({
+      open: false,
+      receiverId: null,
+      productId: null,
+    }),
 }));

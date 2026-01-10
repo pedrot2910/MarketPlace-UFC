@@ -1,55 +1,99 @@
-import { messagesService } from '../services/messages.service.js';
+import { messagesService } from "../services/messages.service.js";
 
 const messagesController = {
-    
-    createMessage: async (req, res) => { 
-        try { 
-            const { sender_id, receiver_id, product_id, message, image_url } = req.body; 
+  /**
+   * Criação de mensagem (REST)
+   */
+  createMessage: async (req, res) => {
+    try {
+      const {
+        sender_id,
+        receiver_id,
+        product_id,
+        message,
+        image_url,
+      } = req.body;
 
-            const [newMessage] = await messagesService.createMessage({ 
-                sender_id, receiver_id, product_id, message, image_url
-            });
+      const newMessage = await messagesService.createMessage({
+        sender_id,
+        receiver_id,
+        product_id,
+        message,
+        image_url,
+      });
 
-            res.status(201).json(newMessage); 
+      res.status(201).json(newMessage);
 
-        } catch (error) { 
-            res.status(500).json({ error: error.message }); 
-        }
-    },
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Erro ao criar mensagem",
+        details: error.message,
+      });
+    }
+  },
 
-    getMessagesByUser: async (req, res) => {
-        try {
-            const { userId } = req.params; // Pega o ID da URL
+  /**
+   * Lista mensagens por usuário
+   */
+  getMessagesByUser: async (req, res) => {
+    try {
+      const { userId } = req.params;
 
-            const messages = await messagesService.getMessagesByUser(userId);
-            
-            res.status(200).json(messages);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    },
+      const messages = await messagesService.getMessagesByUser(userId);
 
-    findMessageById: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const message = await messagesService.getMessageById(id);
-            res.status(200).json(message);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    },
+      res.status(200).json(messages);
 
-    
-    deleteMessageById: async (req, res) => {
-        try {
-            const { id } = req.params;
-            await messagesService.deleteMessageById(id);
-            res.status(200).json({ message: 'Mensagem deletada com sucesso!' });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    },
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Erro ao buscar mensagens",
+        details: error.message,
+      });
+    }
+  },
 
+  /**
+   * Busca mensagem por ID
+   */
+  findMessageById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const message = await messagesService.getMessageById(id);
+
+      res.status(200).json(message);
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Erro ao buscar mensagem",
+        details: error.message,
+      });
+    }
+  },
+
+  /**
+   * Remove mensagem
+   */
+  deleteMessageById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      await messagesService.deleteMessageById(id);
+
+      res.status(200).json({
+        message: "Mensagem deletada com sucesso",
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Erro ao deletar mensagem",
+        details: error.message,
+      });
+    }
+  },
 };
 
 export { messagesController };

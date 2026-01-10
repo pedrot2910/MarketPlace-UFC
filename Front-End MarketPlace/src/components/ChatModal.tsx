@@ -1,234 +1,163 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Trash2 } from "lucide-react";
+import { X, Send } from "lucide-react";
+
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
-import { getUserById } from "../services/api";
+
+import type { Message } from "../types/message";
 
 export default function ChatModal() {
-  const { open, threadId, close } = useChatModal();
-  const { user } = useAuth();
-  const [chats, setChats] = useState<any[]>([]);
-  const [selectedChat, setSelectedChat] = useState<any | null>(null);
-  const [message, setMessage] = useState("");
-  const [otherUserName, setOtherUserName] = useState<string>("");
+  const { open, close, receiverId, productId } = useChatModal();
+  const { user, token } = useAuth();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [text, setText] = useState("");
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const handleDeleteChat = (chatId: string) => {
-    chatService.deleteThread(chatId);
-
-    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
-  };
-
+  /**
+   * 1. Conecta socket quando abrir modal
+   */
   useEffect(() => {
-    if (!open || !user) return;
+    if (!open || !token) return;
 
-    const result = chatService.listUserChats(Number(user.id));
-    setChats(result);
+    chatService.connect(token);
 
-    if (threadId) {
-      const chat = result.find((c) => c.id === threadId);
-      if (chat) setSelectedChat(chat);
-    } else {
-      setSelectedChat(null);
+    return () => {
+      chatService.disconnect();
+    };
+  }, [open, token]);
+
+  /**
+   * 2. Entra na sala do chat
+   */
+  useEffect(() => {
+    if (!open || !user || !receiverId || !productId) return;
+
+    chatService.joinChat({
+      sender_id: user.id,
+      receiver_id: receiverId,
+      product_id: productId,
+    });
+  }, [open, user, receiverId, productId]);
+
+  /**
+   * 3. Escuta mensagens
+   */
+  useEffect(() => {
+    function handleNewMessage(msg: Message) {
+      setMessages((prev) => [...prev, msg]);
     }
-  }, [open, threadId, user]);
 
-  useEffect(() => {
-    if (!selectedChat || !user) return;
+    chatService.onMessage(handleNewMessage);
 
-    const currentUserId = Number(user.id);
+    return () => {
+      chatService.offMessage(handleNewMessage);
+    };
+  }, []);
 
-    const otherUserId =
-      selectedChat.buyerId === currentUserId
-        ? selectedChat.sellerId
-        : selectedChat.buyerId;
-
-    const other = getUserById(Number(otherUserId));
-    setOtherUserName(other ? other.name : `Usuário #${otherUserId}`);
-  }, [selectedChat, user]);
-
+  /**
+   * 4. Auto-scroll
+   */
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [selectedChat?.messages]);
+  }, [messages]);
 
-  useEffect(() => {
-    if (open && user && typeof user.id === "number") {
-      const result = chatService.listUserChats(user.id);
-      setChats(result);
-    }
-  }, [open, user]);
+  /**
+   * 5. Enviar mensagem
+   */
+  function handleSend() {
+    if (!text.trim() || !receiverId || !productId) return;
 
-  function handleSelectChat(chatId: string) {
-    const chat = chats.find((c) => c.id === chatId);
-    setSelectedChat(chat || null);
-  }
+    chatService.sendMessage({
+      receiver_id: receiverId,
+      product_id: productId,
+      message: text,
+    });
 
-  function handleSendMessage() {
-    if (!selectedChat || !message.trim() || !user) return;
-
-    const newMsg = chatService.sendMessage(
-      selectedChat.id,
-      Number(user.id),
-      message
-    );
-
-    setSelectedChat((prev: any) => ({
-      ...prev,
-      messages: [...prev.messages, newMsg],
-    }));
-
-    setMessage("");
+    setText("");
   }
 
   return (
     <AnimatePresence>
       {open && (
         <>
+          {/* BACKDROP */}
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={close}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={close}
           />
 
+          {/* MODAL */}
           <motion.div
+            className="fixed z-50 top-1/2 left-1/2 w-[420px] max-w-[95%]
+              -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl p-5"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.25 }}
-            className="fixed z-50 top-1/2 left-1/2 w-[400px] max-w-[95%] 
-              -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl p-5"
           >
             {/* HEADER */}
             <div className="flex justify-between items-center border-b pb-2 mb-3">
-              <h2 className="text-lg font-semibold text-[#4b3a91] flex items-center gap-2">
-                Conversas
-              </h2>
-              <button
-                className="text-gray-500 hover:text-gray-700 transition"
-                onClick={close}
-              >
+              <h2 className="text-lg font-semibold text-[#4b3a91]">Chat</h2>
+
+              <button onClick={close}>
                 <X size={22} />
               </button>
             </div>
 
-            {/* LISTA DE CHATS */}
-            {!selectedChat && (
-              <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
-                {chats.length === 0 && (
-                  <p className="text-center text-sm text-gray-500">
-                    Nenhuma conversa ainda
-                  </p>
-                )}
+            {/* MENSAGENS */}
+            <div className="flex flex-col h-80">
+              <div className="flex-1 overflow-y-auto border rounded-xl p-3 mb-3 bg-[#F6F4FF]">
+                {messages.map((msg) => {
+                  const isMine = msg.sender_id === user?.id;
 
-                <AnimatePresence>
-                  {chats.map((chat) => {
-                    const currentUserId = Number(user?.id);
-                    const otherUserId =
-                      chat.buyerId === currentUserId
-                        ? chat.sellerId
-                        : chat.buyerId;
-
-                    const otherUser = getUserById(otherUserId);
-                    const chatName =
-                      otherUser?.name ?? `Usuário #${otherUserId}`;
-
-                    return (
-                      <motion.div
-                        key={chat.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.22 }}
-                      >
-                        <div
-                          onClick={() => handleSelectChat(chat.id)}
-                          className="p-3 rounded-xl bg-[#EAEFFE] hover:bg-[#D7D0FF] transition text-left shadow-sm flex justify-between items-center"
-                        >
-                          <div>
-                            <p className="font-semibold text-[#4b3a91]">
-                              Conversa com {chatName}
-                            </p>
-                            <p className="text-sm text-gray-600 truncate max-w-[220px]">
-                              {chat.messages.at(-1)?.text ||
-                                "Sem mensagens ainda"}
-                            </p>
-                          </div>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteChat(chat.id);
-                            }}
-                            className="text-red-500 hover:text-red-700 p-2 transition"
-                          >
-                            <Trash2 size={17} />
-                          </button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-            )}
-
-            {/* CHAT ABERTO */}
-            {selectedChat && (
-              <div className="flex flex-col h-80">
-                {/* MENSAGENS */}
-                <div className="flex-1 overflow-y-auto border rounded-xl p-3 mb-3 bg-[#F6F4FF]">
-                  {selectedChat.messages.map((msg: any) => (
+                  return (
                     <div
                       key={msg.id}
                       className={`mb-2 flex ${
-                        msg.from === Number(user?.id)
-                          ? "justify-end"
-                          : "justify-start"
+                        isMine ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div
                         className={`px-4 py-2 rounded-2xl max-w-[70%] shadow-sm ${
-                          msg.from === Number(user?.id)
+                          isMine
                             ? "bg-[#7C5CFA] text-white"
                             : "bg-white border text-[#4b3a91]"
                         }`}
                       >
-                        {msg.text}
+                        {msg.message}
                       </div>
                     </div>
-                  ))}
-                  <div ref={messageEndRef} />
-                </div>
+                  );
+                })}
+                <div ref={messageEndRef} />
+              </div>
 
-                {/* INPUT */}
-                <div className="flex gap-2">
-                  <input
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Digite uma mensagem..."
-                    className="flex-1 border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#7C5CFA]"
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    className="p-3 bg-[#7C5CFA] hover:bg-[#6E52E0] text-white rounded-xl shadow transition"
-                  >
-                    <Send size={18} />
-                  </button>
-                </div>
+              {/* INPUT */}
+              <div className="flex gap-2">
+                <input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Digite uma mensagem..."
+                  className="flex-1 border rounded-xl px-3 py-2 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSend();
+                  }}
+                />
 
-                {/* VOLTAR */}
                 <button
-                  onClick={() => setSelectedChat(null)}
-                  className="text-sm text-gray-500 mt-3 hover:text-[#4b3a91] transition"
+                  onClick={handleSend}
+                  className="p-3 bg-[#7C5CFA] text-white rounded-xl"
                 >
-                  ← Voltar às conversas
+                  <Send size={18} />
                 </button>
               </div>
-            )}
+            </div>
           </motion.div>
         </>
       )}

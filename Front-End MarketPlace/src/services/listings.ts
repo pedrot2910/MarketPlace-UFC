@@ -1,18 +1,60 @@
-import { api } from "./api";
-import type { Listing } from "../types/listing";
+import api from "./api";
 
-export async function fetchListings(): Promise<Listing[]> {
-    const res = await api.get<Listing[]>('/listings');
-    return res.data;
+/**
+ * Tipagem baseada no retorno real do backend
+ */
+export type Product = {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  condition: "novo" | "seminovo" | "usado";
+  type: "venda" | "troca";
+  created_at: string;
+
+  profiles: {
+    name: string;
+    email: string;
+    matricula: string;
+  };
+
+  categories: {
+    namecategories: string;
+  };
+
+  product_images: {
+    image_url: string;
+    is_cover: boolean;
+  }[];
+};
+
+/**
+ * GET /products
+ */
+export async function fetchListings(): Promise<Product[]> {
+  const response = await api.get("/products");
+  return response.data;
 }
 
-export async function createListing(listing: Partial<Listing>): Promise<Listing> {
-    const res = await api.post<Listing>('/listings', listing);
-    return res.data;
+/**
+ * POST /products
+ */
+export type CreateProductDTO = {
+  title: string;
+  description?: string;
+  price: number;
+  category_id: string;
+  condition: "novo" | "seminovo" | "usado";
+  type: "venda" | "troca";
+  product_images?: string[];
+};
+
+export async function getListingById(id: string) {
+  const response = await api.get(`/products/${id}`);
+  return response.data;
 }
 
-export async function getListingById(id: string): Promise<Listing> {
-    const res = await api.get<Listing>(`/listings/${id}`);
-    return res.data;
+export async function createListing(data: CreateProductDTO) {
+  const response = await api.post("/products", data);
+  return response.data;
 }
-
