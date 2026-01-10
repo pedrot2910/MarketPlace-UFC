@@ -24,9 +24,6 @@ pids/
 coverage/
 .nyc_output/
 
-# Environment variables
-.env
-.env.*
 
 # Editor directories and files
 .vscode/
