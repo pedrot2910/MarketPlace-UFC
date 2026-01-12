@@ -27,6 +27,10 @@
   --color-info: #3B82F6;
 }
 
+body {
+  overscroll-behavior-y: none;
+}
+
 html, body {
   height: 100%;
   overflow-y: auto;
