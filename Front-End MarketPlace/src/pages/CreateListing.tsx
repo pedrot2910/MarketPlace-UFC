@@ -62,7 +62,10 @@ export default function CreateListing() {
 
         <p className="text-[var(--color-text-muted)] text-center mb-8">
           Preencha as informações abaixo para publicar seu anúncio no{" "}
-          <span className="text-[var(--color-primary)] font-semibold">Marketplace</span>.
+          <span className="text-[var(--color-primary)] font-semibold">
+            Marketplace
+          </span>
+          .
         </p>
 
         <form onSubmit={handleSubmit} className="grid gap-5">
@@ -111,7 +114,6 @@ export default function CreateListing() {
               />
             </div>
 
-            <label className="block text-gray-800 font-semibold mb-1">
             <label className="block text-[var(--color-text)] font-semibold mb-1">
               Título
             </label>

@@ -93,7 +93,6 @@ export default function Profile() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div>
-<<<<<<< HEAD
             <p className="font-semibold text-gray-700">Nome:</p>
 
             {isEditing ? (
@@ -106,14 +105,9 @@ export default function Profile() {
             ) : (
               <p className="text-lg text-gray-900">{profile?.name}</p>
             )}
-=======
-            <p className="font-semibold text-[var(--color-text)]">Nome:</p>
-            <p className="text-lg text-[var(--color-text)]">{user.name}</p>
->>>>>>> 06e40cb8f4540296c6dceade37f41494aa9a7b72
           </div>
 
           <div>
-<<<<<<< HEAD
             <p className="font-semibold text-gray-700">Email:</p>
 
             {isEditing ? (
@@ -126,15 +120,13 @@ export default function Profile() {
             ) : (
               <p className="text-lg text-gray-900">{profile?.email}</p>
             )}
-=======
-            <p className="font-semibold text-[var(--color-text)]">Email:</p>
-            <p className="text-lg text-[var(--color-text)]">{user.email}</p>
->>>>>>> 06e40cb8f4540296c6dceade37f41494aa9a7b72
           </div>
 
           <div>
             <p className="font-semibold text-[var(--color-text)]">Função:</p>
-            <p className="text-lg text-[var(--color-text)] capitalize">{user.role}</p>
+            <p className="text-lg text-[var(--color-text)] capitalize">
+              {user.role}
+            </p>
           </div>
 
           <div className="flex gap-3 mb-8">
