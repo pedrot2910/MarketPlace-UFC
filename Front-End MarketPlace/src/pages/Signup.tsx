@@ -19,7 +19,7 @@ export default function Signup() {
         name,
         email,
         password,
-        matricula: "000000",
+        matricula: "554326",
         role: "student",
       });
 
@@ -30,7 +30,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#9787F3] via-[#7b6ccb] to-[#2D274B] p-6">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-primary)] to-[var(--color-primary-dark)] p-6">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,14 +45,14 @@ export default function Signup() {
           className="text-center mb-8"
         >
           <img
-            src="/LogoReUse.png"
+            src="/logoruim3.png"
             alt="Logo ReUse"
             className="mx-auto w-24 h-24 object-contain"
           />
-          <h1 className="text-3xl font-bold text-[#EAEFFE] drop-shadow-[0_0_10px_rgba(151,135,243,0.7)]">
+          <h1 className="text-3xl font-bold text-[var(--color-text-invert)] drop-shadow-[0_0_10px_rgba(124,58,237,0.7)]">
             Crie sua conta
           </h1>
-          <p className="text-[#EAEFFE]/80 mt-2">Comece a usar o ReUse</p>
+          <p className="text-[var(--color-text-invert)]/80 mt-2">Comece a usar o ReUse</p>
         </motion.div>
 
         {/* FORM */}
@@ -61,14 +61,14 @@ export default function Signup() {
           <div className="relative">
             <User
               size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#EAEFFE]/70"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-invert)]/70"
             />
             <input
               type="text"
               placeholder="Nome completo"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[#EAEFFE] placeholder-[#EAEFFE]/60 border border-white/20 focus:border-[#EAEFFE] focus:ring-2 focus:ring-[#9787F3] outline-none transition"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[var(--color-text-invert)] placeholder-[var(--color-text-invert)]/60 border border-white/20 focus:border-[var(--color-secondary-light)] focus:ring-2 focus:ring-[var(--color-secondary)] outline-none transition"
               required
             />
           </div>
@@ -77,14 +77,14 @@ export default function Signup() {
           <div className="relative">
             <Mail
               size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#EAEFFE]/70"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-invert)]/70"
             />
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[#EAEFFE] placeholder-[#EAEFFE]/60 border border-white/20 focus:border-[#EAEFFE] focus:ring-2 focus:ring-[#9787F3] outline-none transition"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[var(--color-text-invert)] placeholder-[var(--color-text-invert)]/60 border border-white/20 focus:border-[var(--color-secondary-light)] focus:ring-2 focus:ring-[var(--color-secondary)] outline-none transition"
               required
             />
           </div>
@@ -93,14 +93,14 @@ export default function Signup() {
           <div className="relative">
             <Lock
               size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#EAEFFE]/70"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-invert)]/70"
             />
             <input
               type="password"
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[#EAEFFE] placeholder-[#EAEFFE]/60 border border-white/20 focus:border-[#EAEFFE] focus:ring-2 focus:ring-[#9787F3] outline-none transition"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-[var(--color-text-invert)] placeholder-[var(--color-text-invert)]/60 border border-white/20 focus:border-[var(--color-secondary-light)] focus:ring-2 focus:ring-[var(--color-secondary)] outline-none transition"
               required
             />
           </div>
@@ -111,19 +111,19 @@ export default function Signup() {
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 300 }}
             type="submit"
-            className="w-full py-3 bg-[#9878f3] hover:bg-[#7b6ccb] text-[#EAEFFE] font-semibold rounded-xl shadow-lg transition"
+            className="w-full py-3 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold rounded-xl shadow-lg transition-all duration-200"
           >
             Criar conta
           </motion.button>
         </form>
 
         {/* LINKS */}
-        <div className="text-center mt-6 text-[#EAEFFE]/80 text-sm">
+        <div className="text-center mt-6 text-[var(--color-text-invert)]/80 text-sm">
           <p>
             Já tem uma conta?{" "}
             <a
               href="/login"
-              className="text-[#EAEFFE] font-semibold hover:underline"
+              className="text-[var(--color-text-invert)] font-semibold hover:underline"
             >
               Entrar
             </a>

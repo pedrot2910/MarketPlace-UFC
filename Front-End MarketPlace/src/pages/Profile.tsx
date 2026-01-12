@@ -33,7 +33,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <p className="text-center text-red-500 mt-10">
+      <p className="text-center text-[var(--color-error)] mt-10">
         Você precisa estar logado para ver seu perfil.
       </p>
     );
@@ -41,35 +41,35 @@ export default function Profile() {
 
   if (loading)
     return (
-      <p className="text-center text-gray-500 mt-10 animate-pulse">
+      <p className="text-center text-[var(--color-text-muted)] mt-10 animate-pulse">
         Carregando perfil...
       </p>
     );
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] bg-[#EAEFFE] px-4">
-      <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-3xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] px-4">
+      <div className="bg-[var(--color-card)] rounded-2xl shadow-lg p-10 w-full max-w-3xl">
+        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-6 text-center">
           Meu Perfil
         </h1>
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div>
-            <p className="font-semibold text-gray-700">Nome:</p>
-            <p className="text-lg text-gray-900">{user.name}</p>
+            <p className="font-semibold text-[var(--color-text)]">Nome:</p>
+            <p className="text-lg text-[var(--color-text)]">{user.name}</p>
           </div>
           <div>
-            <p className="font-semibold text-gray-700">Email:</p>
-            <p className="text-lg text-gray-900">{user.email}</p>
+            <p className="font-semibold text-[var(--color-text)]">Email:</p>
+            <p className="text-lg text-[var(--color-text)]">{user.email}</p>
           </div>
           <div>
-            <p className="font-semibold text-gray-700">Função:</p>
-            <p className="text-lg text-gray-900 capitalize">{user.role}</p>
+            <p className="font-semibold text-[var(--color-text)]">Função:</p>
+            <p className="text-lg text-[var(--color-text)] capitalize">{user.role}</p>
           </div>
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b pb-2">
+          <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-4 border-b pb-2">
             Seus anúncios
           </h2>
 
@@ -78,25 +78,25 @@ export default function Profile() {
               {listings.map((item) => (
                 <li
                   key={item.id}
-                  className="border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all bg-gray-50"
+                  className="border border-[var(--color-border)] rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all bg-[var(--color-bg-alt)]"
                   onClick={() => (window.location.href = `/listing/${item.id}`)}
                   style={{ cursor: "pointer" }}
                 >
-                  <h3 className="font-bold text-gray-900 text-lg">
+                  <h3 className="font-bold text-[var(--color-text)] text-lg">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                  <p className="text-sm text-[var(--color-text-muted)] mt-1 line-clamp-2">
                     {item.description}
                   </p>
-                  <p className="text-sm text-gray-700 mt-3">
+                  <p className="text-sm text-[var(--color-text)] mt-3">
                     <span className="font-semibold">Preço:</span> R${" "}
                     {item.price}
                   </p>
                   <span
                     className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
                       item.type === "offer"
-                        ? "bg-purple-50 text-[#9878f3]"
-                        : "bg-[#b6acf3] text-white"
+                        ? "bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)]"
+                        : "bg-[var(--color-secondary)] text-[var(--color-text-invert)]"
                     } uppercase`}
                   >
                     {item.type}
@@ -105,7 +105,7 @@ export default function Profile() {
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-center mt-4">
+            <p className="text-[var(--color-text-muted)] text-center mt-4">
               Você ainda não possui anúncios.
             </p>
           )}

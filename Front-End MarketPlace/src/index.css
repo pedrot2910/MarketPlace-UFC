@@ -1,5 +1,31 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
+:root {
+  --color-primary: #2D1B4D;
+  --color-primary-light: #7C3AED;
+  --color-primary-dark: #1E1333;
+
+  --color-secondary: #A78BFA;
+  --color-secondary-light: #DDD6FE;
+  --color-secondary-dark: #7C3AED;
+
+  --color-accent: #DDD6FE;
+
+  --color-bg: #FAFAFA;
+  --color-bg-alt: #F5F3FF;
+  --color-card: #FFFFFF;
+
+  --color-text: #111827;
+  --color-text-muted: #6B7280;
+  --color-text-invert: #FFFFFF;
+
+  --color-border: #E5E7EB;
+
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+}
 
 html, body {
   height: 100%;
@@ -9,7 +35,7 @@ html, body {
 /* GLOBAL: opcional — remover se não quiser aplicar em tudo */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #7b6ccb rgba(152, 120, 243, 0.5);
+  scrollbar-color: var(--color-secondary-dark) var(--color-primary);
 }
 
 html::-webkit-scrollbar {
@@ -46,6 +72,6 @@ html::-webkit-scrollbar-track {
 
   .scrollbar-custom {
     scrollbar-width: thin;
-    scrollbar-color: #7b6ccb rgba(152, 120, 243, 0.5);
+    scrollbar-color: var(--color-secondary-dark) var(--color-primary);
   }
 }

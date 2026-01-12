@@ -73,25 +73,25 @@ export default function ListingDetails() {
     "/placeholder.png";
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#EAEFFE] py-6 px-4">
-      <div className="max-w-2xl mx-auto mt-10 bg-white p-6 rounded-2xl shadow-lg">
+    <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-6 px-4">
+      <div className="max-w-2xl mx-auto mt-10 bg-[var(--color-card)] p-6 rounded-2xl shadow-lg">
         <img
           src={coverImage}
           alt={listing.title}
           className="w-full h-64 object-cover rounded-xl mb-4"
         />
 
-        <h1 className="text-3xl font-bold text-[#9878f3] mb-2">
+        <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
           {listing.title}
         </h1>
 
-        <p className="text-gray-600 mb-3">{listing.description}</p>
+        <p className="text-[var(--color-text-muted)] mb-3">{listing.description}</p>
 
-        <p className="text-lg font-semibold text-[#7b6ccb] mb-2">
+        <p className="text-lg font-semibold text-[var(--color-primary-light)] mb-2">
           R$ {listing.price}
         </p>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-[var(--color-text-muted)]">
           <span className="font-medium">Anunciante:</span>{" "}
           {listing.profiles?.name ?? "Desconhecido"}
         </p>
@@ -99,8 +99,8 @@ export default function ListingDetails() {
         <span
           className={`text-xs font-semibold rounded-full inline-block px-3 py-1 mt-4 ${
             listing.type === "venda"
-              ? "bg-purple-50 text-[#9878f3]"
-              : "bg-[#b6acf3] text-white"
+              ? "bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)]"
+              : "bg-[var(--color-secondary)] text-[var(--color-text-invert)]"
           } uppercase`}
         >
           {listing.type === "venda" ? "Venda" : "Troca"}
@@ -108,7 +108,7 @@ export default function ListingDetails() {
 
         <button
           onClick={handleChat}
-          className="w-full mt-4 bg-[#9878f3] text-white font-semibold py-3 rounded-xl shadow"
+          className="w-full mt-4 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
         >
           Conversar com o vendedor
         </button>
