@@ -1,28 +1,41 @@
 import { useEffect, useState } from "react";
 import type { Listing } from "../types/listing";
-import { fetchListings } from "../services/listings";
+import { updateProfile } from "../services/profile";
 import { useAuth } from "../hooks/auth";
+import { fetchProfileById } from "../services/profile";
+import type { Profile as ProfileType } from "../types/profile";
+import { productsService } from "../services/products.service";
 
 export default function Profile() {
   const { user } = useAuth(); // <-- PEGA O USUÁRIO LOGADO
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<ProfileType | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
       try {
-        if (!user) return; // se não tiver user, não busca nada
+        if (!user?.id) return;
 
         setLoading(true);
 
-        const allListings = await fetchListings();
-        const userListings = allListings.filter(
-          (l) => l.ownerName === user.name
-        );
+        const profileData = await fetchProfileById(user.id);
+        setProfile(profileData);
+        setForm({
+          name: profileData.name,
+          email: profileData.email,
+        });
 
+        const userListings = await productsService.getByProfile(user.id);
         setListings(userListings);
       } catch (err) {
-        console.error("Erro ao carregar o perfil:", err);
+        console.error("Erro ao carregar perfil:", err);
       } finally {
         setLoading(false);
       }
@@ -30,6 +43,31 @@ export default function Profile() {
 
     loadProfile();
   }, [user]);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSave() {
+    if (!user?.id) return;
+    try {
+      setSaving(true);
+
+      const updated = await updateProfile(user.id, {
+        name: form.name,
+        email: form.email,
+      });
+
+      setProfile(updated);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Erro ao atualizar perfil:", err);
+      alert("Erro ao atualizar perfil");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   if (!user) {
     return (
@@ -56,15 +94,65 @@ export default function Profile() {
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div>
             <p className="font-semibold text-gray-700">Nome:</p>
-            <p className="text-lg text-gray-900">{user.name}</p>
+
+            {isEditing ? (
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="border rounded-lg px-3 py-2 w-full"
+              />
+            ) : (
+              <p className="text-lg text-gray-900">{profile?.name}</p>
+            )}
           </div>
+
           <div>
             <p className="font-semibold text-gray-700">Email:</p>
-            <p className="text-lg text-gray-900">{user.email}</p>
+
+            {isEditing ? (
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="border rounded-lg px-3 py-2 w-full"
+              />
+            ) : (
+              <p className="text-lg text-gray-900">{profile?.email}</p>
+            )}
           </div>
+
           <div>
             <p className="font-semibold text-gray-700">Função:</p>
             <p className="text-lg text-gray-900 capitalize">{user.role}</p>
+          </div>
+
+          <div className="flex gap-3 mb-8">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="bg-[#9878f3] text-white px-4 py-2 rounded-lg"
+                >
+                  {saving ? "Salvando..." : "Salvar"}
+                </button>
+
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="border px-4 py-2 rounded-lg"
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="border px-4 py-2 rounded-lg"
+              >
+                Editar perfil
+              </button>
+            )}
           </div>
         </div>
 

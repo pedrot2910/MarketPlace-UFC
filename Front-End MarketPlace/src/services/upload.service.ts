@@ -1,16 +1,14 @@
 import api from "./api";
 
-export const uploadService = {
-  uploadImage: async (file: File) => {
-    const formData = new FormData();
-    formData.append("image", file);
+export async function uploadImage(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const response = await api.post("/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  const { data } = await api.post("/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 
-    return response.data.imageUrl;
-  },
-};
+  return data.link as string;
+}

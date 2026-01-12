@@ -23,9 +23,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.clear();
-      window.location.href = "/login";
-    }
+  console.warn("Token inválido ou expirado");
+}
+
     return Promise.reject(error);
   }
 );

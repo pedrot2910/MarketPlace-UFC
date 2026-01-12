@@ -49,8 +49,22 @@ export type CreateProductDTO = {
   product_images?: string[];
 };
 
+export type UpdateProductDTO = Partial<CreateProductDTO>;
+
 export async function getListingById(id: string) {
   const response = await api.get(`/products/${id}`);
+  return response.data;
+}
+
+export async function updateListing(
+  id: string,
+  data: UpdateProductDTO){
+  const response = await api.put(`/products/${id}`, data);
+  return response.data;
+}
+
+export async function deleteListing(id: string) {
+  const response = await api.delete(`/products/${id}`);
   return response.data;
 }
 

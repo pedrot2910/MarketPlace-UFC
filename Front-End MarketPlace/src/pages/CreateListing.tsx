@@ -1,20 +1,56 @@
 import { createListing } from "../services/listings";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { fetchCategories } from "../services/categories";
+import type { Category } from "../services/categories";
+import { uploadImage } from "../services/upload.service";
 export default function CreateListing() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number | "">("");
-  const [type, setType] = useState<"offer" | "trade">("offer");
+  const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">(
+    "novo"
+  );
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [type, setType] = useState<"venda" | "troca">("venda");
+  const [image, setImage] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Erro ao carregar categorias", err);
+      }
+    }
+
+    loadCategories();
+  }, []);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await createListing({ title, description, price: Number(price), type });
+
+    setUploading(true);
+
+    const imageUrl = await uploadImage(image![0]);
+
+    await createListing({
+      title,
+      description,
+      price: Number(price),
+      type,
+      condition,
+      category_id: category,
+      product_images: [imageUrl],
+    });
+
+    setUploading(false);
+
     alert("Anúncio criado com sucesso!");
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setType("offer");
+
+    setPreview(null);
   }
 
   return (
@@ -31,6 +67,50 @@ export default function CreateListing() {
 
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div>
+            <div>
+              <label className="block text-gray-800 font-semibold mb-2">
+                Imagem do Produto
+              </label>
+
+              <label
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center gap-2 cursor-pointer
+               border-2 border-dashed border-gray-300 rounded-xl p-6
+               hover:border-[#9878f3] transition text-center"
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="h-40 object-contain rounded-lg"
+                  />
+                ) : (
+                  <>
+                    <span className="text-sm text-gray-500">
+                      Clique para selecionar uma imagem
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      PNG, JPG, WEBP até 5MB
+                    </span>
+                  </>
+                )}
+              </label>
+
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  setImage([file]);
+                  setPreview(URL.createObjectURL(file));
+                }}
+              />
+            </div>
+
             <label className="block text-gray-800 font-semibold mb-1">
               Título
             </label>
@@ -80,14 +160,40 @@ export default function CreateListing() {
                 Tipo de Anúncio
               </label>
               <select
-                className="w-full border text-gray-800 border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-[#9878f3] focus:outline-none"
                 value={type}
-                onChange={(e) => setType(e.target.value as "offer" | "trade")}
+                onChange={(e) => setType(e.target.value as "venda" | "troca")}
               >
-                <option value="offer">Oferta (Venda)</option>
-                <option value="trade">Troca</option>
+                <option value="venda">Venda</option>
+                <option value="troca">Troca</option>
               </select>
             </div>
+          </div>
+
+          <select onChange={(e) => setCondition(e.target.value as any)}>
+            <option value="novo">Novo</option>
+            <option value="seminovo">Seminovo</option>
+            <option value="usado">Usado</option>
+          </select>
+
+          <div>
+            <label className="block text-gray-800 font-semibold mb-1">
+              Categoria
+            </label>
+
+            <select
+              className="w-full border text-gray-800 border-gray-300 rounded-lg px-4 py-2"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            >
+              <option value="">Selecione uma categoria</option>
+
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.namecategories}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
