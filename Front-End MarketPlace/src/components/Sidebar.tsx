@@ -11,6 +11,12 @@ import {
   NotebookText,
   TabletSmartphone,
   ScrollText,
+  Sofa,
+  KeyboardMusic,
+  Volleyball,
+  Stethoscope,
+  Shirt,
+  HeartPulse,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserLocationMapOSM from "./UserLocationMapOSM";
@@ -217,7 +223,7 @@ export default function Sidebar() {
 
                 <Link
                   to="/category/books"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
@@ -228,7 +234,7 @@ export default function Sidebar() {
 
                 <Link
                   to="/category/electronics"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
@@ -239,7 +245,7 @@ export default function Sidebar() {
 
                 <Link
                   to="/category/officesupplies"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
@@ -247,6 +253,73 @@ export default function Sidebar() {
                   </div>
                   <span className="p-2"> Materiais de Escritório </span>
                 </Link>
+
+                 <Link
+                  to="/category/furniture"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <Sofa size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Mobília </span>
+                </Link>
+
+                <Link
+                  to="/category/musicalinstruments"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <KeyboardMusic size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Instrumentos Musicais </span>
+                </Link>
+
+                <Link
+                  to="/category/sports"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <Volleyball size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Esportes </span>
+                </Link>
+
+                <Link
+                  to="/category/uniforms"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <Stethoscope size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Uniformes e Jalecos </span>
+                </Link>
+
+                <Link
+                  to="/category/clothing"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <Shirt size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Vestuario </span>
+                </Link>
+
+                <Link
+                  to="/category/health"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <HeartPulse size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2"> Saúde </span>
+                </Link>
+
               </nav>
             </motion.div>
 
