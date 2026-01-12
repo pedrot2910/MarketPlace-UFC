@@ -109,7 +109,7 @@ export default function Sidebar() {
               className="fixed top-0 left-0 h-full w-72 bg-[var(--color-primary)] text-[var(--color-text-invert)] shadow-2xl z-60 flex flex-col overflow-y-auto scrollbar-custom"
             >
               {/* Cabeçalho com logo e nome */}
-              <div className="flex items-center gap-1 mb-6 mt-12 px-8 py-3 bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary-light)] rounded-r-3xl shadow-inner">
+              <div className="flex items-center gap-1 mb-6 mt-0 px-8 py-3 bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary)] rounded-r-3xl shadow-inner">
                 <motion.img
                   src="/logoruim3.png"
                   alt="Logo ReUse"
