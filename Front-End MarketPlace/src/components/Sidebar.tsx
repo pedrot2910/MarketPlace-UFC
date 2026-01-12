@@ -26,6 +26,7 @@ export default function Sidebar() {
   const [showMap, setShowMap] = useState(false);
   const [location, setLocation] = useState<string>("Definir localização");
   const [addressArray, setAddressArray] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
   const toggleSidebar = () => setIsOpen(!isOpen);
   const navigate = useNavigate();
 
@@ -36,6 +37,15 @@ export default function Sidebar() {
   const handleConfirmLocation = () => {
     setLocation(addressArray.join(""));
     setShowMap(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchText.trim()) {
+      navigate(`/marketplace?search=${encodeURIComponent(searchText)}`);
+      setIsOpen(false);
+      setSearchText("");
+    }
   };
 
   return (
@@ -136,7 +146,7 @@ export default function Sidebar() {
 
               {/* Navegação */}
               <nav className="flex flex-col space-y-3 px-4">
-                <div className="relative w-full max-w-sm">
+                <form onSubmit={handleSearch} className="relative w-full max-w-sm">
                   <Search
                     size={20}
                     className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--color-text-muted)]"
@@ -144,10 +154,12 @@ export default function Sidebar() {
 
                   <input
                     type="text"
-                    placeholder="Buscar..."
+                    placeholder="Buscar produtos..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-white/90 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] shadow-sm"
                   />
-                </div>
+                </form>
 
                 <Link
                   to="/marketplace"
@@ -174,7 +186,7 @@ export default function Sidebar() {
                 <button
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => {
-                    navigate("marketplace?mode=trade");
+                    navigate("/marketplace?mode=troca");
                     setIsOpen(false);
                   }}
                 >
@@ -187,7 +199,7 @@ export default function Sidebar() {
                 <button
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => {
-                    navigate("marketplace?mode=offer");
+                    navigate("/marketplace?mode=venda");
                     setIsOpen(false);
                   }}
                 >
@@ -222,7 +234,7 @@ export default function Sidebar() {
                 <h1 className="font-semibold text-xl"> Categorias </h1>
 
                 <Link
-                  to="/category/books"
+                  to="/marketplace?category=livros"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -233,7 +245,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/electronics"
+                  to="/marketplace?category=eletrônicos"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -244,7 +256,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/officesupplies"
+                  to="/marketplace?category=escritório"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -255,7 +267,7 @@ export default function Sidebar() {
                 </Link>
 
                  <Link
-                  to="/category/furniture"
+                  to="/marketplace?category=mobília"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -266,7 +278,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/musicalinstruments"
+                  to="/marketplace?category=musicais"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -277,7 +289,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/sports"
+                  to="/marketplace?category=esportes"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -288,7 +300,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/uniforms"
+                  to="/marketplace?category=uniformes"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -299,7 +311,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/clothing"
+                  to="/marketplace?category=vestuário"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
@@ -310,7 +322,7 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/category/health"
+                  to="/marketplace?category=saúde"
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >

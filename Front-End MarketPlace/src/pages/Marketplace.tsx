@@ -7,14 +7,28 @@ export default function Marketplace() {
   const [listings, setListings] = useState<Product[]>([]);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") ?? "all";
+  const searchQuery = searchParams.get("search") ?? "";
+  const category = searchParams.get("category") ?? "";
 
   useEffect(() => {
     fetchListings().then(setListings);
   }, []);
 
   const filteredListings = listings.filter((listing) => {
-    if (mode === "all") return true;
-    return listing.type === mode; // agora "venda" | "troca"
+    // Filtro por modo (venda/troca)
+    const matchesMode = mode === "all" || listing.type === mode;
+    
+    // Filtro por busca de texto
+    const matchesSearch = searchQuery === "" || 
+      listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (listing.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    
+    // Filtro por categoria
+    const matchesCategory = category === "" ||
+      listing.title.toLowerCase().includes(category.toLowerCase()) ||
+      (listing.description?.toLowerCase().includes(category.toLowerCase()) ?? false);
+    
+    return matchesMode && matchesSearch && matchesCategory;
   });
 
   return (

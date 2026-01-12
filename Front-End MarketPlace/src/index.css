@@ -34,6 +34,7 @@ body {
 html, body {
   height: 100%;
   overflow-y: auto;
+  background-color: var(--color-primary);
 }
 
 /* GLOBAL: opcional — remover se não quiser aplicar em tudo */
