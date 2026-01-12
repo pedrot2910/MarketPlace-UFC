@@ -7,21 +7,35 @@ export default function Marketplace() {
   const [listings, setListings] = useState<Product[]>([]);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") ?? "all";
+  const searchQuery = searchParams.get("search") ?? "";
+  const category = searchParams.get("category") ?? "";
 
   useEffect(() => {
     fetchListings().then(setListings);
   }, []);
 
   const filteredListings = listings.filter((listing) => {
-    if (mode === "all") return true;
-    return listing.type === mode; // agora "venda" | "troca"
+    // Filtro por modo (venda/troca)
+    const matchesMode = mode === "all" || listing.type === mode;
+    
+    // Filtro por busca de texto
+    const matchesSearch = searchQuery === "" || 
+      listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (listing.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    
+    // Filtro por categoria
+    const matchesCategory = category === "" ||
+      listing.title.toLowerCase().includes(category.toLowerCase()) ||
+      (listing.description?.toLowerCase().includes(category.toLowerCase()) ?? false);
+    
+    return matchesMode && matchesSearch && matchesCategory;
   });
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#EAEFFE] py-12 px-6 md:px-12">
+    <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-12 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-[#2d274B] mb-10 text-center">
-          Marketplace <span className="text-[#9878f3]">ReUse</span>
+        <h1 className="text-4xl font-bold text-[var(--color-text)] mb-10 text-center">
+          Marketplace <span className="text-[var(--color-primary)]">ReUse</span>
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -34,7 +48,7 @@ export default function Marketplace() {
               return (
                 <div
                   key={listing.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
+                  className="bg-[var(--color-card)] rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
                 >
                   <img
                     src={coverImage}
@@ -43,22 +57,22 @@ export default function Marketplace() {
                   />
 
                   <div className="p-6 text-left">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h2 className="text-xl font-semibold text-[var(--color-text)] mb-2">
                       {listing.title}
                     </h2>
 
-                    <p className="text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-[var(--color-text-muted)] mb-4 line-clamp-2">
                       {listing.description}
                     </p>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-[#9878f3] font-bold text-lg">
+                      <span className="text-[var(--color-primary)] font-bold text-lg">
                         R$ {listing.price.toFixed(2)}
                       </span>
 
                       <Link
                         to={`/listing/${listing.id}`}
-                        className="bg-[#9878f3] hover:bg-[#7b6ccb] text-white px-4 py-2 rounded-lg font-semibold transition"
+                        className="bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] px-4 py-2 rounded-lg font-semibold transition-all duration-200"
                       >
                         Ver Detalhes
                       </Link>
@@ -68,7 +82,7 @@ export default function Marketplace() {
               );
             })
           ) : (
-            <p className="text-center text-gray-500 col-span-full">
+            <p className="text-center text-[var(--color-text-muted)] col-span-full">
               Nenhum anúncio disponível no momento.
             </p>
           )}

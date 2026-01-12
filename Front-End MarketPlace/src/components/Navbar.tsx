@@ -27,7 +27,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-40 bg-[#9878f3] shadow p-3 flex justify-between items-center">
+    <nav className="sticky top-0 z-40 bg-[var(--color-primary)] shadow p-3 flex justify-between items-center">
       <div className="flex justify-center items-center">
         <Sidebar />
       </div>
@@ -37,7 +37,7 @@ export default function Navbar() {
           onClick={() => {
             openModal();
           }}
-          className="top-4 left-4 z-30 p-2 text-[#eaeffe] rounded-lg hover:bg-[#7b6ccb] hover:text-[#EAEFFE] transition"
+          className="top-4 left-4 z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200"
         >
           <MessageSquareMore size={24} />
         </button>
@@ -46,7 +46,7 @@ export default function Navbar() {
         <div className="relative" ref={ref}>
           <button
             onClick={() => setOpen((prev) => !prev)}
-            className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:scale-105 transition"
+            className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:scale-105 transition-all duration-200"
           >
             {user?.photoUrl ? (
               <img
@@ -55,10 +55,10 @@ export default function Navbar() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[#7b6ccb]">
-                <User size={24} className="text-white" />
+              <div className="w-full h-full flex items-center justify-center bg-[var(--color-secundary-dark)]">
+                <User size={24} className="text-[var(--color-text-invert)]" />
               </div>
-            )}
+            )}       
           </button>
 
           <AnimatePresence>
@@ -68,20 +68,20 @@ export default function Navbar() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                className="absolute right-0 mt-2 w-48 bg-[var(--color-card)] rounded-lg shadow-lg overflow-hidden z-50"
               >
-                <div className="flex flex-col text-sm text-gray-700">
+                <div className="flex flex-col text-sm text-[var(--color-text)]">
                   <Link
                     to="/profile"
                     onClick={() => setOpen(false)}
-                    className="px-4 py-3 hover:bg-[#EAEFFE] transition"
+                    className="px-4 py-3 hover:bg-[var(--color-bg-alt)] transition-all duration-200"
                   >
                     Meu Perfil
                   </Link>
                   <Link
                     to="/create-listing"
                     onClick={() => setOpen(false)}
-                    className="px-4 py-3 hover:bg-[#EAEFFE] transition"
+                    className="px-4 py-3 hover:bg-[var(--color-bg-alt)] transition-all duration-200"
                   >
                     Criar Anúncio
                   </Link>
@@ -92,7 +92,7 @@ export default function Navbar() {
                         logout();
                       }
                     }}
-                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition"
+                    className="w-full text-left px-4 py-3 text-[var(--color-error)] hover:bg-red-50 transition-all duration-200"
                   >
                     Sair
                   </button>
