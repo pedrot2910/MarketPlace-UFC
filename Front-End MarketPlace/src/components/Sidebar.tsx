@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,18 +8,11 @@ import {
   Store,
   ArrowRightLeft,
   BadgeDollarSign,
-  NotebookText,
-  TabletSmartphone,
-  ScrollText,
-  Sofa,
-  KeyboardMusic,
-  Volleyball,
-  Stethoscope,
-  Shirt,
-  HeartPulse,
 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserLocationMapOSM from "./UserLocationMapOSM";
+import { fetchCategories, type Category } from "../services/categories";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,8 +20,30 @@ export default function Sidebar() {
   const [location, setLocation] = useState<string>("Definir localização");
   const [addressArray, setAddressArray] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>("");
+  const [categories, setCategories] = useState<Category[]>([]);
   const toggleSidebar = () => setIsOpen(!isOpen);
   const navigate = useNavigate();
+
+  // Função para obter o ícone correto dinamicamente
+  const getIcon = (iconName: string | null | undefined) => {
+    if (!iconName) return Icons.Store;
+    // Acessa diretamente o ícone pelo nome (ex: "Book", "Monitor", "Shirt")
+    const IconComponent = (Icons as any)[iconName];
+    return IconComponent || Icons.Store;
+  };
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Erro ao carregar categorias", err);
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   const handleLocationSelect = (addr: string[]) => {
     setAddressArray(addr);
@@ -233,104 +248,22 @@ export default function Sidebar() {
 
                 <h1 className="font-semibold text-xl"> Categorias </h1>
 
-                <Link
-                  to="/marketplace?category=livros"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <NotebookText size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Livros </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=eletrônicos"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <TabletSmartphone size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Eletrônicos </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=escritório"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <ScrollText size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Materiais de Escritório </span>
-                </Link>
-
-                 <Link
-                  to="/marketplace?category=mobília"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Sofa size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Mobília </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=musicais"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <KeyboardMusic size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Instrumentos Musicais </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=esportes"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Volleyball size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Esportes </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=uniformes"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Stethoscope size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Uniformes e Jalecos </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=vestuário"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Shirt size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Vestuario </span>
-                </Link>
-
-                <Link
-                  to="/marketplace?category=saúde"
-                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <HeartPulse size={18} className="text-[var(--color-text-invert)]" />
-                  </div>
-                  <span className="p-2"> Saúde </span>
-                </Link>
+                {categories.map((cat) => {
+                  const IconComponent = getIcon((cat as any).icon);
+                  return (
+                    <Link
+                      key={cat.id}
+                      to={`/marketplace?category=${encodeURIComponent(cat.namecategories)}`}
+                      className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                        <IconComponent size={18} className="text-[var(--color-text-invert)]" />
+                      </div>
+                      <span className="p-2 capitalize">{cat.namecategories}</span>
+                    </Link>
+                  );
+                })}
 
               </nav>
             </motion.div>

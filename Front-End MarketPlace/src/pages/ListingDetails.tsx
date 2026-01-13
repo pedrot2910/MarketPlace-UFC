@@ -10,9 +10,14 @@ type ProductDetails = {
   description: string | null;
   price: number;
   type: "venda" | "troca";
+  condition: "novo" | "seminovo" | "usado";
 
   profiles: {
     name: string;
+  };
+
+  categories: {
+    namecategories: string;
   };
 
   product_images: {
@@ -96,15 +101,30 @@ export default function ListingDetails() {
           {listing.profiles?.name ?? "Desconhecido"}
         </p>
 
-        <span
-          className={`text-xs font-semibold rounded-full inline-block px-3 py-1 mt-4 ${
-            listing.type === "venda"
-              ? "bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)]"
-              : "bg-[var(--color-secondary)] text-[var(--color-text-invert)]"
-          } uppercase`}
-        >
-          {listing.type === "venda" ? "Venda" : "Troca"}
-        </span>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <span className="font-medium">Categoria:</span>{" "}
+          {listing.categories?.namecategories ?? "Sem categoria"}
+        </p>
+
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <span className="font-medium">Condição:</span>{" "}
+          <span className="capitalize">{listing.condition}</span>
+        </p>
+
+        <div className="flex gap-2 mt-4">
+          <span
+            className={`text-xs font-semibold rounded-full px-3 py-1 ${
+              listing.type === "venda"
+                ? "bg-green-100 text-green-700"
+                : "bg-blue-100 text-blue-700"
+            }`}
+          >
+            {listing.type === "venda" ? "Venda" : "Troca"}
+          </span>
+          <span className="text-xs font-semibold rounded-full px-3 py-1 bg-gray-100 text-gray-700 capitalize">
+            {listing.condition}
+          </span>
+        </div>
 
         <button
           onClick={handleChat}
