@@ -1,56 +1,261 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getListingById, updateListing } from "../services/listings";
+import { fetchCategories } from "../services/categories";
+import type { Category } from "../services/categories";
 
 export default function EditListing() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    price: 0,
-  });
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">("novo");
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [type, setType] = useState<"venda" | "troca">("venda");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (!id) return;
+    async function loadData() {
+      if (!id) return;
 
-    getListingById(id).then((product) => {
-      setForm({
-        title: product.title,
-        description: product.description,
-        price: product.price,
-      });
-    });
+      try {
+        const [product, categoriesList] = await Promise.all([
+          getListingById(id),
+          fetchCategories(),
+        ]);
+
+        setTitle(product.title);
+        setDescription(product.description || "");
+        setPrice(product.price);
+        setCondition(product.condition);
+        setType(product.type);
+        setCategory(product.category_id);
+        setCategories(categoriesList);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        setErrorMessage("Erro ao carregar anúncio");
+        setShowError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
   }, [id]);
 
-  async function handleSave() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
     if (!id) return;
 
-    await updateListing(id, form);
-    alert("Anúncio atualizado!");
-    navigate("/profile");
+    try {
+      setSaving(true);
+
+      await updateListing(id, {
+        title,
+        description: description || undefined,
+        price: Number(price),
+        type,
+        condition,
+        category_id: category,
+      });
+
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate(`/listing/${id}`);
+      }, 2000);
+    } catch (error: any) {
+      console.error("Erro ao atualizar anúncio:", error);
+      setErrorMessage(
+        error.response?.data?.message || error.message || "Erro ao atualizar anúncio"
+      );
+      setShowError(true);
+      setTimeout(() => setShowError(false), 4000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl text-[var(--color-text)]">Carregando...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <input
-        value={form.title}
-        onChange={(e) => setForm({ ...form, title: e.target.value })}
-      />
+    <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-12 px-6 flex justify-center items-center">
+      {/* Notificação de Sucesso */}
+      {showSuccess && (
+        <div className="fixed top-20 right-6 z-50 animate-fade-in">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
+            <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-green-500 text-xl font-bold">✓</span>
+            </div>
+            <div>
+              <p className="font-semibold">Sucesso!</p>
+              <p className="text-sm">Anúncio atualizado com sucesso!</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <textarea
-        value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-      />
+      {/* Notificação de Erro */}
+      {showError && (
+        <div className="fixed top-20 right-6 z-50 animate-fade-in">
+          <div className="bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
+            <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-red-500 text-xl font-bold">✕</span>
+            </div>
+            <div>
+              <p className="font-semibold">Erro!</p>
+              <p className="text-sm">{errorMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <input
-        type="number"
-        value={form.price}
-        onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-      />
+      <div className="w-full max-w-3xl bg-[var(--color-card)] rounded-2xl shadow-lg p-10">
+        <h2 className="text-3xl font-bold text-[var(--color-text)] text-center mb-6">
+          Editar Anúncio
+        </h2>
 
-      <button onClick={handleSave}>Salvar</button>
+        <p className="text-[var(--color-text-muted)] text-center mb-8">
+          Atualize as informações do seu anúncio no{" "}
+          <span className="text-[var(--color-primary)] font-semibold">
+            Marketplace
+          </span>
+          .
+        </p>
+
+        <form onSubmit={handleSubmit} className="grid gap-5">
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-1">
+              Título
+            </label>
+            <input
+              className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+              placeholder="Ex: Calculadora científica Casio"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-1">
+              Descrição
+            </label>
+            <textarea
+              className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 h-32 resize-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+              placeholder="Descreva o produto, estado de uso, etc."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-[var(--color-text)] font-semibold mb-1">
+                Preço (R$)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+                placeholder="Ex: 45.00"
+                value={price}
+                onChange={(e) =>
+                  setPrice(e.target.value ? Number(e.target.value) : "")
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[var(--color-text)] font-semibold mb-1">
+                Tipo de Anúncio
+              </label>
+              <select
+                className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+                value={type}
+                onChange={(e) => setType(e.target.value as "venda" | "troca")}
+              >
+                <option value="venda">Venda</option>
+                <option value="troca">Troca</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-1">
+              Condição
+            </label>
+            <select
+              className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value as "novo" | "seminovo" | "usado")}
+            >
+              <option value="novo">Novo</option>
+              <option value="seminovo">Seminovo</option>
+              <option value="usado">Usado</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-1">
+              Categoria
+            </label>
+            <select
+              className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            >
+              <option value="">Selecione uma categoria</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.namecategories}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(`/listing/${id}`)}
+              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white text-lg font-semibold py-3 rounded-xl transition-all duration-200 shadow-md"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className={`flex-1 text-white text-lg font-semibold py-3 rounded-xl transition-all duration-200 shadow-md ${
+                saving
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)]"
+              }`}
+            >
+              {saving ? "Salvando..." : "Salvar Alterações"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

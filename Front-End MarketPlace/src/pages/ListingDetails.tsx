@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getListingById } from "../services/listings";
+import { useParams, useNavigate } from "react-router-dom";
+import { getListingById, deleteListing } from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
 
@@ -11,6 +11,7 @@ type ProductDetails = {
   price: number;
   type: "venda" | "troca";
   condition: "novo" | "seminovo" | "usado";
+  profile_id: string;
 
   profiles: {
     name: string;
@@ -32,6 +33,7 @@ export default function ListingDetails() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const chatModal = useChatModal();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
@@ -49,6 +51,21 @@ export default function ListingDetails() {
 
     fetchData();
   }, [id]);
+
+  async function handleDelete() {
+    if (!id || !listing) return;
+
+    if (window.confirm("Tem certeza que deseja deletar este anúncio?")) {
+      try {
+        await deleteListing(id);
+        alert("Anúncio deletado com sucesso!");
+        navigate("/marketplace");
+      } catch (error) {
+        console.error("Erro ao deletar anúncio:", error);
+        alert("Erro ao deletar anúncio");
+      }
+    }
+  }
 
   function handleChat() {
     if (!user) {
@@ -126,12 +143,29 @@ export default function ListingDetails() {
           </span>
         </div>
 
-        <button
-          onClick={handleChat}
-          className="w-full mt-4 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-        >
-          Conversar com o vendedor
-        </button>
+        {user && listing.profile_id === user.id ? (
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => navigate(`/edit-listing/${listing.id}`)}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition-all duration-200"
+            >
+              Editar Anúncio
+            </button>
+            <button
+              onClick={handleDelete}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl shadow transition-all duration-200"
+            >
+              Deletar Anúncio
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleChat}
+            className="w-full mt-4 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+          >
+            Conversar com o vendedor
+          </button>
+        )}
       </div>
     </div>
   );

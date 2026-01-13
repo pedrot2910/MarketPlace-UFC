@@ -195,7 +195,7 @@ export default function Sidebar() {
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
                     <ShoppingBag size={18} className="text-[var(--color-text-invert)]" />
                   </div>
-                  <span className="pl-2">Compras</span>
+                  <span className="pl-2">Minhas Compras</span>
                 </Link>
 
                 <button

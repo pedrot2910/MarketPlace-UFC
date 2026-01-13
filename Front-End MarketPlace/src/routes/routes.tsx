@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import AppLayout from "../layouts/AppLayout";
 import Marketplace from "../pages/Marketplace";
 import CreateListing from "../pages/CreateListing";
+import EditListing from "../pages/EditListing";
 import ListingDetails from "../pages/ListingDetails";
 import Profile from "../pages/Profile";
 import AuthLayout from "../layouts/AuthLayout";
@@ -19,6 +20,7 @@ export default function AppRoutes() {
         <Route path="/home" element={<Home />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/create-listing" element={<CreateListing />} />
+        <Route path="/edit-listing/:id" element={<EditListing />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
         <Route path="*" element={<Navigate to="/login" />} />
