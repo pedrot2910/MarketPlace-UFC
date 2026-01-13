@@ -18,13 +18,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// (Opcional) interceptor de response
+// Interceptor de response para tratar sessão expirada
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-  console.warn("Token inválido ou expirado");
-}
+      console.warn("Token inválido ou expirado");
+      
+      // Limpa o localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      
+      // Mostra alerta
+      alert("Sua sessão expirou. Por favor, faça login novamente.");
+      
+      // Redireciona para login
+      window.location.href = "/login";
+    }
 
     return Promise.reject(error);
   }
