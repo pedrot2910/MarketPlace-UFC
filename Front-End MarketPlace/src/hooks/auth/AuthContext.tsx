@@ -33,7 +33,7 @@ export function AuthContextProvider({ children }: ProviderProps) {
       setToken(token);
       setUser(user);
 
-      navigate("/home");
+      navigate("/marketplace");
     } catch {
       alert("Erro ao fazer login");
     }

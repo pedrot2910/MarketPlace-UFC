@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "../pages/Home";
 import Login from "../pages/Login";
 import AppLayout from "../layouts/AppLayout";
 import Marketplace from "../pages/Marketplace";
@@ -17,7 +16,7 @@ export default function AppRoutes() {
 
       {/* Layout principal (com Navbar e Sidebar) */}
       <Route element={<AppLayout />}>
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<Navigate to="/marketplace" replace />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/edit-listing/:id" element={<EditListing />} />
