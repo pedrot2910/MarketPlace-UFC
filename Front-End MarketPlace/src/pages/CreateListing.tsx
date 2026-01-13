@@ -16,6 +16,9 @@ export default function CreateListing() {
   const [image, setImage] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function loadCategories() {
@@ -32,29 +35,92 @@ export default function CreateListing() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    setUploading(true);
+    // Validações antes de enviar
+    if (!image || image.length === 0) {
+      setErrorMessage("Por favor, selecione uma imagem para o produto");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
 
-    const imageUrl = await uploadImage(image![0]);
+    if (!category) {
+      setErrorMessage("Por favor, selecione uma categoria");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
 
-    await createListing({
-      title,
-      description,
-      price: Number(price),
-      type,
-      condition,
-      category_id: category,
-      product_images: [imageUrl],
-    });
+    try {
+      setUploading(true);
 
-    setUploading(false);
+      const imageUrl = await uploadImage(image[0]);
 
-    alert("Anúncio criado com sucesso!");
+      await createListing({
+        title,
+        description: description || undefined,
+        price: Number(price),
+        type,
+        condition,
+        category_id: category,
+        product_images: [imageUrl],
+      });
 
-    setPreview(null);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 4000);
+
+      // Limpar o formulário
+      setTitle("");
+      setDescription("");
+      setPrice("");
+      setCondition("novo");
+      setCategory("");
+      setType("venda");
+      setImage([]);
+      setPreview(null);
+    } catch (error: any) {
+      console.error("Erro ao criar anúncio:", error);
+      setErrorMessage(
+        error.response?.data?.message || error.message || "Erro desconhecido ao criar anúncio"
+      );
+      setShowError(true);
+      setTimeout(() => setShowError(false), 4000);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-12 px-6 flex justify-center items-center">
+      {/* Notificação de Sucesso */}
+      {showSuccess && (
+        <div className="fixed top-20 right-6 z-50 animate-fade-in">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
+            <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-green-500 text-xl font-bold">✓</span>
+            </div>
+            <div>
+              <p className="font-semibold">Sucesso!</p>
+              <p className="text-sm">Anúncio criado com sucesso!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notificação de Erro */}
+      {showError && (
+        <div className="fixed top-20 right-6 z-50 animate-fade-in">
+          <div className="bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
+            <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-red-500 text-xl font-bold">✕</span>
+            </div>
+            <div>
+              <p className="font-semibold">Erro!</p>
+              <p className="text-sm">{errorMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-3xl bg-[var(--color-card)] rounded-2xl shadow-lg p-10">
         <h2 className="text-3xl font-bold text-[var(--color-text)] text-center mb-6">
           Criar Novo Anúncio
@@ -173,11 +239,20 @@ export default function CreateListing() {
             </div>
           </div>
 
-          <select onChange={(e) => setCondition(e.target.value as any)}>
-            <option value="novo">Novo</option>
-            <option value="seminovo">Seminovo</option>
-            <option value="usado">Usado</option>
-          </select>
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-1">
+              Condição
+            </label>
+            <select
+              className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value as "novo" | "seminovo" | "usado")}
+            >
+              <option value="novo">Novo</option>
+              <option value="seminovo">Seminovo</option>
+              <option value="usado">Usado</option>
+            </select>
+          </div>
 
           <div>
             <label className="block text-gray-800 font-semibold mb-1">
@@ -202,9 +277,14 @@ export default function CreateListing() {
 
           <button
             type="submit"
-            className="w-full bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] text-lg font-semibold py-3 rounded-xl transition-all duration-200 shadow-md"
+            disabled={uploading}
+            className={`w-full text-[var(--color-text-invert)] text-lg font-semibold py-3 rounded-xl transition-all duration-200 shadow-md ${
+              uploading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)]"
+            }`}
           >
-            Publicar Anúncio
+            {uploading ? "Criando anúncio..." : "Publicar Anúncio"}
           </button>
         </form>
       </div>

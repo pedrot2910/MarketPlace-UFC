@@ -25,12 +25,11 @@ export default function Marketplace() {
       (listing.description?.toLowerCase().includes(searchQuery.toLowerCase()) ??
         false);
 
-    // Filtro por categoria
+    // Filtro por categoria - compara com o campo namecategories
     const matchesCategory =
       category === "" ||
-      listing.title.toLowerCase().includes(category.toLowerCase()) ||
-      (listing.description?.toLowerCase().includes(category.toLowerCase()) ??
-        false);
+      listing.categories?.namecategories?.toLowerCase() ===
+        category.toLowerCase();
 
     return matchesMode && matchesSearch && matchesCategory;
   });
@@ -68,6 +67,21 @@ export default function Marketplace() {
                     <p className="text-[var(--color-text-muted)] mb-4 line-clamp-2">
                       {listing.description}
                     </p>
+
+                    <div className="flex gap-2 mb-3">
+                      <span
+                        className={`text-xs font-semibold rounded-full px-3 py-1 ${
+                          listing.type === "venda"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {listing.type === "venda" ? "Venda" : "Troca"}
+                      </span>
+                      <span className="text-xs font-semibold rounded-full px-3 py-1 bg-gray-100 text-gray-700 capitalize">
+                        {listing.condition}
+                      </span>
+                    </div>
 
                     <div className="flex items-center justify-between">
                       <span className="text-[var(--color-primary)] font-bold text-lg">
