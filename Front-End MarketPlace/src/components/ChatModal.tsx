@@ -207,7 +207,7 @@ export default function ChatModal() {
             <div className="flex flex-col h-80">
               <div className="flex-1 overflow-y-auto border rounded-xl p-3 mb-3 bg-[#F6F4FF]">
                 {messages.map((msg) => {
-                  const senderId = msg.sender?.id;
+                  const senderId = msg.sender?.id ?? msg.sender_id;
                   const isMine = senderId === user?.id;
 
                   return (
