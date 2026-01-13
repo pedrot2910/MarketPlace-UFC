@@ -17,7 +17,7 @@ const productService = {
       .select(
         `
                 *,
-                profiles ( name, email, matricula ),
+                profiles ( id, name, email, matricula ),
                 categories ( namecategories ),
                 product_images ( image_url, is_cover ) 
             `
@@ -43,7 +43,7 @@ const productService = {
       .select(
         `
                 *,
-                profiles ( name, email, matricula ),
+                profiles ( id, name, email, matricula ),
                 categories ( namecategories ),
                 product_images ( image_url, is_cover )
             `

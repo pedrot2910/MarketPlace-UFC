@@ -16,7 +16,6 @@ interface ChatModalStore {
   /**
    * Abre o modal diretamente
    */
-  openModal: () => void;
 
   /**
    * Abre o modal já com contexto do chat
@@ -32,15 +31,18 @@ interface ChatModalStore {
   close: () => void;
 }
 
+export function getOtherUser(messages: any[], myId: string) {
+  for (const msg of messages) {
+    if (msg.sender?.id && msg.sender.id !== myId) return msg.sender;
+    if (msg.receiver?.id && msg.receiver.id !== myId) return msg.receiver;
+  }
+  return null;
+}
+
 export const useChatModal = create<ChatModalStore>((set) => ({
   open: false,
   receiverId: null,
   productId: null,
-
-  openModal: () =>
-    set({
-      open: true,
-    }),
 
   openChat: ({ receiverId, productId }) =>
     set({

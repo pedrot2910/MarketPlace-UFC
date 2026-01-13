@@ -8,6 +8,8 @@ export async function socketAuthMiddleware(socket, next) {
   try {
     const token = socket.handshake.auth?.token;
 
+    console.log("🔐 Token recebido no socket:", token?.slice(0, 20));
+
     if (!token) {
       return next(new Error("Token de autenticação não fornecido."));
     }
@@ -22,7 +24,7 @@ export async function socketAuthMiddleware(socket, next) {
     }
 
     // Injeta o usuário autenticado no socket
-    socket.user = user;
+    socket.data.user = user;
 
     next();
   } catch (error) {

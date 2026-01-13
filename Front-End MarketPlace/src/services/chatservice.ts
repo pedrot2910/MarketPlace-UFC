@@ -9,18 +9,28 @@ export const chatService = {
   connect(token: string) {
     if (socket) return;
 
-    socket = io(import.meta.env.VITE_API_URL ?? "http://localhost:3333", {
+    console.log("🧪 TOKEN FRONTEND:", token?.slice(0, 30));
+
+    socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:3000", {
       auth: {
         token,
       },
     });
 
     socket.on("connect", () => {
-      console.log("Socket conectado:", socket?.id);
+      console.log("🟢 SOCKET CONECTADO:", socket?.id);
     });
 
-    socket.on("disconnect", () => {
-      console.log("Socket desconectado");
+    socket.on("connect_error", (err) => {
+      console.error("🔴 SOCKET ERROR:", err.message);
+    });
+
+    socket.on("chat-error", (err) => {
+      console.error("🔴 CHAT ERROR:", err);
+    });
+
+    socket.on("joined-chat", (data) => {
+      console.log("🟢 ENTROU NA SALA:", data);
     });
   },
 

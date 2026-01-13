@@ -4,59 +4,102 @@ import { X, Send } from "lucide-react";
 
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
-import { useChatModal } from "../hooks/useChatModal";
+import { useChatModal, getOtherUser } from "../hooks/useChatModal";
+import { getMessagesByUser } from "../services/messages.service";
 
 import type { Message } from "../types/message";
 
 export default function ChatModal() {
   const { open, close, receiverId, productId } = useChatModal();
   const { user, token } = useAuth();
-
+  const [otherUser, setOtherUser] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
+  const otherUserRef = useRef<any>(null);
 
   /**
    * 1. Conecta socket quando abrir modal
    */
   useEffect(() => {
-    if (!open || !token) return;
-
+    if (!open) return;
+    if (!token) return;
+    if (!user) return;
+    if (!receiverId || !productId) return;
     chatService.connect(token);
-
-    return () => {
-      chatService.disconnect();
-    };
-  }, [open, token]);
-
-  /**
-   * 2. Entra na sala do chat
-   */
-  useEffect(() => {
-    if (!open || !user || !receiverId || !productId) return;
 
     chatService.joinChat({
       sender_id: user.id,
       receiver_id: receiverId,
       product_id: productId,
     });
-  }, [open, user, receiverId, productId]);
 
-  /**
-   * 3. Escuta mensagens
-   */
-  useEffect(() => {
     function handleNewMessage(msg: Message) {
-      setMessages((prev) => [...prev, msg]);
+      console.log("📩 NOVA MENSAGEM RECEBIDA:", msg);
+      setMessages((prev) => {
+        const updated = [...prev, msg];
+
+        if (!otherUserRef.current) {
+          const other = getOtherUser(updated, user!.id);
+          otherUserRef.current = other;
+          setOtherUser(other);
+        }
+
+        return updated;
+      });
     }
 
     chatService.onMessage(handleNewMessage);
 
     return () => {
       chatService.offMessage(handleNewMessage);
+      chatService.disconnect();
     };
-  }, []);
+  }, [open, user, token, receiverId, productId]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (!user || !receiverId || !productId) return;
+
+    async function loadHistory() {
+      if (!user) return;
+      console.log("📜 CARREGANDO HISTÓRICO", { receiverId, productId });
+
+      const allMessages = await getMessagesByUser(user.id);
+
+      const filtered = allMessages
+        .filter((msg) => {
+          const senderId = msg.sender?.id;
+          const receiverIdMsg = msg.receiver?.id;
+          const productIdMsg = msg.product_id ?? msg.product?.id;
+
+          if (!senderId || !receiverIdMsg || !productIdMsg) return false;
+
+          const isSameProduct = productIdMsg === productId;
+
+          const isSameUsers =
+            (senderId === user.id && receiverIdMsg === receiverId) ||
+            (senderId === receiverId && receiverIdMsg === user.id);
+
+          return isSameProduct && isSameUsers;
+        })
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+
+      console.log("📜 HISTÓRICO FILTRADO:", filtered);
+
+      setMessages(filtered);
+      const other = getOtherUser(filtered, user.id);
+      console.log("👤 OUTRO USUÁRIO:", other);
+      setOtherUser(other);
+    }
+
+    setMessages([]);
+    loadHistory();
+  }, [open, user, receiverId, productId]);
 
   /**
    * 4. Auto-scroll
@@ -69,7 +112,12 @@ export default function ChatModal() {
    * 5. Enviar mensagem
    */
   function handleSend() {
-    if (!text.trim() || !receiverId || !productId) return;
+    console.log("🧪 HANDLE SEND", { text, receiverId, productId });
+
+    if (!text.trim() || !receiverId || !productId) {
+      console.warn("⛔ BLOQUEADO NO HANDLESEND");
+      return;
+    }
 
     chatService.sendMessage({
       receiver_id: receiverId,
@@ -103,7 +151,12 @@ export default function ChatModal() {
           >
             {/* HEADER */}
             <div className="flex justify-between items-center border-b pb-2 mb-3">
-              <h2 className="text-lg font-semibold text-[#4b3a91]">Chat</h2>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">Conversando com</span>
+                <h2 className="text-lg font-semibold text-[#4b3a91]">
+                  {otherUser ? otherUser.name : "Carregando..."}
+                </h2>
+              </div>
 
               <button onClick={close}>
                 <X size={22} />
@@ -114,7 +167,8 @@ export default function ChatModal() {
             <div className="flex flex-col h-80">
               <div className="flex-1 overflow-y-auto border rounded-xl p-3 mb-3 bg-[#F6F4FF]">
                 {messages.map((msg) => {
-                  const isMine = msg.sender_id === user?.id;
+                  const senderId = msg.sender?.id ?? msg.sender_id;
+                  const isMine = senderId === user?.id;
 
                   return (
                     <div

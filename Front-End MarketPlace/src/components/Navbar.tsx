@@ -4,15 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/auth";
 import Sidebar from "./Sidebar";
-import { useChatModal } from "../hooks/useChatModal";
+import { useInboxModal } from "../hooks/useInboxModal";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { openModal } = useChatModal();
   const ref = useRef<HTMLDivElement>(null);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const { logout } = useAuth();
+  const { openInbox } = useInboxModal();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -35,7 +35,7 @@ export default function Navbar() {
         {/* Botão de mensagens */}
         <button
           onClick={() => {
-            openModal();
+            openInbox();
           }}
           className="top-4 left-4 z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200"
         >
@@ -58,7 +58,7 @@ export default function Navbar() {
               <div className="w-full h-full flex items-center justify-center bg-[var(--color-secundary-dark)]">
                 <User size={24} className="text-[var(--color-text-invert)]" />
               </div>
-            )}       
+            )}
           </button>
 
           <AnimatePresence>

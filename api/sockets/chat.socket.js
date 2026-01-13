@@ -37,51 +37,54 @@ export function RegisterChatSocket(io) {
     // ============================
     socket.on("send-message", async (payload) => {
       try {
-         const sender_id = socket.user.id;
-          const {
+        console.log("🧪 SOCKET USER:", socket.user);
+        console.log("🧪 SOCKET DATA:", socket.data);
+
+        if (!socket.data.user) {
+          return socket.emit(
+            "chat-error",
+            "Usuário não autenticado no socket."
+          );
+        }
+
+        const sender_id = socket.data.user.id;
+
+        const { receiver_id, product_id, message, image_url } = payload;
+        // Validação usando o mesmo schema do REST
+        const parsed = messagesSchema.create.safeParse({
+          body: {
+            sender_id,
             receiver_id,
             product_id,
             message,
             image_url,
-        } = payload;
-        // Validação usando o mesmo schema do REST
-        const parsed = messagesSchema.create.safeParse({
-           body: {
-                sender_id,
-                receiver_id,
-                product_id,
-                message,
-                image_url,
-            },
+          },
         });
 
         if (!parsed.success) {
           return socket.emit("chat-error", parsed.error.format());
         }
 
-
         const roomId = buildRoomId({
-            senderId: sender_id,
-            receiverId: receiver_id,
-            productId: product_id,
+          senderId: sender_id,
+          receiverId: receiver_id,
+          productId: product_id,
         });
-
 
         // Persistência
         const savedMessage = await messagesService.createMessage({
-            sender_id,
-            receiver_id,
-            product_id,
-            message,
-            image_url,
+          sender_id,
+          receiver_id,
+          product_id,
+          message,
+          image_url,
         });
 
         // Broadcast para todos da sala
         io.to(roomId).emit("new-message", savedMessage);
-
       } catch (error) {
         console.error("Erro ao processar mensagem:", error.message);
-        socket.emit("chat-error", "Erro interno ao enviar mensagem");
+        socket.emit("chat-error", error.message ?? error);
       }
     });
 

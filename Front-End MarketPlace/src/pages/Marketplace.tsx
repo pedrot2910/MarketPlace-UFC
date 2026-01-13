@@ -17,17 +17,21 @@ export default function Marketplace() {
   const filteredListings = listings.filter((listing) => {
     // Filtro por modo (venda/troca)
     const matchesMode = mode === "all" || listing.type === mode;
-    
+
     // Filtro por busca de texto
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch =
+      searchQuery === "" ||
       listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (listing.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    
+      (listing.description?.toLowerCase().includes(searchQuery.toLowerCase()) ??
+        false);
+
     // Filtro por categoria
-    const matchesCategory = category === "" ||
+    const matchesCategory =
+      category === "" ||
       listing.title.toLowerCase().includes(category.toLowerCase()) ||
-      (listing.description?.toLowerCase().includes(category.toLowerCase()) ?? false);
-    
+      (listing.description?.toLowerCase().includes(category.toLowerCase()) ??
+        false);
+
     return matchesMode && matchesSearch && matchesCategory;
   });
 
@@ -41,9 +45,9 @@ export default function Marketplace() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredListings.length > 0 ? (
             filteredListings.map((listing) => {
-              const coverImage =
-                listing.product_images.find((img) => img.is_cover)?.image_url ??
-                "/placeholder.png";
+              const coverImage = listing.product_images.find(
+                (img) => img.is_cover
+              )?.image_url;
 
               return (
                 <div

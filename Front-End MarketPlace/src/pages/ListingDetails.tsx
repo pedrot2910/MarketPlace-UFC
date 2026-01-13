@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getListingById } from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
+import type { Profile } from "../types/profile";
 
 type ProductDetails = {
   id: string;
@@ -11,9 +12,7 @@ type ProductDetails = {
   price: number;
   type: "venda" | "troca";
 
-  profiles: {
-    name: string;
-  };
+  profiles: Profile;
 
   product_images: {
     image_url: string;
@@ -46,6 +45,8 @@ export default function ListingDetails() {
   }, [id]);
 
   function handleChat() {
+    console.log("🧪 LISTING PROFILES:", listing?.profiles);
+
     if (!user) {
       alert("Você precisa estar logado");
       return;
@@ -53,10 +54,14 @@ export default function ListingDetails() {
 
     if (!listing) return;
 
-    chatModal.openWithThread({
-      buyerId: Number(user.id),
-      sellerId: 0, // ⚠️ Ajustaremos depois quando existir profile_id no retorno
-      productId: Number(listing.id),
+    if (user.id === listing.profiles.id) {
+      alert("Você não pode conversar com você mesmo.");
+      return;
+    }
+
+    chatModal.openChat({
+      receiverId: listing.profiles.id,
+      productId: listing.id,
     });
   }
 
@@ -68,9 +73,9 @@ export default function ListingDetails() {
     return <div className="text-center mt-20">Anúncio não encontrado.</div>;
   }
 
-  const coverImage =
-    listing.product_images.find((img) => img.is_cover)?.image_url ??
-    "/placeholder.png";
+  const coverImage = listing.product_images.find(
+    (img) => img.is_cover
+  )?.image_url;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-6 px-4">
@@ -85,7 +90,9 @@ export default function ListingDetails() {
           {listing.title}
         </h1>
 
-        <p className="text-[var(--color-text-muted)] mb-3">{listing.description}</p>
+        <p className="text-[var(--color-text-muted)] mb-3">
+          {listing.description}
+        </p>
 
         <p className="text-lg font-semibold text-[var(--color-primary-light)] mb-2">
           R$ {listing.price}
