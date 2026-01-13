@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import type { Message } from "../types/message";
+import type { AppNotification } from "../types/notification";
 
 let socket: Socket | null = null;
 
@@ -72,4 +73,12 @@ export const chatService = {
   offMessage(callback: MessageListener) {
     socket?.off("new-message", callback);
   },
+
+  onNotification(callback: (n: AppNotification) => void) {
+  socket?.on("notification", callback);
+},
+
+offNotification(callback: any) {
+  socket?.off("notification", callback);
+},
 };

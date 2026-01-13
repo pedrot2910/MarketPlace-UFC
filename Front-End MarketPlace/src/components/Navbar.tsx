@@ -1,23 +1,28 @@
-import { MessageSquareMore, User } from "lucide-react";
+import { MessageSquareMore, User, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/auth";
 import Sidebar from "./Sidebar";
 import { useInboxModal } from "../hooks/useInboxModal";
+import { useNotifications } from "../hooks/useNotifications";
+import { NotificationCenter } from "./NotificationDropdown";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [openNot, setOpenNot] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const { logout } = useAuth();
   const { openInbox } = useInboxModal();
+  const { unreadCount } = useNotifications();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setOpen(false);
+        setOpenNot(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -41,6 +46,24 @@ export default function Navbar() {
         >
           <MessageSquareMore size={24} />
         </button>
+
+        <div className="flex gap-4">
+          {/* Botão de mensagens */}
+          <button
+            onClick={() => setOpenNot((prev) => !prev)}
+            className="top-4 left-4 z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200"
+          >
+            <Bell size={24} />
+          </button>
+
+          {unreadCount > 0 && (
+            <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
+              {unreadCount}
+            </div>
+          )}
+
+          {openNot && <NotificationCenter />}
+        </div>
 
         {/* Menu do usuário */}
         <div className="relative" ref={ref}>

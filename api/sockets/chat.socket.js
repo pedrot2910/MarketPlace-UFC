@@ -82,6 +82,15 @@ export function RegisterChatSocket(io) {
 
         // Broadcast para todos da sala
         io.to(roomId).emit("new-message", savedMessage);
+
+        io.to(`user:${receiver_id}`).emit("notification", {
+          type: "chat",
+          title: "Nova mensagem",
+          message: `Você recebeu uma nova mensagem`,
+          userId: receiver_id,
+          productId: product_id,
+          chatUserId: sender_id,
+        });
       } catch (error) {
         console.error("Erro ao processar mensagem:", error.message);
         socket.emit("chat-error", error.message ?? error);
