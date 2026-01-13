@@ -38,6 +38,10 @@ export default function ChatModal() {
     function handleNewMessage(msg: Message) {
       console.log("📩 NOVA MENSAGEM RECEBIDA:", msg);
       setMessages((prev) => {
+        // Evitar mensagens duplicadas
+        const exists = prev.some((m) => m.id === msg.id);
+        if (exists) return prev;
+
         const updated = [...prev, msg];
 
         if (!otherUserRef.current) {
@@ -52,7 +56,43 @@ export default function ChatModal() {
 
     chatService.onMessage(handleNewMessage);
 
+    // Polling como fallback para garantir que as mensagens sejam atualizadas
+    const pollInterval = setInterval(async () => {
+      if (!user) return;
+      const allMessages = await getMessagesByUser(user.id);
+
+      const filtered = allMessages
+        .filter((msg) => {
+          const senderId = msg.sender?.id;
+          const receiverIdMsg = msg.receiver?.id;
+          const productIdMsg = msg.product_id ?? msg.product?.id;
+
+          if (!senderId || !receiverIdMsg || !productIdMsg) return false;
+
+          const isSameProduct = productIdMsg === productId;
+
+          const isSameUsers =
+            (senderId === user.id && receiverIdMsg === receiverId) ||
+            (senderId === receiverId && receiverIdMsg === user.id);
+
+          return isSameProduct && isSameUsers;
+        })
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+
+      setMessages((prev) => {
+        // Só atualiza se houver novas mensagens
+        if (filtered.length > prev.length) {
+          return filtered;
+        }
+        return prev;
+      });
+    }, 3000); // Verifica a cada 3 segundos
+
     return () => {
+      clearInterval(pollInterval);
       chatService.offMessage(handleNewMessage);
       chatService.disconnect();
     };
@@ -167,7 +207,7 @@ export default function ChatModal() {
             <div className="flex flex-col h-80">
               <div className="flex-1 overflow-y-auto border rounded-xl p-3 mb-3 bg-[#F6F4FF]">
                 {messages.map((msg) => {
-                  const senderId = msg.sender?.id ?? msg.sender_id;
+                  const senderId = msg.sender?.id;
                   const isMine = senderId === user?.id;
 
                   return (
