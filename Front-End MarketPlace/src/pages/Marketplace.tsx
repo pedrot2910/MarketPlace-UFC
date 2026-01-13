@@ -85,7 +85,7 @@ export default function Marketplace() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-[var(--color-primary)] font-bold text-lg">
-                        R$ {listing.price.toFixed(2)}
+                        R$ {listing.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
 
                       <Link

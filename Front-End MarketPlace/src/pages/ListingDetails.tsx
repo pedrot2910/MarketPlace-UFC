@@ -88,11 +88,31 @@ export default function ListingDetails() {
   }
 
   if (loading) {
-    return <div className="text-center mt-20">Carregando anúncio...</div>;
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[var(--color-primary)] mx-auto mb-4"></div>
+          <p className="text-lg font-semibold text-[var(--color-text)]">
+            Carregando anúncio...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!listing) {
-    return <div className="text-center mt-20">Anúncio não encontrado.</div>;
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] flex items-center justify-center">
+        <div className="text-center bg-[var(--color-card)] p-8 rounded-2xl shadow-lg">
+          <p className="text-xl font-semibold text-[var(--color-text)] mb-2">
+            Anúncio não encontrado
+          </p>
+          <p className="text-[var(--color-text-muted)]">
+            O anúncio que você procura não existe ou foi removido.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const coverImage = listing.product_images.find(
@@ -117,7 +137,7 @@ export default function ListingDetails() {
         </p>
 
         <p className="text-lg font-semibold text-[var(--color-primary-light)] mb-2">
-          R$ {listing.price}
+          R$ {listing.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </p>
 
         <p className="text-sm text-[var(--color-text-muted)]">
