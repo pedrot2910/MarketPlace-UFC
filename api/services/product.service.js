@@ -122,6 +122,31 @@ const productService = {
 
   // 4. Deletar
   deleteProductById: async (id) => {
+    // Primeiro, deletar todas as mensagens relacionadas ao produto
+    const { error: messagesError } = await supabase
+      .from('messages')
+      .delete()
+      .eq('product_id', id);
+
+    if (messagesError) throw new Error(messagesError.message);
+
+    // Deletar todos os favoritos relacionados ao produto
+    const { error: favoritesError } = await supabase
+      .from('favorites')
+      .delete()
+      .eq('product_id', id);
+
+    if (favoritesError) throw new Error(favoritesError.message);
+
+    // Deletar as imagens do produto
+    const { error: imagesError } = await supabase
+      .from('product_images')
+      .delete()
+      .eq('product_id', id);
+
+    if (imagesError) throw new Error(imagesError.message);
+
+    // Por fim, deletar o produto
     const { error } = await supabase.from('products').delete().eq('id', id);
 
     if (error) throw new Error(error.message);
