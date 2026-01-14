@@ -17,13 +17,16 @@ export function NotificationCenter() {
         {notifications.map((n) => (
           <div
             key={n.id}
-            onClick={() => markAsRead(n.id)}
+            onClick={() => {
+              markAsRead(n.id);
+              if (n.link) window.location.href = n.link;
+            }}
             className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${
               !n.read && "bg-violet-50"
             }`}
           >
             <p className="font-medium text-sm">{n.title}</p>
-            <p className="text-xs text-gray-600">{n.message}</p>
+            <p className="text-xs text-gray-600">{n.content}</p>
           </div>
         ))}
       </div>

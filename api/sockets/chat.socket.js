@@ -1,5 +1,6 @@
 import { messagesService } from "../services/messages.service.js";
 import { messagesSchema } from "../schemas/messages.schema.js";
+import { createNotification } from "../services/notifications.service.js";
 
 /**
  * Gera um ID determinístico de sala para garantir
@@ -83,14 +84,15 @@ export function RegisterChatSocket(io) {
         // Broadcast para todos da sala
         io.to(roomId).emit("new-message", savedMessage);
 
-        io.to(`user:${receiver_id}`).emit("notification", {
-          type: "chat",
-          title: "Nova mensagem",
-          message: `Você recebeu uma nova mensagem`,
+        const notification = await createNotification({
           userId: receiver_id,
-          productId: product_id,
-          chatUserId: sender_id,
+          type: "message",
+          title: "Nova mensagem",
+          content: "Você recebeu uma nova mensagem",
+          link: `/chat?user=${sender_id}&product=${product_id}`,
         });
+
+        io.to(`user:${receiver_id}`).emit("new-notification", notification);
       } catch (error) {
         console.error("Erro ao processar mensagem:", error.message);
         socket.emit("chat-error", error.message ?? error);

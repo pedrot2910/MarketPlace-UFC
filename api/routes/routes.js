@@ -7,6 +7,7 @@ import { reportsRoutes } from "./reports.routes.js";
 import { favoritesRoutes } from "./favorites.routes.js";
 import { uploadRoutes } from "./upload.routes.js";
 import { authRoutes } from "./auth.routes.js";
+import notificationRoutes from "./notifications.routes.js";
 
 import { Router } from "express";
 
@@ -20,6 +21,7 @@ router.use("/favorites", favoritesRoutes);
 router.use("/products-images", productsImagesRoutes);
 router.use("/reports", reportsRoutes);
 router.use("/upload", uploadRoutes);
+router.use("/notifications", notificationRoutes);
 router.use("/auth", authRoutes);
 
 export default router;
