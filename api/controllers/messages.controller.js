@@ -1,4 +1,4 @@
-import { messagesService } from "../services/messages.service.js";
+import { messagesService } from '../services/messages.service.js';
 
 const messagesController = {
   /**
@@ -6,13 +6,8 @@ const messagesController = {
    */
   createMessage: async (req, res) => {
     try {
-      const {
-        sender_id,
-        receiver_id,
-        product_id,
-        message,
-        image_url,
-      } = req.body;
+      const { sender_id, receiver_id, product_id, message, image_url } =
+        req.body;
 
       const newMessage = await messagesService.createMessage({
         sender_id,
@@ -23,11 +18,10 @@ const messagesController = {
       });
 
       res.status(201).json(newMessage);
-
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        message: "Erro ao criar mensagem",
+        message: 'Erro ao criar mensagem',
         details: error.message,
       });
     }
@@ -43,11 +37,10 @@ const messagesController = {
       const messages = await messagesService.getMessagesByUser(userId);
 
       res.status(200).json(messages);
-
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        message: "Erro ao buscar mensagens",
+        message: 'Erro ao buscar mensagens',
         details: error.message,
       });
     }
@@ -63,11 +56,10 @@ const messagesController = {
       const message = await messagesService.getMessageById(id);
 
       res.status(200).json(message);
-
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        message: "Erro ao buscar mensagem",
+        message: 'Erro ao buscar mensagem',
         details: error.message,
       });
     }
@@ -83,13 +75,31 @@ const messagesController = {
       await messagesService.deleteMessageById(id);
 
       res.status(200).json({
-        message: "Mensagem deletada com sucesso",
+        message: 'Mensagem deletada com sucesso',
       });
-
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        message: "Erro ao deletar mensagem",
+        message: 'Erro ao deletar mensagem',
+        details: error.message,
+      });
+    }
+  },
+
+  /**
+   * Marca mensagens como lidas
+   */
+  markMessagesAsRead: async (req, res) => {
+    try {
+      const { userId, productId, otherUserId } = req.body;
+
+      await messagesService.markMessagesAsRead(userId, productId, otherUserId);
+
+      res.status(200).json({ message: 'Mensagens marcadas como lidas' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: 'Erro ao marcar mensagens como lidas',
         details: error.message,
       });
     }

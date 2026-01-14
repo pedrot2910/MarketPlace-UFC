@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send } from "lucide-react";
+import { X, Send, ArrowLeft } from "lucide-react";
 
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal, getOtherUser } from "../hooks/useChatModal";
-import { getMessagesByUser } from "../services/messages.service";
+import { useInboxModal } from "../hooks/useInboxModal";
+import { getMessagesByUser, markMessagesAsRead } from "../services/messages.service";
+import { fetchProfileById } from "../services/profile";
 
 import type { Message } from "../types/message";
 
 export default function ChatModal() {
   const { open, close, receiverId, productId } = useChatModal();
+  const { openInbox } = useInboxModal();
   const { user, token } = useAuth();
   const [otherUser, setOtherUser] = useState<any>(null);
+  const [productTitle, setProductTitle] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
 
@@ -31,8 +35,8 @@ export default function ChatModal() {
 
     chatService.joinChat({
       sender_id: user.id,
-      receiver_id: receiverId,
-      product_id: productId,
+      receiver_id: String(receiverId),
+      product_id: String(productId),
     });
 
     function handleNewMessage(msg: Message) {
@@ -106,6 +110,15 @@ export default function ChatModal() {
       if (!user) return;
       console.log("📜 CARREGANDO HISTÓRICO", { receiverId, productId });
 
+      // Buscar o perfil do outro usuário diretamente
+      try {
+        const profile = await fetchProfileById(String(receiverId));
+        setOtherUser(profile);
+        console.log("👤 PERFIL DO OUTRO USUÁRIO:", profile);
+      } catch (err) {
+        console.error("Erro ao buscar perfil:", err);
+      }
+
       const allMessages = await getMessagesByUser(user.id);
 
       const filtered = allMessages
@@ -132,9 +145,18 @@ export default function ChatModal() {
       console.log("📜 HISTÓRICO FILTRADO:", filtered);
 
       setMessages(filtered);
-      const other = getOtherUser(filtered, user.id);
-      console.log("👤 OUTRO USUÁRIO:", other);
-      setOtherUser(other);
+      
+      // Extrair título do produto
+      const title = filtered[0]?.product?.title ?? 'Produto';
+      setProductTitle(title);
+
+      // Marcar mensagens como lidas
+      try {
+        await markMessagesAsRead(user.id, String(productId), String(receiverId));
+        console.log("✅ Mensagens marcadas como lidas");
+      } catch (err) {
+        console.error("Erro ao marcar mensagens como lidas:", err);
+      }
     }
 
     setMessages([]);
@@ -160,8 +182,8 @@ export default function ChatModal() {
     }
 
     chatService.sendMessage({
-      receiver_id: receiverId,
-      product_id: productId,
+      receiver_id: String(receiverId),
+      product_id: String(productId),
       message: text,
     });
 
@@ -191,8 +213,19 @@ export default function ChatModal() {
           >
             {/* HEADER */}
             <div className="flex justify-between items-center border-b pb-2 mb-3">
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Conversando com</span>
+              <button
+                onClick={() => {
+                  close();
+                  openInbox();
+                }}
+                className="p-1 hover:bg-gray-100 rounded-lg transition"
+                title="Voltar para lista de conversas"
+              >
+                <ArrowLeft size={20} className="text-gray-600" />
+              </button>
+              
+              <div className="flex flex-col flex-1 mx-3">
+                <span className="text-xs text-gray-500">Anúncio: {productTitle || "Carregando..."}</span>
                 <h2 className="text-lg font-semibold text-[#4b3a91]">
                   {otherUser ? otherUser.name : "Carregando..."}
                 </h2>

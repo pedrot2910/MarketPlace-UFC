@@ -2,6 +2,7 @@ export interface Message {
   id: string;
   message: string;
   created_at: string;
+  read_at?: string | null;
 
   sender: {
     id: string;
@@ -15,7 +16,10 @@ export interface Message {
 
   product?: {
     id: string;
+    title?: string;
   };
 
   product_id?: string;
+  sender_id?: string;
+  receiver_id?: string;
 }

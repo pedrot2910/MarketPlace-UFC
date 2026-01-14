@@ -6,12 +6,37 @@ import { messagesSchema } from '../schemas/messages.schema.js';
 
 const messagesRoutes = Router();
 
+messagesRoutes.post(
+  '/',
+  authMiddleware,
+  validateSchema(messagesSchema.create),
+  messagesController.createMessage,
+);
 
-messagesRoutes.post('/', authMiddleware, validateSchema(messagesSchema.create), messagesController.createMessage);
+messagesRoutes.get(
+  '/user/:userId',
+  authMiddleware,
+  validateSchema(messagesSchema.getMessagesByUser),
+  messagesController.getMessagesByUser,
+);
 
-messagesRoutes.get('/user/:userId', authMiddleware, validateSchema(messagesSchema.getMessagesByUser), messagesController.getMessagesByUser);
+messagesRoutes.put(
+  '/mark-read',
+  authMiddleware,
+  messagesController.markMessagesAsRead,
+);
 
-messagesRoutes.get('/:id', authMiddleware, validateSchema(messagesSchema.findMessageById), messagesController.findMessageById);
-messagesRoutes.delete('/:id', authMiddleware, validateSchema(messagesSchema.delete), messagesController.deleteMessageById);
+messagesRoutes.get(
+  '/:id',
+  authMiddleware,
+  validateSchema(messagesSchema.findMessageById),
+  messagesController.findMessageById,
+);
+messagesRoutes.delete(
+  '/:id',
+  authMiddleware,
+  validateSchema(messagesSchema.delete),
+  messagesController.deleteMessageById,
+);
 
 export { messagesRoutes };

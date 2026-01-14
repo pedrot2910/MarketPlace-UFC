@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/auth";
 import Sidebar from "./Sidebar";
 import { useInboxModal } from "../hooks/useInboxModal";
 import { useNotifications } from "../hooks/useNotifications";
+import { useUnreadMessages } from "../hooks/useUnreadMessages";
 import { NotificationCenter } from "./NotificationDropdown";
 import { getProfileImage } from "../services/profile";
 
@@ -19,6 +20,7 @@ export default function Navbar() {
   const { logout } = useAuth();
   const { openInbox } = useInboxModal();
   const { unreadCount } = useNotifications();
+  const { unreadCount: unreadMessagesCount } = useUnreadMessages();
   const notRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,18 +77,26 @@ export default function Navbar() {
         <Sidebar />
       </div>
       <div className="flex gap-4">
-        {/* Botão de mensagens */}
-        <button
-          onClick={() => {
-            openInbox();
-          }}
-          className="top-4 left-4 z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200"
-        >
-          <MessageSquareMore size={24} />
-        </button>
+        <div className="flex gap-4 relative">
+          {/* Botão de mensagens */}
+          <button
+            onClick={() => {
+              openInbox();
+            }}
+            className="z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200 relative"
+          >
+            <MessageSquareMore size={24} />
+            
+            {unreadMessagesCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                {unreadMessagesCount}
+              </span>
+            )}
+          </button>
+        </div>
 
         <div className="flex gap-4 relative" ref={notRef}>
-          {/* Botão de mensagens */}
+          {/* Botão de notificações */}
           <button
             onClick={() => setOpenNot((prev) => !prev)}
             className="z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200 relative"

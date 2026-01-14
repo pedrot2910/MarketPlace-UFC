@@ -28,6 +28,18 @@ export default function InboxModal() {
     }
 
     load();
+
+    // Polling para atualizar lista em tempo real
+    const pollInterval = setInterval(async () => {
+      if (!user) return;
+      const messages = await getMessagesByUser(user.id);
+      const threads = buildThreads(messages, user.id);
+      setThreads(threads);
+    }, 3000); // Verifica a cada 3 segundos
+
+    return () => {
+      clearInterval(pollInterval);
+    };
   }, [open, user]);
 
   return (
@@ -82,13 +94,20 @@ export default function InboxModal() {
                       productId: thread.productId,
                     });
                   }}
-                  className="cursor-pointer border rounded-xl p-3 hover:bg-gray-50"
+                  className="cursor-pointer border rounded-xl p-3 hover:bg-gray-50 relative"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <p className="font-semibold text-sm truncate">
-                        {thread.otherUsername}
-                      </p>
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">
+                          {thread.otherUsername}
+                        </p>
+                        {thread.unreadCount > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+                            {thread.unreadCount}
+                          </span>
+                        )}
+                      </div>
 
                       <span className="text-[11px] text-gray-400 ml-2 shrink-0">
                         {new Date(
@@ -97,7 +116,12 @@ export default function InboxModal() {
                       </span>
                     </div>
 
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                      {thread.productTitle}
+                    </p>
+
                     <p className="text-sm text-gray-600 truncate mt-0.5">
+                      {thread.lastMessage.sender?.id === user?.id && "Você: "}
                       {thread.lastMessage.message}
                     </p>
                   </div>
