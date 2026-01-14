@@ -228,7 +228,7 @@ export default function Profile() {
             
             {/* Menu dropdown */}
             {showImageMenu && profileImageUrl && (
-              <div className="absolute bottom-12 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-10 min-w-[140px]">
+              <div className="absolute top-7 left-30 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-10 min-w-[140px]">
                 <button
                   onClick={() => {
                     fileInputRef.current?.click();

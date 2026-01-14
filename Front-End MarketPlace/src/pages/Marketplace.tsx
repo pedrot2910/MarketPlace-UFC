@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { fetchListings } from "../services/listings";
 import { Link, useSearchParams } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import type { Product } from "../types/product";
 
 export default function Marketplace() {
   const [listings, setListings] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") ?? "all";
@@ -13,7 +14,10 @@ export default function Marketplace() {
   const category = searchParams.get("category") ?? "";
 
   useEffect(() => {
-    fetchListings().then(setListings);
+    setLoading(true);
+    fetchListings()
+      .then(setListings)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredListings = listings.filter((listing) => {
@@ -43,9 +47,15 @@ export default function Marketplace() {
           Marketplace <span className="text-[var(--color-primary)]">ReUse</span>
         </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredListings.length > 0 ? (
-            filteredListings.map((listing) => {
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-[var(--color-primary)] mb-4" />
+            <p className="text-[var(--color-text-muted)] text-lg">Carregando anúncios...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredListings.length > 0 ? (
+              filteredListings.map((listing) => {
               const coverImage = listing.product_images.find(
                 (img) => img.is_cover
               )?.image_url;
@@ -131,11 +141,12 @@ export default function Marketplace() {
               );
             })
           ) : (
-            <p className="text-center text-[var(--color-text-muted)] col-span-full">
+            <p className="text-center text-[var(--color-text-muted)] col-span-full py-10 text-lg">
               Nenhum anúncio disponível no momento.
             </p>
           )}
         </div>
+        )}
       </div>
     </div>
   );
