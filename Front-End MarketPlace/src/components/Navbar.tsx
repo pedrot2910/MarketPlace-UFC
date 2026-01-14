@@ -19,6 +19,7 @@ export default function Navbar() {
   const { logout } = useAuth();
   const { openInbox } = useInboxModal();
   const { unreadCount } = useNotifications();
+  const notRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadProfileImage() {
@@ -51,11 +52,17 @@ export default function Navbar() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (ref.current && !ref.current.contains(target)) {
         setOpen(false);
+      }
+
+      if (notRef.current && !notRef.current.contains(target)) {
         setOpenNot(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -78,20 +85,20 @@ export default function Navbar() {
           <MessageSquareMore size={24} />
         </button>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 relative" ref={notRef}>
           {/* Botão de mensagens */}
           <button
             onClick={() => setOpenNot((prev) => !prev)}
-            className="top-4 left-4 z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200"
+            className="z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200 relative"
           >
             <Bell size={24} />
-          </button>
 
-          {unreadCount > 0 && (
-            <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
-              {unreadCount}
-            </div>
-          )}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
           {openNot && <NotificationCenter />}
         </div>
