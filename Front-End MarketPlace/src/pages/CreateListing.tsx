@@ -13,9 +13,10 @@ export default function CreateListing() {
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [type, setType] = useState<"venda" | "troca">("venda");
-  const [image, setImage] = useState<File[]>([]);
+  const [images, setImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -36,8 +37,8 @@ export default function CreateListing() {
     e.preventDefault();
 
     // Validações antes de enviar
-    if (!image || image.length === 0) {
-      setErrorMessage("Por favor, selecione uma imagem para o produto");
+    if (!images || images.length === 0) {
+      setErrorMessage("Por favor, selecione pelo menos uma imagem para o produto");
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
@@ -53,7 +54,16 @@ export default function CreateListing() {
     try {
       setUploading(true);
 
-      const imageUrl = await uploadImage(image[0]);
+      // Upload de todas as imagens
+      const imageUrls = await Promise.all(
+        images.map((img) => uploadImage(img))
+      );
+
+      // Marcar qual é a imagem de capa
+      const imagesWithCover = imageUrls.map((url, index) => ({
+        url,
+        is_cover: index === coverIndex,
+      }));
 
       await createListing({
         title,
@@ -62,7 +72,7 @@ export default function CreateListing() {
         type,
         condition,
         category_id: category,
-        product_images: [imageUrl],
+        product_images: imagesWithCover.map((img) => img.url),
       });
 
       setShowSuccess(true);
@@ -75,8 +85,9 @@ export default function CreateListing() {
       setCondition("novo");
       setCategory("");
       setType("venda");
-      setImage([]);
-      setPreview(null);
+      setImages([]);
+      setPreviews([]);
+      setCoverIndex(0);
     } catch (error: any) {
       console.error("Erro ao criar anúncio:", error);
       setErrorMessage(
@@ -138,7 +149,7 @@ export default function CreateListing() {
           <div>
             <div>
               <label className="block text-gray-800 font-semibold mb-2">
-                Imagem do Produto
+                Imagens do Produto {previews.length > 0 && `(${previews.length})`}
               </label>
 
               <label
@@ -147,37 +158,83 @@ export default function CreateListing() {
                border-2 border-dashed border-gray-300 rounded-xl p-6
                hover:border-[#9878f3] transition text-center"
               >
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="h-40 object-contain rounded-lg"
-                  />
-                ) : (
-                  <>
-                    <span className="text-sm text-gray-500">
-                      Clique para selecionar uma imagem
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      PNG, JPG, WEBP até 5MB
-                    </span>
-                  </>
-                )}
+                <span className="text-sm text-gray-500">
+                  Clique para adicionar imagens
+                </span>
+                <span className="text-xs text-gray-400">
+                  PNG, JPG, WEBP até 5MB (múltiplas imagens)
+                </span>
               </label>
 
               <input
                 id="file-upload"
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+                  const files = Array.from(e.target.files || []);
+                  if (files.length === 0) return;
 
-                  setImage([file]);
-                  setPreview(URL.createObjectURL(file));
+                  setImages((prev) => [...prev, ...files]);
+                  
+                  files.forEach((file) => {
+                    const url = URL.createObjectURL(file);
+                    setPreviews((prev) => [...prev, url]);
+                  });
                 }}
               />
+
+              {/* Preview das imagens */}
+              {previews.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  {previews.map((preview, index) => (
+                    <div
+                      key={index}
+                      className="relative group aspect-square rounded-lg overflow-hidden border-2 hover:border-[#9878f3] transition"
+                      style={{
+                        borderColor: index === coverIndex ? '#9878f3' : 'transparent'
+                      }}
+                    >
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {/* Badge de capa */}
+                      {index === coverIndex && (
+                        <div className="absolute top-2 left-2 bg-[#9878f3] text-white text-xs font-semibold px-2 py-1 rounded">
+                          CAPA
+                        </div>
+                      )}
+
+                      {/* Botões de ação */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCoverIndex(index)}
+                          className="bg-white text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100"
+                        >
+                          Definir Capa
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImages((prev) => prev.filter((_, i) => i !== index));
+                            setPreviews((prev) => prev.filter((_, i) => i !== index));
+                            if (coverIndex === index) setCoverIndex(0);
+                            if (coverIndex > index) setCoverIndex((prev) => prev - 1);
+                          }}
+                          className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <label className="block text-[var(--color-text)] font-semibold mb-1">

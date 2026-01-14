@@ -58,7 +58,7 @@ export default function Marketplace() {
               filteredListings.map((listing) => {
               const coverImage = listing.product_images.find(
                 (img) => img.is_cover
-              )?.image_url;
+              )?.image_url || listing.product_images[0]?.image_url;
 
               const conditionColors = {
                 novo: "bg-green-500/10 text-green-600 border-green-500/20",
@@ -124,7 +124,7 @@ export default function Marketplace() {
                     <div className="mb-4 flex items-baseline gap-1">
                       <span className="text-xs" style={{ color: 'hsl(263, 20%, 45%)' }}>R$</span>
                       <span className="text-xl font-bold" style={{ color: 'hsl(263, 70%, 50%)' }}>
-                        {listing.price.toLocaleString('pt-BR')}
+                        {listing.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
 

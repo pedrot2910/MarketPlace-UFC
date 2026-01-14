@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getListingById, updateListing } from "../services/listings";
 import { fetchCategories } from "../services/categories";
 import type { Category } from "../services/categories";
+import { uploadImage } from "../services/upload.service";
 
 export default function EditListing() {
   const { id } = useParams();
@@ -20,6 +21,12 @@ export default function EditListing() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [existingImages, setExistingImages] = useState<{id?: string; image_url: string; is_cover: boolean}[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -38,6 +45,11 @@ export default function EditListing() {
         setType(product.type);
         setCategory(product.category_id);
         setCategories(categoriesList);
+        setExistingImages(product.product_images || []);
+        const coverIdx = product.product_images?.findIndex((img: any) => img.is_cover) ?? 0;
+        setCoverIndex(coverIdx >= 0 ? coverIdx : 0);
+        const coverImg = product.product_images?.find((img: any) => img.is_cover);
+        setCoverImageUrl(coverImg ? coverImg.image_url : product.product_images?.[0]?.image_url || null);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         setErrorMessage("Erro ao carregar anúncio");
@@ -58,14 +70,32 @@ export default function EditListing() {
     try {
       setSaving(true);
 
-      await updateListing(id, {
+      // Upload apenas de novas imagens (se houver)
+      let newImageUrls: string[] = [];
+      if (newImages.length > 0) {
+        newImageUrls = await Promise.all(
+          newImages.map((img) => uploadImage(img))
+        );
+      }
+
+      const updateData = {
         title,
         description: description || undefined,
         price: Number(price),
         type,
         condition,
         category_id: category,
-      });
+        // Envia apenas as novas imagens para serem adicionadas
+        product_images: newImageUrls.length > 0 ? newImageUrls : undefined,
+        // Envia as URLs das imagens a serem removidas
+        images_to_remove: removedImages.length > 0 ? removedImages : undefined,
+        // Envia qual imagem deve ser a capa
+        cover_image_url: coverImageUrl,
+      };
+
+      console.log('📤 Enviando para backend:', updateData);
+
+      await updateListing(id, updateData);
 
       setShowSuccess(true);
       setTimeout(() => {
@@ -140,6 +170,155 @@ export default function EditListing() {
         </p>
 
         <form onSubmit={handleSubmit} className="grid gap-5">
+          {/* Seção de Imagens */}
+          <div>
+            <label className="block text-[var(--color-text)] font-semibold mb-2">
+              Imagens do Produto {(existingImages.length + newImages.length) > 0 && `(${existingImages.length + newImages.length})`}
+            </label>
+
+            {/* Imagens Existentes */}
+            {existingImages.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-[var(--color-text-muted)] mb-2">Imagens atuais:</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {existingImages.map((img, index) => (
+                    <div
+                      key={index}
+                      className="relative group aspect-square rounded-lg overflow-hidden border-2 hover:border-[#9878f3] transition"
+                      style={{
+                        borderColor: img.image_url === coverImageUrl ? '#9878f3' : 'transparent'
+                      }}
+                    >
+                      <img
+                        src={img.image_url}
+                        alt={`Imagem ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {img.image_url === coverImageUrl && (
+                        <div className="absolute top-2 left-2 bg-[#9878f3] text-white text-xs font-semibold px-2 py-1 rounded">
+                          CAPA
+                        </div>
+                      )}
+
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                        {img.image_url !== coverImageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              console.log('🖼️ Definindo nova capa:', img.image_url);
+                              setCoverImageUrl(img.image_url);
+                              setCoverIndex(index);
+                            }}
+                            className="bg-white text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100"
+                          >
+                            Definir Capa
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            console.log('🗑️ Removendo imagem:', img.image_url);
+                            // Adicionar à lista de removidas
+                            setRemovedImages((prev) => {
+                              const updated = [...prev, img.image_url];
+                              console.log('Lista de removidas:', updated);
+                              return updated;
+                            });
+                            setExistingImages((prev) => prev.filter((_, i) => i !== index));
+                            // Se for a capa, definir a próxima como capa
+                            if (img.image_url === coverImageUrl) {
+                              const remaining = existingImages.filter((_, i) => i !== index);
+                              const newCover = remaining[0]?.image_url || null;
+                              console.log('Nova capa após remoção:', newCover);
+                              setCoverImageUrl(newCover);
+                              setCoverIndex(0);
+                            }
+                          }}
+                          className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Adicionar Novas Imagens */}
+            <label
+              htmlFor="file-upload-edit"
+              className="flex flex-col items-center justify-center gap-2 cursor-pointer
+               border-2 border-dashed border-gray-300 rounded-xl p-6
+               hover:border-[#9878f3] transition text-center"
+            >
+              <span className="text-sm text-gray-500">
+                Clique para adicionar mais imagens
+              </span>
+              <span className="text-xs text-gray-400">
+                PNG, JPG, WEBP até 5MB (múltiplas imagens)
+              </span>
+            </label>
+
+            <input
+              id="file-upload-edit"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+
+                setNewImages((prev) => [...prev, ...files]);
+                
+                files.forEach((file) => {
+                  const url = URL.createObjectURL(file);
+                  setNewPreviews((prev) => [...prev, url]);
+                });
+              }}
+            />
+
+            {/* Preview de Novas Imagens */}
+            {newPreviews.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-[var(--color-text-muted)] mb-2">Novas imagens a adicionar:</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {newPreviews.map((preview, index) => (
+                    <div
+                      key={index}
+                      className="relative group aspect-square rounded-lg overflow-hidden border-2 border-green-500/50"
+                    >
+                      <img
+                        src={preview}
+                        alt={`Nova imagem ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                        NOVA
+                      </div>
+
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewImages((prev) => prev.filter((_, i) => i !== index));
+                            setNewPreviews((prev) => prev.filter((_, i) => i !== index));
+                          }}
+                          className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-[var(--color-text)] font-semibold mb-1">
               Título

@@ -11,6 +11,7 @@ export type Product = {
   condition: "novo" | "seminovo" | "usado";
   type: "venda" | "troca";
   created_at: string;
+  profile_id: string;
 
   profiles: {
     name: string;
@@ -47,6 +48,8 @@ export type CreateProductDTO = {
   condition: "novo" | "seminovo" | "usado";
   type: "venda" | "troca";
   product_images?: string[];
+  images_to_remove?: string[];
+  cover_image_url?: string | null;
 };
 
 export type UpdateProductDTO = Partial<CreateProductDTO>;

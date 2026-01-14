@@ -4,4 +4,5 @@ export type Profile = {
   email: string;
   matricula: string;
   role: string;
+  avatar_url?: string | null;
 };
