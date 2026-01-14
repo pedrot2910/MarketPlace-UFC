@@ -3,6 +3,7 @@ import type { Message } from "./message";
 export interface ChatThread {
   productId: string;
   otherUserId: string;
+  otherUsername: string;
   lastMessage: Message;
 }
 
@@ -42,6 +43,7 @@ export function buildThreads(
       map.set(key, {
         productId,
         otherUserId,
+        otherUsername: msg.sender?.name ?? msg.receiver?.name,
         lastMessage: msg,
       });
     } else {

@@ -84,13 +84,23 @@ export default function InboxModal() {
                   }}
                   className="cursor-pointer border rounded-xl p-3 hover:bg-gray-50"
                 >
-                  <p className="text-sm font-medium truncate">
-                    {thread.lastMessage.message}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold text-sm truncate">
+                        {thread.otherUsername}
+                      </p>
 
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(thread.lastMessage.created_at).toLocaleString()}
-                  </p>
+                      <span className="text-[11px] text-gray-400 ml-2 shrink-0">
+                        {new Date(
+                          thread.lastMessage.created_at
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-gray-600 truncate mt-0.5">
+                      {thread.lastMessage.message}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
