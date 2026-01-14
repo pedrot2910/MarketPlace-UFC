@@ -35,6 +35,19 @@ const profilesService = {
       throw new Error(error.message);
     }
 
+    // Buscar foto de perfil separadamente
+    if (data) {
+      const { data: profileImage } = await supabase
+        .from('profile_images')
+        .select('image_url')
+        .eq('id', id)
+        .single();
+
+      if (profileImage) {
+        data.profile_images = [profileImage];
+      }
+    }
+
     return data;
   },
 

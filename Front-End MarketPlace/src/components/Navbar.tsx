@@ -1,4 +1,4 @@
-import { MessageSquareMore, User, Bell } from "lucide-react";
+import { MessageCircle, User, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,10 +85,10 @@ export default function Navbar() {
             }}
             className="z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200 relative"
           >
-            <MessageSquareMore size={24} />
+            <MessageCircle size={24} />
             
             {unreadMessagesCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white" style={{ backgroundColor: "#6B46E5" }}>
                 {unreadMessagesCount}
               </span>
             )}
@@ -104,7 +104,7 @@ export default function Navbar() {
             <Bell size={24} />
 
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white" style={{ backgroundColor: "#6B46E5" }}>
                 {unreadCount}
               </span>
             )}
