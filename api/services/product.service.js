@@ -122,35 +122,64 @@ const productService = {
 
   // 4. Deletar
   deleteProductById: async (id) => {
-    // Primeiro, deletar todas as mensagens relacionadas ao produto
-    const { error: messagesError } = await supabase
-      .from('messages')
-      .delete()
-      .eq('product_id', id);
+    try {
+      // Primeiro, deletar todas as mensagens relacionadas ao produto
+      const { error: messagesError } = await supabase
+        .from('messages')
+        .delete()
+        .eq('product_id', id);
 
-    if (messagesError) throw new Error(messagesError.message);
+      if (messagesError) {
+        console.error('Erro ao deletar mensagens:', messagesError);
+        throw new Error(`Erro ao deletar mensagens: ${messagesError.message}`);
+      }
 
-    // Deletar todos os favoritos relacionados ao produto
-    const { error: favoritesError } = await supabase
-      .from('favorites')
-      .delete()
-      .eq('product_id', id);
+      // Deletar todos os relatórios relacionados ao produto
+      const { error: reportsError } = await supabase
+        .from('reports')
+        .delete()
+        .eq('product_id', id);
 
-    if (favoritesError) throw new Error(favoritesError.message);
+      if (reportsError) {
+        console.error('Erro ao deletar relatórios:', reportsError);
+        throw new Error(`Erro ao deletar relatórios: ${reportsError.message}`);
+      }
 
-    // Deletar as imagens do produto
-    const { error: imagesError } = await supabase
-      .from('product_images')
-      .delete()
-      .eq('product_id', id);
+      // Deletar todos os favoritos relacionados ao produto
+      const { error: favoritesError } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('product_id', id);
 
-    if (imagesError) throw new Error(imagesError.message);
+      if (favoritesError) {
+        console.error('Erro ao deletar favoritos:', favoritesError);
+        throw new Error(`Erro ao deletar favoritos: ${favoritesError.message}`);
+      }
 
-    // Por fim, deletar o produto
-    const { error } = await supabase.from('products').delete().eq('id', id);
+      // Deletar as imagens do produto
+      const { error: imagesError } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('product_id', id);
 
-    if (error) throw new Error(error.message);
-    return true;
+      if (imagesError) {
+        console.error('Erro ao deletar imagens:', imagesError);
+        throw new Error(`Erro ao deletar imagens: ${imagesError.message}`);
+      }
+
+      // Por fim, deletar o produto
+      const { error } = await supabase.from('products').delete().eq('id', id);
+
+      if (error) {
+        console.error('Erro ao deletar produto:', error);
+        throw new Error(`Erro ao deletar produto: ${error.message}`);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Erro geral ao deletar produto:', error);
+      throw error;
+    }
   },
 
   // 5. Atualizar

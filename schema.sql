@@ -88,9 +88,9 @@ CREATE TABLE favorites (
 -- Mensagens (Chat)
 CREATE TABLE messages (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    sender_id uuid REFERENCES profiles(id),
-    receiver_id uuid REFERENCES profiles(id),
-    product_id uuid REFERENCES products(id),
+    sender_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+    receiver_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+    product_id uuid REFERENCES products(id) ON DELETE CASCADE,
     message text,
     image_url text,
     created_at timestamp DEFAULT now(),
@@ -100,8 +100,8 @@ CREATE TABLE messages (
 -- Denúncias (Reports)
 CREATE TABLE reports (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    reporter_id uuid REFERENCES profiles(id),
-    product_id uuid REFERENCES products(id),
+    reporter_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+    product_id uuid REFERENCES products(id) ON DELETE CASCADE,
     reason text NOT NULL,
     status report_status DEFAULT 'pendente', -- Usa o ENUM report_status
     created_at timestamp DEFAULT now()
