@@ -161,7 +161,7 @@ export default function ListingDetails() {
         <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
           <div className="bg-[var(--color-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
             <div className="flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-16 h-16 text-[var(--color-error)]" />
+              <AlertCircle className="w-16 h-16 text-[var(--color-critical)]" />
             </div>
             <h3 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
               Deletar Anúncio?
@@ -178,7 +178,7 @@ export default function ListingDetails() {
               </button>
               <button
                 onClick={confirmDelete}
-                className="flex-1 bg-[var(--color-error)] hover:bg-[var(--color-warning)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl transition-all duration-200"
+                className="flex-1 btn-critical"
               >
                 Deletar
               </button>
@@ -281,7 +281,7 @@ export default function ListingDetails() {
         {/* Carrossel de Imagens */}
         <div className="relative mb-4 group">
           <div 
-            className="relative w-full h-64 rounded-xl overflow-hidden cursor-zoom-in"
+            className="relative w-full aspect-square rounded-xl overflow-hidden cursor-zoom-in"
             onClick={() => setShowLightbox(true)}
           >
             <img
@@ -365,11 +365,6 @@ export default function ListingDetails() {
           R$ {listing.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </p>
 
-        <p className="text-sm text-[var(--color-text-muted)]">
-          <span className="font-medium">Anunciante:</span>{" "}
-          {listing.profiles?.name ?? "Desconhecido"}
-        </p>
-
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
           <span className="font-medium">Categoria:</span>{" "}
           {listing.categories?.namecategories ?? "Sem categoria"}
@@ -390,9 +385,6 @@ export default function ListingDetails() {
           >
             {listing.type === "venda" ? "Venda" : "Troca"}
           </span>
-          <span className="text-xs font-semibold rounded-full px-3 py-1 bg-gray-100 text-gray-700 capitalize">
-            {listing.condition}
-          </span>
         </div>
 
         {/* Botões de ação */}
@@ -406,7 +398,7 @@ export default function ListingDetails() {
             </button>
             <button
               onClick={handleDelete}
-              className="flex-1 bg-[var(--color-error)] hover:bg-[var(--color-warning)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              className="flex-1 btn-critical"
             >
               Deletar Anúncio
             </button>
@@ -442,9 +434,6 @@ export default function ListingDetails() {
             <div className="flex-1">
               <p className="font-semibold text-[var(--color-text)] text-lg">
                 {listing.profiles?.name ?? "Vendedor"}
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Matrícula: {listing.profiles?.matricula ?? "N/A"}
               </p>
               <p className="text-sm text-[var(--color-text-muted)]">
                 {listing.profiles?.email ?? ""}
