@@ -210,7 +210,7 @@ export default function EditListing() {
                               setCoverImageUrl(img.image_url);
                               setCoverIndex(index);
                             }}
-                            className="bg-white text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100"
+                            className="btn-secondary text-xs px-2 py-1"
                           >
                             Definir Capa
                           </button>
@@ -235,7 +235,7 @@ export default function EditListing() {
                               setCoverIndex(0);
                             }
                           }}
-                          className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                          className="btn-critical text-xs px-2 py-1"
                         >
                           Remover
                         </button>

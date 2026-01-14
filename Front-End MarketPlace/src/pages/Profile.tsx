@@ -243,7 +243,9 @@ export default function Profile() {
                     handleDeleteImage();
                     setShowImageMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  className="w-full px-4 py-2 text-left text-sm font-semibold transition-colors" style={{color: 'var(--color-critical)'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(179, 38, 30, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   Deletar foto
                 </button>
@@ -289,13 +291,6 @@ export default function Profile() {
             ) : (
               <p className="text-lg text-gray-900">{profile?.email}</p>
             )}
-          </div>
-
-          <div>
-            <p className="font-semibold text-[var(--color-text)]">Função:</p>
-            <p className="text-lg text-[var(--color-text)] capitalize">
-              {user.role}
-            </p>
           </div>
 
           <div className="flex gap-3 mb-8">

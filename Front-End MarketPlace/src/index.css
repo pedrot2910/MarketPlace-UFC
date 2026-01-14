@@ -28,6 +28,11 @@
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
+  
+  /* Cores para botões críticos/destrutivos */
+  --color-critical: #B3261E;
+  --color-critical-hover: #8B1E3F;
+  
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -113,6 +118,46 @@ html::-webkit-scrollbar-track {
   .scrollbar-custom {
     scrollbar-width: thin;
     scrollbar-color: var(--color-secondary-dark) var(--color-primary);
+  }
+
+  /* Botões críticos/destrutivos */
+  .btn-critical {
+    background-color: var(--color-critical);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.2s;
+  }
+
+  .btn-critical:hover {
+    background-color: var(--color-critical-hover);
+  }
+
+  .btn-critical:focus {
+    outline: 2px solid var(--color-critical);
+    outline-offset: 2px;
+  }
+
+  /* Botões secundários (ações não-destrutivas) */
+  .btn-secondary {
+    background-color: var(--color-secondary-dark);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-secondary);
+  }
+
+  .btn-secondary:focus {
+    outline: 2px solid var(--color-secondary-dark);
+    outline-offset: 2px;
   }
 }
 

@@ -214,7 +214,7 @@ export default function CreateListing() {
                         <button
                           type="button"
                           onClick={() => setCoverIndex(index)}
-                          className="bg-white text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100"
+                          className="btn-secondary text-xs px-2 py-1"
                         >
                           Definir Capa
                         </button>
@@ -226,7 +226,7 @@ export default function CreateListing() {
                             if (coverIndex === index) setCoverIndex(0);
                             if (coverIndex > index) setCoverIndex((prev) => prev - 1);
                           }}
-                          className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                          className="btn-critical text-xs px-2 py-1"
                         >
                           Remover
                         </button>
