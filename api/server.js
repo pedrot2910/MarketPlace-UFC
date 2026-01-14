@@ -38,7 +38,6 @@ app.use(
       console.warn("Blocked CORS origin:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
-    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -76,7 +75,6 @@ const io = new Server(server, {
 
       return callback("Not allowed by CORS", false);
     },
-    credentials: true,
   },
 });
 
