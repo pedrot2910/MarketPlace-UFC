@@ -1,9 +1,9 @@
-import supabase from "../supabase.js";
+import supabase from '../supabase.js';
 
 const profilesService = {
   createProfile: async (productData) => {
     const { data, error } = await supabase
-      .from("profiles")
+      .from('profiles')
       .insert([productData])
       .select();
 
@@ -15,7 +15,7 @@ const profilesService = {
   },
 
   getAllProfiles: async () => {
-    const { data, error } = await supabase.from("profiles").select("*");
+    const { data, error } = await supabase.from('profiles').select('*');
 
     if (error) {
       throw new Error(error.message);
@@ -26,9 +26,9 @@ const profilesService = {
 
   getProfileById: async (id) => {
     const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", id)
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -39,7 +39,7 @@ const profilesService = {
   },
 
   deleteProfileById: async (id) => {
-    const { error } = await supabase.from("profiles").delete().eq("id", id);
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
 
     if (error) {
       throw new Error(error.message);
@@ -50,7 +50,7 @@ const profilesService = {
 
   getProductsByProfileId: async (profileId) => {
     const { data, error } = await supabase
-      .from("products")
+      .from('products')
       .select(
         `
       *,
@@ -62,9 +62,9 @@ const profilesService = {
         image_url,
         is_cover
       )
-    `
+    `,
       )
-      .eq("profile_id", profileId);
+      .eq('profile_id', profileId);
 
     if (error) {
       throw new Error(error.message);
@@ -75,9 +75,9 @@ const profilesService = {
 
   updateProfileById: async (id, updatedData) => {
     const { data, error } = await supabase
-      .from("profiles")
+      .from('profiles')
       .update(updatedData)
-      .eq("id", id)
+      .eq('id', id)
       .select();
 
     if (error) {
@@ -85,6 +85,60 @@ const profilesService = {
     }
 
     return data;
+  },
+
+  getProfileImage: async (profileId) => {
+    const { data, error } = await supabase
+      .from('profile_images')
+      .select('*')
+      .eq('id', profileId)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  },
+
+  createProfileImage: async (profileId, imageUrl) => {
+    const { data, error } = await supabase
+      .from('profile_images')
+      .insert([{ id: profileId, image_url: imageUrl }])
+      .select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  },
+
+  updateProfileImage: async (profileId, imageUrl) => {
+    const { data, error } = await supabase
+      .from('profile_images')
+      .update({ image_url: imageUrl })
+      .eq('id', profileId)
+      .select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  },
+
+  deleteProfileImage: async (profileId) => {
+    const { error } = await supabase
+      .from('profile_images')
+      .delete()
+      .eq('id', profileId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return true;
   },
 };
 

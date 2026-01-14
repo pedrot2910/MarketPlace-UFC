@@ -7,16 +7,47 @@ import Sidebar from "./Sidebar";
 import { useInboxModal } from "../hooks/useInboxModal";
 import { useNotifications } from "../hooks/useNotifications";
 import { NotificationCenter } from "./NotificationDropdown";
+import { getProfileImage } from "../services/profile";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [openNot, setOpenNot] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const { logout } = useAuth();
   const { openInbox } = useInboxModal();
   const { unreadCount } = useNotifications();
+
+  useEffect(() => {
+    async function loadProfileImage() {
+      if (user?.id) {
+        try {
+          const imageData = await getProfileImage(user.id);
+          if (imageData?.imageUrl) {
+            setProfileImageUrl(imageData.imageUrl);
+          } else {
+            setProfileImageUrl(null);
+          }
+        } catch (err) {
+          console.log("Sem foto de perfil");
+          setProfileImageUrl(null);
+        }
+      }
+    }
+    loadProfileImage();
+
+    // Escutar evento de atualização de foto
+    const handleProfileImageUpdate = () => {
+      loadProfileImage();
+    };
+    window.addEventListener('profileImageUpdated', handleProfileImageUpdate);
+
+    return () => {
+      window.removeEventListener('profileImageUpdated', handleProfileImageUpdate);
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -74,9 +105,9 @@ export default function Navbar() {
             }}
             className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:scale-105 transition-all duration-200"
           >
-            {user?.photoUrl ? (
+            {profileImageUrl ? (
               <img
-                src={user.photoUrl}
+                src={profileImageUrl}
                 alt="Foto de perfil"
                 className="w-full h-full object-cover"
               />
