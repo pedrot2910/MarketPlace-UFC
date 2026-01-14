@@ -94,7 +94,7 @@ export default function ChatModal() {
     return () => {
       clearInterval(pollInterval);
       chatService.offMessage(handleNewMessage);
-      chatService.disconnect();
+      // Não desconecta o socket pois as notificações também usam
     };
   }, [open, user, token, receiverId, productId]);
 

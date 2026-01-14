@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { User } from "../../types/user";
 import { authService } from "../../services/auth.service";
 import { AuthContext } from "./AuthContext";
+import { chatService } from "../../services/chatservice";
 
 interface ProviderProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export function AuthContextProvider({ children }: ProviderProps) {
     setUser(null);
     setToken(null);
     localStorage.clear();
+    chatService.disconnect(); // Desconecta o socket ao fazer logout
     navigate("/login");
   }
 
