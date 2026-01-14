@@ -15,7 +15,35 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+const allowedOriginPatterns = [
+  /^http:\/\/localhost:5173$/,
+  /^https:\/\/market-place-ufc\.vercel\.app$/,
+  /^https:\/\/.*\.vercel\.app$/, // fallback seguro
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Mobile / WebView às vezes envia origin null
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOriginPatterns.some((pattern) =>
+        pattern.test(origin)
+      );
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      console.warn("Blocked CORS origin:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.options("*", cors());
 
 app.get("/", (req, res) => {
   res.send("Backend do Marketplace está on! 🚀");
@@ -36,7 +64,17 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOriginPatterns.some((pattern) =>
+        pattern.test(origin)
+      );
+
+      if (isAllowed) return callback(null, true);
+
+      return callback("Not allowed by CORS", false);
+    },
   },
 });
 

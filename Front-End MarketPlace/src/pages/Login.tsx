@@ -38,7 +38,9 @@ export default function Login() {
             <h1 className="text-3xl font-bold text-[var(--color-text-invert)] drop-shadow-[0_0_10px_rgba(124,58,237,0.7)]">
               Bem-vindo ao ReUse
             </h1>
-            <p className="text-[var(--color-text-invert)]/80 mt-2">Entre para continuar</p>
+            <p className="text-[var(--color-text-invert)]/80 mt-2">
+              Entre para continuar
+            </p>
           </motion.div>
 
           {/* FORMULÁRIO */}
@@ -78,6 +80,7 @@ export default function Login() {
               whileTap={{ scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300 }}
               type="submit"
+              onClick={() => console.log(import.meta.env.VITE_API_URL)}
               className="w-full py-3 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold rounded-xl shadow-lg transition-all duration-200"
             >
               Entrar
