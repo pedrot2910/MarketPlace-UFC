@@ -6,6 +6,7 @@ import CreateListing from "../pages/CreateListing";
 import EditListing from "../pages/EditListing";
 import ListingDetails from "../pages/ListingDetails";
 import Profile from "../pages/Profile";
+import Favorites from "../pages/Favorites";
 import AuthLayout from "../layouts/AuthLayout";
 import Signup from "../pages/Signup";
 
@@ -18,6 +19,7 @@ export default function AppRoutes() {
       <Route element={<AppLayout />}>
         <Route path="/home" element={<Navigate to="/marketplace" replace />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/favorites" element={<Favorites />} />
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/edit-listing/:id" element={<EditListing />} />
         <Route path="/profile" element={<Profile />} />

@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import {
   Menu,
   Search,
-  ShoppingBag,
   Store,
   ArrowRightLeft,
   BadgeDollarSign,
+  Heart,
 } from "lucide-react";
 import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -188,14 +188,14 @@ export default function Sidebar() {
                 </Link>
 
                 <Link
-                  to="/profile"
+                  to="/favorites"
                   className="flex items-center hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] p-2 pl-4 rounded-lg transition-all duration-200 text-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <ShoppingBag size={18} className="text-[var(--color-text-invert)]" />
+                    <Heart size={18} className="text-[var(--color-text-invert)]" />
                   </div>
-                  <span className="pl-2">Minhas Compras</span>
+                  <span className="pl-2">Favoritos</span>
                 </Link>
 
                 <button
@@ -247,6 +247,18 @@ export default function Sidebar() {
                 <hr className="border-t border-white/20" />
 
                 <h1 className="font-semibold text-xl"> Categorias </h1>
+
+                {/* Categoria Todos */}
+                <Link
+                  to="/marketplace"
+                  className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
+                    <Store size={18} className="text-[var(--color-text-invert)]" />
+                  </div>
+                  <span className="p-2 capitalize">Todos</span>
+                </Link>
 
                 {categories.map((cat) => {
                   const IconComponent = getIcon((cat as any).icon);

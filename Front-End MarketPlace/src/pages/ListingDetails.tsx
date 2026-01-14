@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { AlertCircle, Check, X, ChevronLeft, ChevronRight, ZoomIn, User } from "lucide-react";
+import { AlertCircle, Check, X, ChevronLeft, ChevronRight, ZoomIn, User, Heart } from "lucide-react";
 import { getListingById, deleteListing, fetchListings, type Product } from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
+import { toggleFavorite, checkIsFavorite } from "../services/favorites.service";
 import type { Profile } from "../types/profile";
 
 type ProductDetails = {
@@ -41,6 +42,7 @@ export default function ListingDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [sellerListings, setSellerListings] = useState<Product[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { user } = useAuth();
   const chatModal = useChatModal();
   const navigate = useNavigate();
@@ -59,6 +61,12 @@ export default function ListingDetails() {
           (item) => item.profile_id === data.profile_id && item.id !== id
         ).slice(0, 4); // Limitar a 4 anúncios
         setSellerListings(otherListings);
+
+        // Verificar se está nos favoritos
+        if (user) {
+          const favStatus = await checkIsFavorite(user.id, id);
+          setIsFavorite(favStatus);
+        }
       } catch (error) {
         console.error("Erro ao carregar anúncio:", error);
       } finally {
@@ -67,7 +75,7 @@ export default function ListingDetails() {
     }
 
     fetchData();
-  }, [id]);
+  }, [id, user]);
 
   async function handleDelete() {
     setShowDeleteModal(true);
@@ -404,12 +412,31 @@ export default function ListingDetails() {
             </button>
           </div>
         ) : user ? (
-          <button
-            onClick={handleChat}
-            className="w-full mt-6 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-          >
-            Conversar com o vendedor
-          </button>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleChat}
+              className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+            >
+              Conversar com o vendedor
+            </button>
+            <button
+              onClick={() => {
+                if (!user) return;
+                setIsFavorite(!isFavorite);
+                toggleFavorite(user.id, listing.id);
+              }}
+              className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
+              title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            >
+              <Heart 
+                className={`w-6 h-6 transition-colors ${
+                  isFavorite 
+                    ? 'fill-red-500 text-red-500' 
+                    : 'text-gray-600 group-hover:text-red-500'
+                }`}
+              />
+            </button>
+          </div>
         ) : null}
 
         {/* Seção do Vendedor */}
