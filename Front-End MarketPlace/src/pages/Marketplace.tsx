@@ -73,8 +73,8 @@ export default function Marketplace() {
   // Ordenar listings
   const sortedListings = [...filteredListings].sort((a, b) => {
     if (sortBy === "recent") {
-      // Como não temos created_at, ordenar por ID (assumindo que IDs maiores = mais recentes)
-      return b.id.localeCompare(a.id);
+      // Ordenar por data de criação (mais recentes primeiro)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     } else if (sortBy === "price-asc") {
       return a.price - b.price;
     } else if (sortBy === "price-desc") {

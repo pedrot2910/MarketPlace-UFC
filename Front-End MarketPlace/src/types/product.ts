@@ -18,6 +18,7 @@ export type Product = {
   price: number;
   type: "venda" | "troca";
   condition: "novo" | "seminovo" | "usado";
+  created_at: string;
   profiles: ProductProfile;
   categories: ProductCategory;
   product_images: ProductImage[];
