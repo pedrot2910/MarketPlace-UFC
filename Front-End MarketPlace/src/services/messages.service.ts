@@ -17,3 +17,17 @@ export async function markMessagesAsRead(
     otherUserId,
   });
 }
+
+export async function deleteConversation(
+  userId: string,
+  productId: string,
+  otherUserId: string
+) {
+  await api.delete("/messages/conversation", {
+    data: {
+      userId,
+      productId,
+      otherUserId,
+    },
+  });
+}

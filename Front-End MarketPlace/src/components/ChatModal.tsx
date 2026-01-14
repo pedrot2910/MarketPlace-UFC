@@ -322,10 +322,10 @@ export default function ChatModal() {
 
                 {/* Nome e status */}
                 <div className="flex-1 min-w-0">
+                  <p className="text-xs text-white/90 truncate">{productTitle}</p>
                   <h2 className="font-semibold truncate">
                     {otherUser ? otherUser.name : "Carregando..."}
                   </h2>
-                  <p className="text-xs text-white/80">Online agora</p>
                 </div>
 
                 {/* Ações do header */}

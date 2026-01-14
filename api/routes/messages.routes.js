@@ -26,6 +26,12 @@ messagesRoutes.put(
   messagesController.markMessagesAsRead,
 );
 
+messagesRoutes.delete(
+  '/conversation',
+  authMiddleware,
+  messagesController.deleteConversation,
+);
+
 messagesRoutes.get(
   '/:id',
   authMiddleware,
