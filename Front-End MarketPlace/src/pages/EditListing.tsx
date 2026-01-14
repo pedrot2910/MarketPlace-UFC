@@ -11,7 +11,8 @@ export default function EditListing() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState<number | "">("");
+  const [price, setPrice] = useState<number>(0);
+
   const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">(
     "novo"
   );
@@ -390,9 +391,10 @@ export default function EditListing() {
                 className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
                 placeholder="Ex: 45.00"
                 value={price}
-                onChange={(e) =>
-                  setPrice(e.target.value ? Number(e.target.value) : "")
-                }
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setPrice(isNaN(value) ? 0 : value);
+                }}
                 required
               />
             </div>
