@@ -365,7 +365,7 @@ export default function ListingDetails() {
           {listing.title}
         </h1>
 
-        <p className="text-[var(--color-text-muted)] mb-3">
+        <p className="text-[var(--color-text-muted)] mb-3 whitespace-pre-wrap">
           {listing.description}
         </p>
 
