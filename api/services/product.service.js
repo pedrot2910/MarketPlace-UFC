@@ -174,7 +174,7 @@ const productService = {
         console.error('Erro ao deletar produto:', error);
         throw new Error(`Erro ao deletar produto: ${error.message}`);
       }
-      
+
       return true;
     } catch (error) {
       console.error('Erro geral ao deletar produto:', error);

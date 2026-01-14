@@ -1,11 +1,13 @@
 # Correção: Erro ao deletar anúncios com mensagens de chat
 
 ## Problema
+
 Não era possível deletar anúncios que tinham mensagens de chat associadas devido à falta de `ON DELETE CASCADE` nas foreign keys.
 
 ## Solução Implementada
 
 ### 1. Migration SQL
+
 Execute o arquivo `migration_fix_delete_cascade.sql` no seu banco de dados Supabase:
 
 ```bash
@@ -17,7 +19,9 @@ Execute o arquivo `migration_fix_delete_cascade.sql` no seu banco de dados Supab
 ```
 
 ### 2. Código Melhorado
+
 O arquivo `api/services/product.service.js` foi atualizado para:
+
 - Deletar mensagens relacionadas ao produto
 - Deletar relatórios relacionados ao produto
 - Deletar favoritos relacionados ao produto
@@ -26,7 +30,9 @@ O arquivo `api/services/product.service.js` foi atualizado para:
 - Melhor tratamento de erros com logs detalhados
 
 ### 3. Schema Atualizado
+
 O arquivo `schema.sql` foi atualizado para incluir `ON DELETE CASCADE` nas tabelas:
+
 - `messages` (sender_id, receiver_id, product_id)
 - `reports` (reporter_id, product_id)
 
@@ -47,7 +53,8 @@ O arquivo `schema.sql` foi atualizado para incluir `ON DELETE CASCADE` nas tabel
 ✅ Relatórios são deletados quando o produto é deletado  
 ✅ Favoritos são deletados quando o produto é deletado (já estava)  
 ✅ Imagens são deletadas quando o produto é deletado (já estava)  
-✅ Melhor tratamento de erros com logs  
+✅ Melhor tratamento de erros com logs
 
 ## Nota Importante
+
 Se o banco de dados já está rodando, você **DEVE** executar a migration `migration_fix_delete_cascade.sql` para corrigir as constraints existentes.
