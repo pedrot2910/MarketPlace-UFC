@@ -1,4 +1,4 @@
-import { MessageCircle, User, Bell } from "lucide-react";
+import { MessageCircle, User, Bell, Recycle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,10 +45,13 @@ export default function Navbar() {
     const handleProfileImageUpdate = () => {
       loadProfileImage();
     };
-    window.addEventListener('profileImageUpdated', handleProfileImageUpdate);
+    window.addEventListener("profileImageUpdated", handleProfileImageUpdate);
 
     return () => {
-      window.removeEventListener('profileImageUpdated', handleProfileImageUpdate);
+      window.removeEventListener(
+        "profileImageUpdated",
+        handleProfileImageUpdate
+      );
     };
   }, [user?.id]);
 
@@ -76,6 +79,17 @@ export default function Navbar() {
       <div className="flex justify-center items-center">
         <Sidebar />
       </div>
+
+      <div className="flex items-center gap-2">
+        <h1 className="logo-text bg-[var(--logo-nome)] bg-clip-text text-transparent font-[var(--fonte-logo)]">
+          Marketplace{" "}
+          <span className="logo-text bg-[var(--logo-color)] bg-clip-text text-transparent font-[var(--fonte-logo)]">
+            Re
+          </span>
+          Use
+        </h1>
+      </div>
+
       <div className="flex gap-4">
         <div className="flex gap-4 relative">
           {/* Botão de mensagens */}
@@ -86,9 +100,12 @@ export default function Navbar() {
             className="z-30 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-secondary)] transition-all duration-200 relative"
           >
             <MessageCircle size={24} />
-            
+
             {unreadMessagesCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white" style={{ backgroundColor: "#6B46E5" }}>
+              <span
+                className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white"
+                style={{ backgroundColor: "#6B46E5" }}
+              >
                 {unreadMessagesCount}
               </span>
             )}
@@ -104,7 +121,10 @@ export default function Navbar() {
             <Bell size={24} />
 
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white" style={{ backgroundColor: "#6B46E5" }}>
+              <span
+                className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] text-white"
+                style={{ backgroundColor: "#6B46E5" }}
+              >
                 {unreadCount}
               </span>
             )}
