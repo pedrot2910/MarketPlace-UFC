@@ -8,6 +8,7 @@ import { useChatModal, getOtherUser } from "../hooks/useChatModal";
 import { useInboxModal } from "../hooks/useInboxModal";
 import { getMessagesByUser, markMessagesAsRead } from "../services/messages.service";
 import { fetchProfileById } from "../services/profile";
+import { getListingById } from "../services/listings";
 
 import type { Message } from "../types/message";
 
@@ -172,9 +173,17 @@ export default function ChatModal() {
 
       setMessages(filtered);
       
-      // Extrair título do produto
-      const title = filtered[0]?.product?.title ?? 'Produto';
-      setProductTitle(title);
+      // Buscar título do produto diretamente (não depende de mensagens existentes)
+      try {
+        const product = await getListingById(String(productId));
+        setProductTitle(product.title);
+        console.log("📦 PRODUTO CARREGADO:", product.title);
+      } catch (err) {
+        console.error("Erro ao buscar produto:", err);
+        // Fallback: tentar extrair das mensagens
+        const title = filtered[0]?.product?.title ?? 'Produto';
+        setProductTitle(title);
+      }
 
       // Marcar mensagens como lidas
       try {
