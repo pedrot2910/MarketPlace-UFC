@@ -1,14 +1,14 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import http from "http";
-import { Server } from "socket.io";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import http from 'http';
+import { Server } from 'socket.io';
 
 dotenv.config();
 
-import routes from "./routes/routes.js";
-import { RegisterChatSocket } from "./sockets/chat.socket.js";
-import { socketAuthMiddleware } from "./middlewares/socketAuth.middleware.js";
+import routes from './routes/routes.js';
+import { RegisterChatSocket } from './sockets/chat.socket.js';
+import { socketAuthMiddleware } from './middlewares/socketAuth.middleware.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,37 +28,37 @@ app.use(
       if (!origin) return callback(null, true);
 
       const isAllowed = allowedOriginPatterns.some((pattern) =>
-        pattern.test(origin)
+        pattern.test(origin),
       );
 
       if (isAllowed) {
         return callback(null, true);
       }
 
-      console.warn("Blocked CORS origin:", origin);
-      return callback(new Error("Not allowed by CORS"));
+      console.warn('Blocked CORS origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
 );
 
-app.options("*", cors());
+app.options('*', cors());
 
-app.get("/", (req, res) => {
-  res.send("Backend do Marketplace está on! 🚀");
+app.get('/', (req, res) => {
+  res.send('Backend do Marketplace está on! 🚀');
 });
 
-app.post("/teste", (req, res) => {
-  console.log("REQ.BODY =", req.body);
-  console.log("HEADERS =", req.headers["content-type"]);
+app.post('/teste', (req, res) => {
+  console.log('REQ.BODY =', req.body);
+  console.log('HEADERS =', req.headers['content-type']);
   res.json({
     body: req.body,
-    headers: req.headers["content-type"],
+    headers: req.headers['content-type'],
   });
 });
 
-app.use("/api", routes);
+app.use('/api', routes);
 
 const server = http.createServer(app);
 
@@ -68,14 +68,17 @@ const io = new Server(server, {
       if (!origin) return callback(null, true);
 
       const isAllowed = allowedOriginPatterns.some((pattern) =>
-        pattern.test(origin)
+        pattern.test(origin),
       );
 
       if (isAllowed) return callback(null, true);
 
-      return callback("Not allowed by CORS", false);
+      return callback('Not allowed by CORS', false);
     },
+    credentials: true,
   },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
 });
 
 io.use(socketAuthMiddleware);

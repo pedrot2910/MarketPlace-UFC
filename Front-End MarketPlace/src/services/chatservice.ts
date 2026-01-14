@@ -13,6 +13,10 @@ export const chatService = {
 
     socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:3000", {
       auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socket.on("connect", () => {
