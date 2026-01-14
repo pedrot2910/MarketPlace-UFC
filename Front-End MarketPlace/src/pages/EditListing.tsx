@@ -29,7 +29,7 @@ export default function EditListing() {
   const [removedImages, setRemovedImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
-  const [setCoverIndex] = useState(0);
+  const [coverIndex, setCoverIndex] = useState(0);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function EditListing() {
         setExistingImages(product.product_images || []);
         const coverIdx =
           product.product_images?.findIndex((img: any) => img.is_cover) ?? 0;
-        setCoverIndex(coverIdx >= 0 ? coverIdx : 0);
+        setCoverIndex(coverIndex >= 0 ? coverIdx : 0);
         const coverImg = product.product_images?.find(
           (img: any) => img.is_cover
         );
