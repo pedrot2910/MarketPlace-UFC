@@ -5,17 +5,14 @@ import type { AppNotification } from "../types/notification";
 let socket: Socket | null = null;
 
 type MessageListener = (msg: Message) => void;
+type NotificationListener = (notification: AppNotification) => void;
 
 export const chatService = {
   connect(token: string) {
     if (socket) return;
 
-    console.log("🧪 TOKEN FRONTEND:", token?.slice(0, 30));
-
     socket = io(import.meta.env.VITE_SOCKET_URL ?? "http://localhost:3000", {
-      auth: {
-        token,
-      },
+      auth: { token },
     });
 
     socket.on("connect", () => {
@@ -40,32 +37,23 @@ export const chatService = {
     socket = null;
   },
 
-  /**
-   * Entrar na sala
-   */
   joinChat(payload: {
-    sender_id: string | number;
-    receiver_id: string | number;
-    product_id: string | number;
+    sender_id: string;
+    receiver_id: string;
+    product_id: string;
   }) {
     socket?.emit("join-chat", payload);
   },
 
-  /**
-   * Enviar mensagem
-   */
   sendMessage(payload: {
-    receiver_id: string | number;
-    product_id: string | number;
+    receiver_id: string;
+    product_id: string;
     message: string;
     image_url?: string;
   }) {
     socket?.emit("send-message", payload);
   },
 
-  /**
-   * Receber mensagens
-   */
   onMessage(callback: MessageListener) {
     socket?.on("new-message", callback);
   },
@@ -74,11 +62,11 @@ export const chatService = {
     socket?.off("new-message", callback);
   },
 
-  onNotification(callback: (n: AppNotification) => void) {
-  socket?.on("notification", callback);
-},
+  onNotification(callback: NotificationListener) {
+    socket?.on("new-notification", callback);
+  },
 
-offNotification(callback: any) {
-  socket?.off("notification", callback);
-},
+  offNotification(callback: NotificationListener) {
+    socket?.off("new-notification", callback);
+  },
 };

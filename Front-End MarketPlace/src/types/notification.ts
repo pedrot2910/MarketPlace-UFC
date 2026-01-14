@@ -1,22 +1,15 @@
 export type NotificationType =
-  | "chat"
-  | "order"
-  | "review"
+  | "message"
+  | "purchase"
+  | "favorite"
   | "system";
 
 export type AppNotification = {
   id: string;
   type: NotificationType;
   title: string;
-  message: string;
+  content: string;
+  link?: string | null;
   created_at: string;
   read: boolean;
-
-  // contexto
-  userId?: string;
-  productId?: string;
-  chatUserId?: string;
-  orderId?: string;
-
-  payload?: any;
 };

@@ -68,7 +68,10 @@ export default function Navbar() {
         {/* Menu do usuário */}
         <div className="relative" ref={ref}>
           <button
-            onClick={() => setOpen((prev) => !prev)}
+            onClick={() => {
+              setOpen((prev) => !prev);
+              setOpenNot(false);
+            }}
             className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:scale-105 transition-all duration-200"
           >
             {user?.photoUrl ? (
