@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AlertCircle, Check, X } from "lucide-react";
 import { getListingById, deleteListing } from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
@@ -30,6 +31,9 @@ export default function ListingDetails() {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const { user } = useAuth();
   const chatModal = useChatModal();
   const navigate = useNavigate();
@@ -52,17 +56,22 @@ export default function ListingDetails() {
   }, [id]);
 
   async function handleDelete() {
+    setShowDeleteModal(true);
+  }
+
+  async function confirmDelete() {
     if (!id || !listing) return;
 
-    if (window.confirm("Tem certeza que deseja deletar este anúncio?")) {
-      try {
-        await deleteListing(id);
-        alert("Anúncio deletado com sucesso!");
+    setShowDeleteModal(false);
+    try {
+      await deleteListing(id);
+      setShowSuccessModal(true);
+      setTimeout(() => {
         navigate("/marketplace");
-      } catch (error) {
-        console.error("Erro ao deletar anúncio:", error);
-        alert("Erro ao deletar anúncio");
-      }
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao deletar anúncio:", error);
+      setShowErrorModal(true);
     }
   }
 
@@ -120,8 +129,80 @@ export default function ListingDetails() {
   )?.image_url;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-6 px-4">
-      <div className="max-w-2xl mx-auto mt-10 bg-[var(--color-card)] p-6 rounded-2xl shadow-lg">
+    <>
+      {/* Modal de Confirmação de Exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
+          <div className="bg-[var(--color-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-16 h-16 text-[var(--color-error)]" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
+              Deletar Anúncio?
+            </h3>
+            <p className="text-[var(--color-text-muted)] text-center mb-6">
+              Tem certeza que deseja deletar este anúncio? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 bg-[var(--color-border)] hover:bg-[var(--color-text-muted)] text-[var(--color-text)] font-semibold py-3 rounded-xl transition-all duration-200"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-[var(--color-error)] hover:bg-[var(--color-warning)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl transition-all duration-200"
+              >
+                Deletar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
+          <div className="bg-[var(--color-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4">
+              <Check className="w-16 h-16 text-[var(--color-success)]" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
+              Sucesso!
+            </h3>
+            <p className="text-[var(--color-text-muted)] text-center">
+              Anúncio deletado com sucesso! Redirecionando...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Erro */}
+      {showErrorModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
+          <div className="bg-[var(--color-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4">
+              <X className="w-16 h-16 text-[var(--color-error)]" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
+              Erro!
+            </h3>
+            <p className="text-[var(--color-text-muted)] text-center mb-6">
+              Não foi possível deletar o anúncio. Tente novamente.
+            </p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full bg-[var(--color-error)] hover:bg-[var(--color-warning)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl transition-all duration-200"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-6 px-4">
+        <div className="max-w-2xl mx-auto mt-10 bg-[var(--color-card)] p-6 rounded-2xl shadow-lg">
         <img
           src={coverImage}
           alt={listing.title}
@@ -174,13 +255,13 @@ export default function ListingDetails() {
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => navigate(`/edit-listing/${listing.id}`)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              className="flex-1 bg-[var(--color-info)] hover:bg-[var(--color-primary-light)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
             >
               Editar Anúncio
             </button>
             <button
               onClick={handleDelete}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              className="flex-1 bg-[var(--color-error)] hover:bg-[var(--color-warning)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
             >
               Deletar Anúncio
             </button>
@@ -193,7 +274,8 @@ export default function ListingDetails() {
             Conversar com o vendedor
           </button>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
 import { authService } from "../services/auth.service";
+import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -30,13 +31,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-primary)] to-[var(--color-primary-dark)] p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white/10 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20"
-      >
+    <BackgroundGradientAnimation>
+      <div className="absolute z-50 inset-0 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-white/10 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20"
+        >
         {/* LOGO */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -129,7 +131,8 @@ export default function Signup() {
             </a>
           </p>
         </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </BackgroundGradientAnimation>
   );
 }
