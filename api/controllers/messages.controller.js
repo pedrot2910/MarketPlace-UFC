@@ -104,6 +104,25 @@ const messagesController = {
       });
     }
   },
+
+  /**
+   * Deleta toda a conversa entre dois usuários sobre um produto
+   */
+  deleteConversation: async (req, res) => {
+    try {
+      const { userId, productId, otherUserId } = req.body;
+
+      await messagesService.deleteConversation(userId, productId, otherUserId);
+
+      res.status(200).json({ message: 'Conversa deletada com sucesso' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: 'Erro ao deletar conversa',
+        details: error.message,
+      });
+    }
+  },
 };
 
 export { messagesController };

@@ -79,6 +79,22 @@ const messagesService = {
     if (error) throw new Error(error.message);
     return true;
   },
+
+  /**
+   * Deleta toda a conversa entre dois usuários sobre um produto
+   */
+  deleteConversation: async (userId, productId, otherUserId) => {
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .eq('product_id', productId)
+      .or(
+        `and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`,
+      );
+
+    if (error) throw new Error(error.message);
+    return true;
+  },
 };
 
 export { messagesService };

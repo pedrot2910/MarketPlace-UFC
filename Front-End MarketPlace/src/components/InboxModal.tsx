@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageCircle, User, Search } from "lucide-react";
+import { X, MessageCircle, User, Search, Trash2 } from "lucide-react";
 
 import { useInboxModal } from "../hooks/useInboxModal";
 import { useChatModal } from "../hooks/useChatModal";
 import { useAuth } from "../hooks/auth/useAuth";
-import { getMessagesByUser } from "../services/messages.service";
+import { getMessagesByUser, deleteConversation } from "../services/messages.service";
 import { buildThreads, type ChatThread } from "../types/chat-thread";
 import { fetchProfileById } from "../services/profile";
 
@@ -18,6 +18,26 @@ export default function InboxModal() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [profileImages, setProfileImages] = useState<Record<string, string>>({});
+
+  const handleDeleteThread = async (e: React.MouseEvent, productId: string, otherUserId: string) => {
+    e.stopPropagation();
+    if (!confirm("Deseja realmente apagar esta conversa?")) return;
+    
+    try {
+      // Apaga a conversa no backend
+      if (user) {
+        await deleteConversation(user.id, productId, otherUserId);
+      }
+      
+      // Remove a conversa da lista localmente
+      setThreads((prev) => prev.filter(
+        (t) => !(t.productId === productId && t.otherUserId === otherUserId)
+      ));
+    } catch (err) {
+      console.error("Erro ao deletar conversa:", err);
+      alert("Erro ao deletar conversa. Tente novamente.");
+    }
+  };
 
   useEffect(() => {
     if (!open || !user) return;
@@ -139,7 +159,7 @@ export default function InboxModal() {
                       productId: thread.productId,
                     });
                   }}
-                  className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 group"
                 >
                   <div className="flex items-start gap-3 p-4">
                     {/* Avatar */}
@@ -175,22 +195,33 @@ export default function InboxModal() {
                           </p>
                         </div>
 
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span className="text-[11px] text-gray-400">
-                            {new Date(thread.lastMessage.created_at).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: '2-digit'
-                            })}
-                          </span>
-                          
-                          {thread.unreadCount > 0 && (
-                            <span 
-                              className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center"
-                              style={{ backgroundColor: "#6B46E5" }}
-                            >
-                              {thread.unreadCount}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-[11px] text-gray-400">
+                              {new Date(thread.lastMessage.created_at).toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit'
+                              })}
                             </span>
-                          )}
+                            
+                            {thread.unreadCount > 0 && (
+                              <span 
+                                className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center"
+                                style={{ backgroundColor: "#6B46E5" }}
+                              >
+                                {thread.unreadCount}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Botão de deletar - aparece no hover */}
+                          <button
+                            onClick={(e) => handleDeleteThread(e, thread.productId, thread.otherUserId)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-red-50 rounded-lg"
+                            title="Apagar conversa"
+                          >
+                            <Trash2 size={16} className="text-red-500" />
+                          </button>
                         </div>
                       </div>
 
