@@ -1,4 +1,4 @@
-import { MessageCircle, User, Bell, Recycle } from "lucide-react";
+import { MessageCircle, User, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";

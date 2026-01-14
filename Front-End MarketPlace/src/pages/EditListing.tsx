@@ -12,7 +12,9 @@ export default function EditListing() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number | "">("");
-  const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">("novo");
+  const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">(
+    "novo"
+  );
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [type, setType] = useState<"venda" | "troca">("venda");
@@ -21,7 +23,9 @@ export default function EditListing() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [existingImages, setExistingImages] = useState<{id?: string; image_url: string; is_cover: boolean}[]>([]);
+  const [existingImages, setExistingImages] = useState<
+    { id?: string; image_url: string; is_cover: boolean }[]
+  >([]);
   const [removedImages, setRemovedImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
@@ -46,10 +50,17 @@ export default function EditListing() {
         setCategory(product.category_id);
         setCategories(categoriesList);
         setExistingImages(product.product_images || []);
-        const coverIdx = product.product_images?.findIndex((img: any) => img.is_cover) ?? 0;
-        setCoverIndex(coverIdx >= 0 ? coverIdx : 0);
-        const coverImg = product.product_images?.find((img: any) => img.is_cover);
-        setCoverImageUrl(coverImg ? coverImg.image_url : product.product_images?.[0]?.image_url || null);
+        const coverIdx =
+          product.product_images?.findIndex((img: any) => img.is_cover) ?? 0;
+        setCoverIndex(coverIndex >= 0 ? coverIdx : 0);
+        const coverImg = product.product_images?.find(
+          (img: any) => img.is_cover
+        );
+        setCoverImageUrl(
+          coverImg
+            ? coverImg.image_url
+            : product.product_images?.[0]?.image_url || null
+        );
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         setErrorMessage("Erro ao carregar anúncio");
@@ -93,7 +104,7 @@ export default function EditListing() {
         cover_image_url: coverImageUrl,
       };
 
-      console.log('📤 Enviando para backend:', updateData);
+      console.log("📤 Enviando para backend:", updateData);
 
       await updateListing(id, updateData);
 
@@ -105,7 +116,9 @@ export default function EditListing() {
     } catch (error: any) {
       console.error("Erro ao atualizar anúncio:", error);
       setErrorMessage(
-        error.response?.data?.message || error.message || "Erro ao atualizar anúncio"
+        error.response?.data?.message ||
+          error.message ||
+          "Erro ao atualizar anúncio"
       );
       setShowError(true);
       setTimeout(() => setShowError(false), 4000);
@@ -173,20 +186,27 @@ export default function EditListing() {
           {/* Seção de Imagens */}
           <div>
             <label className="block text-[var(--color-text)] font-semibold mb-2">
-              Imagens do Produto {(existingImages.length + newImages.length) > 0 && `(${existingImages.length + newImages.length})`}
+              Imagens do Produto{" "}
+              {existingImages.length + newImages.length > 0 &&
+                `(${existingImages.length + newImages.length})`}
             </label>
 
             {/* Imagens Existentes */}
             {existingImages.length > 0 && (
               <div className="mb-4">
-                <p className="text-sm text-[var(--color-text-muted)] mb-2">Imagens atuais:</p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-2">
+                  Imagens atuais:
+                </p>
                 <div className="grid grid-cols-3 gap-3">
                   {existingImages.map((img, index) => (
                     <div
                       key={index}
                       className="relative group aspect-square rounded-lg overflow-hidden border-2 hover:border-[#9878f3] transition"
                       style={{
-                        borderColor: img.image_url === coverImageUrl ? '#9878f3' : 'transparent'
+                        borderColor:
+                          img.image_url === coverImageUrl
+                            ? "#9878f3"
+                            : "transparent",
                       }}
                     >
                       <img
@@ -194,7 +214,7 @@ export default function EditListing() {
                         alt={`Imagem ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      
+
                       {img.image_url === coverImageUrl && (
                         <div className="absolute top-2 left-2 bg-[#9878f3] text-white text-xs font-semibold px-2 py-1 rounded">
                           CAPA
@@ -206,7 +226,10 @@ export default function EditListing() {
                           <button
                             type="button"
                             onClick={() => {
-                              console.log('🖼️ Definindo nova capa:', img.image_url);
+                              console.log(
+                                "🖼️ Definindo nova capa:",
+                                img.image_url
+                              );
                               setCoverImageUrl(img.image_url);
                               setCoverIndex(index);
                             }}
@@ -218,19 +241,23 @@ export default function EditListing() {
                         <button
                           type="button"
                           onClick={() => {
-                            console.log('🗑️ Removendo imagem:', img.image_url);
+                            console.log("🗑️ Removendo imagem:", img.image_url);
                             // Adicionar à lista de removidas
                             setRemovedImages((prev) => {
                               const updated = [...prev, img.image_url];
-                              console.log('Lista de removidas:', updated);
+                              console.log("Lista de removidas:", updated);
                               return updated;
                             });
-                            setExistingImages((prev) => prev.filter((_, i) => i !== index));
+                            setExistingImages((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
                             // Se for a capa, definir a próxima como capa
                             if (img.image_url === coverImageUrl) {
-                              const remaining = existingImages.filter((_, i) => i !== index);
+                              const remaining = existingImages.filter(
+                                (_, i) => i !== index
+                              );
                               const newCover = remaining[0]?.image_url || null;
-                              console.log('Nova capa após remoção:', newCover);
+                              console.log("Nova capa após remoção:", newCover);
                               setCoverImageUrl(newCover);
                               setCoverIndex(0);
                             }
@@ -272,7 +299,7 @@ export default function EditListing() {
                 if (files.length === 0) return;
 
                 setNewImages((prev) => [...prev, ...files]);
-                
+
                 files.forEach((file) => {
                   const url = URL.createObjectURL(file);
                   setNewPreviews((prev) => [...prev, url]);
@@ -283,7 +310,9 @@ export default function EditListing() {
             {/* Preview de Novas Imagens */}
             {newPreviews.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm text-[var(--color-text-muted)] mb-2">Novas imagens a adicionar:</p>
+                <p className="text-sm text-[var(--color-text-muted)] mb-2">
+                  Novas imagens a adicionar:
+                </p>
                 <div className="grid grid-cols-3 gap-3">
                   {newPreviews.map((preview, index) => (
                     <div
@@ -295,7 +324,7 @@ export default function EditListing() {
                         alt={`Nova imagem ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      
+
                       <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">
                         NOVA
                       </div>
@@ -304,8 +333,12 @@ export default function EditListing() {
                         <button
                           type="button"
                           onClick={() => {
-                            setNewImages((prev) => prev.filter((_, i) => i !== index));
-                            setNewPreviews((prev) => prev.filter((_, i) => i !== index));
+                            setNewImages((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
+                            setNewPreviews((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
                           }}
                           className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
                         >
@@ -386,7 +419,9 @@ export default function EditListing() {
             <select
               className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
               value={condition}
-              onChange={(e) => setCondition(e.target.value as "novo" | "seminovo" | "usado")}
+              onChange={(e) =>
+                setCondition(e.target.value as "novo" | "seminovo" | "usado")
+              }
             >
               <option value="novo">Novo</option>
               <option value="seminovo">Seminovo</option>
