@@ -17,6 +17,14 @@ export function RegisterChatSocket(io) {
   io.on("connection", (socket) => {
     console.log("Usuário conectado:", socket.id);
 
+    if (socket.data.user?.id) {
+      const userRoom = `user:${socket.data.user.id}`;
+      socket.join(userRoom);
+      console.log("✅ Socket entrou na sala pessoal:", userRoom);
+    } else {
+      console.log("❌ Socket conectado sem usuário autenticado");
+    }
+
     // ============================
     // Entrar na sala do chat
     // ============================
@@ -84,6 +92,8 @@ export function RegisterChatSocket(io) {
         // Broadcast para todos da sala
         io.to(roomId).emit("new-message", savedMessage);
 
+        console.log("📩 Criando notificação para:", receiver_id);
+
         const notification = await createNotification({
           userId: receiver_id,
           type: "message",
@@ -92,7 +102,11 @@ export function RegisterChatSocket(io) {
           link: `/chat?user=${sender_id}&product=${product_id}`,
         });
 
+        console.log("✅ Notificação criada:", notification.id);
+
         io.to(`user:${receiver_id}`).emit("new-notification", notification);
+
+        console.log("📡 Notificação emitida para:", `user:${receiver_id}`);
       } catch (error) {
         console.error("Erro ao processar mensagem:", error.message);
         socket.emit("chat-error", error.message ?? error);

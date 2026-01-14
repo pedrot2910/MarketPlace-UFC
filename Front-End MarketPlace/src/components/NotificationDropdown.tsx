@@ -18,8 +18,8 @@ export function NotificationCenter() {
           <div
             key={n.id}
             onClick={() => {
+              console.log("🧪 CLIQUEI NA NOTIFICAÇÃO:", n.id, n.read);
               markAsRead(n.id);
-              if (n.link) window.location.href = n.link;
             }}
             className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${
               !n.read && "bg-violet-50"

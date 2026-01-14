@@ -30,6 +30,10 @@ export const chatService = {
     socket.on("joined-chat", (data) => {
       console.log("🟢 ENTROU NA SALA:", data);
     });
+
+    socket?.on("new-notification", (data) => {
+    console.log("🔥 FRONT RECEBEU NOTIFICAÇÃO:", data);
+  });
   },
 
   disconnect() {
