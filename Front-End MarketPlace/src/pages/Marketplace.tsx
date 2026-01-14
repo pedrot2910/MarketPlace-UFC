@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchListings } from "../services/listings";
 import { Link, useSearchParams } from "react-router-dom";
-import { Eye, Loader2, Grid3x3, List, ChevronDown, Heart } from "lucide-react";
+import { Eye, Loader2, Grid3x3, List, ChevronDown, Heart, Check } from "lucide-react";
 import type { Product } from "../types/product";
 import { useAuth } from "../hooks/auth";
 import { toggleFavorite, getFavoritesByUser } from "../services/favorites.service";
@@ -13,6 +13,8 @@ export default function Marketplace() {
   const [sortBy, setSortBy] = useState<"recent" | "price-asc" | "price-desc">("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") ?? "all";
   const searchQuery = searchParams.get("search") ?? "";
@@ -35,6 +37,18 @@ export default function Marketplace() {
       })
       .catch((err) => console.error("Erro ao carregar favoritos:", err));
   }, [user]);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredListings = listings.filter((listing) => {
     // Filtro por modo (venda/troca)
@@ -88,28 +102,74 @@ export default function Marketplace() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Filtro de ordenação */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="appearance-none bg-white border border-[var(--color-border)] rounded-lg px-4 py-2 pr-10 text-sm font-medium text-[var(--color-text)] cursor-pointer hover:border-[var(--color-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+              {/* Filtro de ordenação customizado */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="appearance-none bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-semibold text-[var(--color-text)] cursor-pointer hover:border-[var(--color-primary)] hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] flex items-center gap-2"
                 >
-                  <option value="recent">Mais recentes</option>
-                  <option value="price-asc">Menor preço</option>
-                  <option value="price-desc">Maior preço</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-text-muted)] pointer-events-none" />
+                  {sortBy === "recent" && "Mais recentes"}
+                  {sortBy === "price-asc" && "Menor preço"}
+                  {sortBy === "price-desc" && "Maior preço"}
+                  <ChevronDown className={`h-4 w-4 text-[var(--color-primary)] transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-xl overflow-hidden z-50 border border-gray-200 p-1">
+                    <button
+                      onClick={() => {
+                        setSortBy("recent");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-lg ${
+                        sortBy === "recent" 
+                          ? "bg-gradient-to-r from-[#7C5CFA] to-[#6B46E5] text-white" 
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-[#7C5CFA] hover:to-[#6B46E5] hover:text-white"
+                      }`}
+                    >
+                      {sortBy === "recent" && <Check size={16} />}
+                      <span className={sortBy !== "recent" ? "ml-6" : ""}>Mais recentes</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortBy("price-asc");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-lg ${
+                        sortBy === "price-asc" 
+                          ? "bg-gradient-to-r from-[#7C5CFA] to-[#6B46E5] text-white" 
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-[#7C5CFA] hover:to-[#6B46E5] hover:text-white"
+                      }`}
+                    >
+                      {sortBy === "price-asc" && <Check size={16} />}
+                      <span className={sortBy !== "price-asc" ? "ml-6" : ""}>Menor preço</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortBy("price-desc");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-lg ${
+                        sortBy === "price-desc" 
+                          ? "bg-gradient-to-r from-[#7C5CFA] to-[#6B46E5] text-white" 
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-[#7C5CFA] hover:to-[#6B46E5] hover:text-white"
+                      }`}
+                    >
+                      {sortBy === "price-desc" && <Check size={16} />}
+                      <span className={sortBy !== "price-desc" ? "ml-6" : ""}>Maior preço</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Botões de visualização */}
-              <div className="flex items-center gap-1 bg-white border border-[var(--color-border)] rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded transition-colors ${
+                  className={`p-2 rounded-lg transition-all duration-200 ${
                     viewMode === "grid"
-                      ? "bg-[var(--color-primary)] text-white"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      ? "bg-gradient-to-br from-[#7C5CFA] to-[#6B46E5] text-white shadow-md"
+                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-white"
                   }`}
                   title="Visualização em grade"
                 >
@@ -117,10 +177,10 @@ export default function Marketplace() {
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded transition-colors ${
+                  className={`p-2 rounded-lg transition-all duration-200 ${
                     viewMode === "list"
-                      ? "bg-[var(--color-primary)] text-white"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      ? "bg-gradient-to-br from-[#7C5CFA] to-[#6B46E5] text-white shadow-md"
+                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-white"
                   }`}
                   title="Visualização em lista"
                 >
