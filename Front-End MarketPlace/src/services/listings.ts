@@ -1,5 +1,5 @@
 import api from "./api";
-import type { ListingFilters } from "@/types/Filters";
+import type { ListingFilters } from "../types/filters";
 
 /**
  * Tipagem baseada no retorno real do backend
