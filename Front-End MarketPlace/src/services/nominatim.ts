@@ -13,6 +13,20 @@ export interface NominatimAddress {
     country?: string;
 }
 
+export const searchAddress = async (query: string) => {
+  if (query.length < 3) return []; // Evita buscas muito curtas
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+    );
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro na busca:", error);
+    return [];
+  }
+};
+
 export async function reverseGeocode(lat: number, lng: number): Promise<string[]> {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
 
