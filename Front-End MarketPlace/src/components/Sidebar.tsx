@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Menu,
   Search,
@@ -21,6 +22,12 @@ export default function Sidebar() {
   const [addressArray, setAddressArray] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [searchParams] = useSearchParams();
+  const endereco = localStorage.getItem(addressArray.join(""));
+  const [tempCoords, setTempCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const toggleSidebar = () => setIsOpen(!isOpen);
   const navigate = useNavigate();
 
@@ -45,19 +52,42 @@ export default function Sidebar() {
     loadCategories();
   }, []);
 
-  const handleLocationSelect = (addr: string[]) => {
+  useEffect(() => {
+    const lat = searchParams.get("lat");
+    if (lat && location === "Definir localização") {
+      setLocation(endereco ?? "Localização definida"); // Ou salvar o nome da rua no localStorage
+    }
+  }, [searchParams]);
+
+  const handleLocationSelect = (
+    addr: string[],
+    coords: { lat: number; lng: number },
+  ) => {
     setAddressArray(addr);
+    setTempCoords(coords);
   };
 
   const handleConfirmLocation = () => {
-    setLocation(addressArray.join(""));
-    setShowMap(false);
+    if (tempCoords) {
+      const params = new URLSearchParams(searchParams);
+      params.set("lat", tempCoords.lat.toString());
+      params.set("lng", tempCoords.lng.toString());
+      params.set("radius", "5000"); // Define um raio padrão de 5 km
+
+      setLocation(addressArray.join(""));
+      setShowMap(false);
+      setIsOpen(false);
+
+      navigate(`/marketplace?${params.toString()}`);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchText.trim()) {
-      navigate(`/marketplace?search=${encodeURIComponent(searchText)}`);
+      const params = new URLSearchParams(searchParams);
+      params.set("search", searchText.trim());
+      navigate(`/marketplace?${params.toString()}`);
       setIsOpen(false);
       setSearchText("");
     }
@@ -68,7 +98,7 @@ export default function Sidebar() {
       {/* Botão do menu */}
       <button
         onClick={toggleSidebar}
-        className="top-4 left-4 z-60 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-accent)] transition-all duration-200"
+        className="top-4 left-4 z-50 p-2 text-[var(--color-text-invert)] rounded-lg hover:bg-[var(--color-accent)] transition-all duration-200"
       >
         {isOpen === false && <Menu size={24} />}
       </button>
@@ -154,14 +184,21 @@ export default function Sidebar() {
                   transition={{ delay: 0.3 }}
                 >
                   <Link to="/home" onClick={() => setIsOpen(false)}>
-                    <motion.img src="/logoruim4.png" alt="Logo ReUse" className="w-28 h-20 object-fill drop-shadow-lg" />
+                    <motion.img
+                      src="/logoruim4.png"
+                      alt="Logo ReUse"
+                      className="w-28 h-20 object-fill drop-shadow-lg"
+                    />
                   </Link>
                 </motion.h2>
               </div>
 
               {/* Navegação */}
               <nav className="flex flex-col space-y-3 px-4">
-                <form onSubmit={handleSearch} className="relative w-full max-w-sm">
+                <form
+                  onSubmit={handleSearch}
+                  className="relative w-full max-w-sm"
+                >
                   <Search
                     size={20}
                     className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--color-text-muted)]"
@@ -182,7 +219,10 @@ export default function Sidebar() {
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Store size={18} className="text-[var(--color-text-invert)]" />
+                    <Store
+                      size={18}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                   <span className="pl-2">Explorar</span>
                 </Link>
@@ -193,7 +233,10 @@ export default function Sidebar() {
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Heart size={18} className="text-[var(--color-text-invert)]" />
+                    <Heart
+                      size={18}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                   <span className="pl-2">Favoritos</span>
                 </Link>
@@ -206,7 +249,10 @@ export default function Sidebar() {
                   }}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <ArrowRightLeft size={18} className="text-[var(--color-text-invert)]" />
+                    <ArrowRightLeft
+                      size={18}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                   <span className="pl-2">Trocas</span>
                 </button>
@@ -219,7 +265,10 @@ export default function Sidebar() {
                   }}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <BadgeDollarSign size={18} className="text-[var(--color-text-invert)]" />
+                    <BadgeDollarSign
+                      size={18}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                   <span className="pl-2">Vendas</span>
                 </button>
@@ -230,7 +279,10 @@ export default function Sidebar() {
 
                 <button
                   className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-2 pl-4 rounded-lg transition-all duration-200 text-lg text-left"
-                  onClick={() => setShowMap(true)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setShowMap(true);
+                  }}
                 >
                   <span
                     className={
@@ -255,28 +307,38 @@ export default function Sidebar() {
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                    <Store size={18} className="text-[var(--color-text-invert)]" />
+                    <Store
+                      size={18}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                   <span className="p-2 capitalize">Todos</span>
                 </Link>
 
                 {categories.map((cat) => {
                   const IconComponent = getIcon((cat as any).icon);
+                  const params = new URLSearchParams(searchParams);
+                  params.set("category", cat.namecategories);
+                  const categoryUrl = `/marketplace?${params.toString()}`;
                   return (
                     <Link
                       key={cat.id}
-                      to={`/marketplace?category=${encodeURIComponent(cat.namecategories)}`}
+                      to={categoryUrl}
                       className="hover:text-[var(--color-text-invert)] hover:bg-[var(--color-accent)] flex items-center p-0 pl-4 rounded-lg transition-all duration-200 text-lg"
                       onClick={() => setIsOpen(false)}
                     >
                       <div className="p-2 rounded-full bg-[var(--color-secondary-dark)] inline-grid mr-2">
-                        <IconComponent size={18} className="text-[var(--color-text-invert)]" />
+                        <IconComponent
+                          size={18}
+                          className="text-[var(--color-text-invert)]"
+                        />
                       </div>
-                      <span className="p-2 capitalize">{cat.namecategories}</span>
+                      <span className="p-2 capitalize">
+                        {cat.namecategories}
+                      </span>
                     </Link>
                   );
                 })}
-
               </nav>
             </motion.div>
 

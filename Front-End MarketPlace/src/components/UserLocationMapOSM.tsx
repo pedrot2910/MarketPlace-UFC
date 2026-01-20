@@ -6,6 +6,10 @@ import "leaflet/dist/leaflet.css";
 
 type Coords = { lat: number; lng: number };
 
+interface UserLocationMapOSMProps {
+  onLocationSelect?: (addr: string[], coords: Coords) => void;
+}
+
 const customIcon = L.icon({
   iconUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
@@ -17,9 +21,7 @@ const customIcon = L.icon({
 
 export default function UserLocationMapOSM({
   onLocationSelect,
-}: {
-  onLocationSelect?: (addr: string[]) => void;
-}) {
+}: UserLocationMapOSMProps) {
   const [coords, setCoords] = useState<Coords | null>(null);
   const [address, setAddress] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
@@ -47,7 +49,7 @@ export default function UserLocationMapOSM({
 
     const addr = await reverseGeocode(lat, lng);
     setAddress(addr);
-    onLocationSelect?.(addr);
+    onLocationSelect?.(addr, newCoords);
   };
 
   // 1. Obter localização inicial

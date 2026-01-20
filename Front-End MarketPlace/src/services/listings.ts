@@ -1,4 +1,5 @@
 import api from "./api";
+import type { ListingFilters } from "@/types/Filters";
 
 /**
  * Tipagem baseada no retorno real do backend
@@ -32,8 +33,8 @@ export type Product = {
 /**
  * GET /products
  */
-export async function fetchListings(): Promise<Product[]> {
-  const response = await api.get("/products");
+export async function fetchListings(filters: ListingFilters = {}): Promise<Product[]> {
+  const response = await api.get("/products", { params: filters });
   return response.data;
 }
 
@@ -48,6 +49,8 @@ export type CreateProductDTO = {
   condition: "novo" | "seminovo" | "usado";
   type: "venda" | "troca";
   product_images?: string[];
+  lat?: number;
+  lng?: number;
   images_to_remove?: string[];
   cover_image_url?: string | null;
 };
