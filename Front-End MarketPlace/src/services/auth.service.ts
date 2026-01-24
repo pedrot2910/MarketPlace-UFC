@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import api from "./api";
 import type { User } from "../types/user";
 

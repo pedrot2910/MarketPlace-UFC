@@ -4,7 +4,9 @@ import type { User } from "../../types/user";
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  isGuest: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginAsGuest: () => void;
   logout: () => void;
 }
 

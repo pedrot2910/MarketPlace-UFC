@@ -8,7 +8,7 @@ export default function CreateListing() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [condition, setCondition] = useState<"novo" | "seminovo" | "usado">(
-    "novo"
+    "novo",
   );
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -38,7 +38,9 @@ export default function CreateListing() {
 
     // Validações antes de enviar
     if (!images || images.length === 0) {
-      setErrorMessage("Por favor, selecione pelo menos uma imagem para o produto");
+      setErrorMessage(
+        "Por favor, selecione pelo menos uma imagem para o produto",
+      );
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
@@ -56,7 +58,7 @@ export default function CreateListing() {
 
       // Upload de todas as imagens
       const imageUrls = await Promise.all(
-        images.map((img) => uploadImage(img))
+        images.map((img) => uploadImage(img)),
       );
 
       // Marcar qual é a imagem de capa
@@ -91,7 +93,9 @@ export default function CreateListing() {
     } catch (error: any) {
       console.error("Erro ao criar anúncio:", error);
       setErrorMessage(
-        error.response?.data?.message || error.message || "Erro desconhecido ao criar anúncio"
+        error.response?.data?.message ||
+          error.message ||
+          "Erro desconhecido ao criar anúncio",
       );
       setShowError(true);
       setTimeout(() => setShowError(false), 4000);
@@ -149,7 +153,8 @@ export default function CreateListing() {
           <div>
             <div>
               <label className="block text-gray-800 font-semibold mb-2">
-                Imagens do Produto {previews.length > 0 && `(${previews.length})`}
+                Imagens do Produto{" "}
+                {previews.length > 0 && `(${previews.length})`}
               </label>
 
               <label
@@ -177,7 +182,7 @@ export default function CreateListing() {
                   if (files.length === 0) return;
 
                   setImages((prev) => [...prev, ...files]);
-                  
+
                   files.forEach((file) => {
                     const url = URL.createObjectURL(file);
                     setPreviews((prev) => [...prev, url]);
@@ -193,7 +198,8 @@ export default function CreateListing() {
                       key={index}
                       className="relative group aspect-square rounded-lg overflow-hidden border-2 hover:border-[#9878f3] transition"
                       style={{
-                        borderColor: index === coverIndex ? '#9878f3' : 'transparent'
+                        borderColor:
+                          index === coverIndex ? "#9878f3" : "transparent",
                       }}
                     >
                       <img
@@ -201,7 +207,7 @@ export default function CreateListing() {
                         alt={`Preview ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      
+
                       {/* Badge de capa */}
                       {index === coverIndex && (
                         <div className="absolute top-2 left-2 bg-[#9878f3] text-white text-xs font-semibold px-2 py-1 rounded">
@@ -221,10 +227,15 @@ export default function CreateListing() {
                         <button
                           type="button"
                           onClick={() => {
-                            setImages((prev) => prev.filter((_, i) => i !== index));
-                            setPreviews((prev) => prev.filter((_, i) => i !== index));
+                            setImages((prev) =>
+                              prev.filter((_, i) => i !== index),
+                            );
+                            setPreviews((prev) =>
+                              prev.filter((_, i) => i !== index),
+                            );
                             if (coverIndex === index) setCoverIndex(0);
-                            if (coverIndex > index) setCoverIndex((prev) => prev - 1);
+                            if (coverIndex > index)
+                              setCoverIndex((prev) => prev - 1);
                           }}
                           className="btn-critical text-xs px-2 py-1"
                         >
@@ -303,7 +314,9 @@ export default function CreateListing() {
             <select
               className="w-full border text-[var(--color-text)] border-[var(--color-border)] rounded-lg px-4 py-2 bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-secondary)] focus:outline-none"
               value={condition}
-              onChange={(e) => setCondition(e.target.value as "novo" | "seminovo" | "usado")}
+              onChange={(e) =>
+                setCondition(e.target.value as "novo" | "seminovo" | "usado")
+              }
             >
               <option value="novo">Novo</option>
               <option value="seminovo">Seminovo</option>

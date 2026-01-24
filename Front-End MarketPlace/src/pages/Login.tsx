@@ -1,17 +1,23 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Lock, Mail } from "lucide-react";
-import { useAuth } from "../hooks/auth";
+import { Lock, Mail, User } from "lucide-react"; // Adicionei o User para o ícone
+import { useAuth } from "../hooks/auth/useAuth"; // Ajuste o caminho se necessário
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
+
+  // Pegamos a função loginAsGuest do contexto
+  const { login, loginAsGuest } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     login(email, password);
+  };
+
+  const handleGuestLogin = () => {
+    loginAsGuest();
   };
 
   return (
@@ -75,16 +81,34 @@ export default function Login() {
               />
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              type="submit"
-              onClick={() => console.log(import.meta.env.VITE_API_URL)}
-              className="w-full py-3 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold rounded-xl shadow-lg transition-all duration-200"
-            >
-              Entrar
-            </motion.button>
+            <div className="flex flex-col gap-3 pt-2">
+              {/* Botão de Login Principal */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                type="submit"
+                className="w-full py-3 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold rounded-xl shadow-lg transition-all duration-200"
+              >
+                Entrar
+              </motion.button>
+
+              {/* Botão de Convidado */}
+              <motion.button
+                type="button" // Importante: type="button" para não submeter o form
+                onClick={handleGuestLogin}
+                whileHover={{
+                  scale: 1.02,
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="w-full py-3 bg-transparent border border-white/30 text-[var(--color-text-invert)] font-medium rounded-xl hover:border-white/50 transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <User size={18} />
+                Entrar como Visitante
+              </motion.button>
+            </div>
           </form>
 
           {/* LINKS */}

@@ -12,15 +12,19 @@ interface ProviderProps {
 export function AuthContextProvider({ children }: ProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
+    const storedGuest = localStorage.getItem("isGuest");
 
     if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
+    } else if (storedGuest === "true") {
+      setIsGuest(true);
     }
   }, []);
 
@@ -30,6 +34,8 @@ export function AuthContextProvider({ children }: ProviderProps) {
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.removeItem("isGuest");
+      setIsGuest(false);
 
       setToken(token);
       setUser(user);
@@ -40,16 +46,31 @@ export function AuthContextProvider({ children }: ProviderProps) {
     }
   }
 
+  function loginAsGuest() {
+    setIsGuest(true);
+    localStorage.setItem("isGuest", "true");
+
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    navigate("/marketplace");
+  }
+
   function logout() {
     setUser(null);
     setToken(null);
+    setIsGuest(false);
     localStorage.clear();
     chatService.disconnect(); // Desconecta o socket ao fazer logout
     navigate("/login");
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, isGuest, login, loginAsGuest, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
