@@ -1,12 +1,11 @@
 import { productsImagesService } from "../services/productsImages.service.js";
 const productsImagesController = {
 
-    createProductImage: async (req, res) => { 
+    createProductImage: async (req, res, next) => { 
     try { 
-        const { product_id, image_url, is_cover } = req.body; 
 
         const [newProductImage] = await productsImagesService.createProdImages( 
-            product_id, image_url, is_cover
+            req.body
         );
 
         // Success
@@ -14,56 +13,50 @@ const productsImagesController = {
 
     } catch (error) { 
         // Internal Error
-        res.status(500).json({ error: error.message }); 
-        
+        next(error);
     }
 },
 
-findAllProductsImages: async (req, res) => {
+findAllProductsImages: async (req, res, next) => {
     try {
         const productsImages = await productsImagesService.getAllProdImages();
         res.status(200).json(productsImages);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 
 },
 
-findProductImageById: async (req, res) => {
+findProductImageById: async (req, res, next) => {
     try {
-        const { id } = req.params;
         
-        const productImage = await productsImagesService.getProdImagesById(id);
+        const productImage = await productsImagesService.getProdImagesById(req.params);
         res.status(200).json(productImage);
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 },
 
-deleteProductImageById: async (req, res) => {
+deleteProductImageById: async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        await productsImagesService.deleteProdImagesById(id);
+        await productsImagesService.deleteProdImagesById(req.params);
         res.status(200).json({ message: 'Imagem do produto deletada com sucesso!' });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 },
 
-updateProductImageById: async (req, res) => {
+updateProductImageById: async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const updatedData = req.body;
 
-        const [updatedProductImage] = await productsImagesService.updateProdImagesById(id, updatedData);
+        const [updatedProductImage] = await productsImagesService.updateProdImagesById(req.params, req.body);
         
         res.status(200).json(updatedProductImage);
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }       
 },
 

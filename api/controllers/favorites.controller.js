@@ -2,14 +2,13 @@ import { favoritesService } from "../services/favorites.service.js";
 
 const favoritesController = {
 
-    toggleFavorite: async (req, res) => {
+    toggleFavorite: async (req, res, next) => {
         try {
-            const { user_id, product_id } = req.body;
 
-            const Exists = await favoritesService.getByUserAndProduct(user_id, product_id);
+            const Exists = await favoritesService.getByUserAndProduct(req.body, req.user.id);
 
             if (Exists) {
-                await favoritesService.deleteByUserAndProduct(user_id, product_id);
+                await favoritesService.deleteByUserAndProduct(req.body, req.user.id);
                 
                 return res.status(200).json({ 
                     message: 'Produto removido dos favoritos.', 
@@ -18,7 +17,7 @@ const favoritesController = {
 
             } else {
                 
-                const [novoFavorito] = await favoritesService.createFavorite({ user_id, product_id });
+                const [novoFavorito] = await favoritesService.createFavorite(req.body, req.user.id);
                 
                 return res.status(201).json({ 
                     message: 'Produto adicionado aos favoritos!', 
@@ -28,19 +27,18 @@ const favoritesController = {
             }
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }
     },
 
-    getFavoritesByUser: async (req, res) => {
+    getFavoritesByUser: async (req, res, next) => {
         try {
-            const { userId } = req.params;
 
-            const favorites = await favoritesService.getAllFavoritesByUserId(userId);
+            const favorites = await favoritesService.getAllFavoritesByUserId(req.user.id);
             res.status(200).json(favorites);
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }
     }
     

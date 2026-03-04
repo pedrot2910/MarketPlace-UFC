@@ -1,11 +1,23 @@
-import * as service from "../services/notifications.service.js";
+import { notificationsService } from "../services/notifications.service.js";
 
-export async function getMyNotifications(req, res) {
-  const data = await service.getUserNotifications(req.user.id);
+
+const notificationsController = {
+
+createNotification: async (req, res) => {
+  const notification = await notificationsService.createNotification(req.body);
+  res.status(201).json(notification);
+},
+
+getMyNotifications: async (req, res) => {
+  const data = await notificationsService.getUserNotifications(req.user.id);
   res.json(data);
-}
+},
 
-export async function markNotificationAsRead(req, res) {
-  await service.markAsRead(req.params.id, req.user.id);
+markNotificationAsRead: async (req, res) => {
+  await notificationsService.markAsRead(req.params.id, req.user.id);
   res.sendStatus(204);
 }
+
+};
+
+export { notificationsController };

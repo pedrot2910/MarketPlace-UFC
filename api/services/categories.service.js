@@ -1,16 +1,24 @@
 import supabase from '../supabase.js'; 
+import {appError} from '../utils/appError.utils.js';
 
 const categoriesService = {
 
-    createCategory: async (categoryData) => { 
+    createCategory: async (body) => { 
     
+     const {namecategories, icon} = body;
+
+    const categoryData = {
+        namecategories: namecategories,
+        icon: icon
+    };
+
     const { data, error } = await supabase 
         .from('categories') 
         .insert([categoryData]) 
         .select(); 
 
     if (error) { 
-        throw new Error(error.message); 
+        throw new appError(error.message, 500); 
     }
 
     return data;  
@@ -22,7 +30,7 @@ getAllCategories: async () => {
         .select('*');
 
     if (error) {
-        throw new Error(error.message);
+        throw new appError(error.message, 500);
     }
 
     return data;
@@ -36,7 +44,7 @@ getCategoryById: async (id) => {
         .single();
 
     if (error) {
-        throw new Error(error.message);
+        throw new appError(error.message, 500);
     }
 
     return data;
@@ -49,7 +57,7 @@ deleteCategoryById: async (id) => {
         .eq('id', id);
 
     if (error) {
-        throw new Error(error.message);
+        throw new appError(error.message, 500);
     }
 
     return true;
@@ -63,7 +71,7 @@ updateCategoryById: async (id, updatedData) => {
         .select();
 
     if (error) {
-        throw new Error(error.message);
+        throw new appError(error.message, 500);
     }
 
     return data;

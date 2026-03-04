@@ -2,6 +2,18 @@ import { z } from 'zod';
 
 const params = z.object({ id: z.string().uuid('ID do produto inválido') });
 
+const proximityParams = z.object({
+  lat: z.coerce.number({
+        required_error: 'A latitude é obrigatória',
+      }).optional(),
+      lng: z.coerce.number({
+        required_error: 'A longitude é obrigatória',
+      }).optional(),
+      radius: z.coerce.number({
+        required_error: 'O raio é obrigatório',
+      }).min(1, 'O raio deve ser pelo menos 1 km').optional(),
+    });
+
 const baseSchema = z.object({
   title: z
     .string({ required_error: 'O título é obrigatório' })
@@ -26,20 +38,28 @@ const baseSchema = z.object({
     errorMap: () => ({ message: 'Tipo deve ser: venda ou troca' }),
   }),
 
-  product_images: z.array(z.string().url('URL de imagem inválida')).optional(),
+  lat: z.coerce.number().optional(),
+  lng: z.coerce.number().optional(),
+
+  product_images: z
+  .array(z.string().url('URL de imagem inválida'))
+  .min(1, 'Pelo menos uma imagem é obrigatória'),
+
   images_to_remove: z
     .array(z.string().url('URL de imagem inválida'))
     .optional(),
+
   cover_image_url: z
     .string()
     .url('URL de imagem de capa inválida')
     .nullable()
     .optional(),
+
 });
 
 const productSchema = {
   create: z.object({
-    body: baseSchema,
+    body: baseSchema, 
   }),
   update: z.object({
     params: params,
@@ -51,6 +71,13 @@ const productSchema = {
   delete: z.object({
     params: params,
   }),
+  getAllProducts: z.object({
+   query: proximityParams.extend({
+    search: z.string().optional(),
+    categoryId: params.shape.id.optional(),
+  }),
+  }),
+
 };
 
 export { productSchema };

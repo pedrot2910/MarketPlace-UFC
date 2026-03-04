@@ -4,123 +4,87 @@ const messagesController = {
   /**
    * Criação de mensagem (REST)
    */
-  createMessage: async (req, res) => {
+  createMessage: async (req, res, next) => {
     try {
-      const { sender_id, receiver_id, product_id, message, image_url } =
-        req.body;
 
-      const newMessage = await messagesService.createMessage({
-        sender_id,
-        receiver_id,
-        product_id,
-        message,
-        image_url,
-      });
+      const newMessage = await messagesService.createMessage(req.body, req.user.id);
 
       res.status(201).json(newMessage);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao criar mensagem',
-        details: error.message,
-      });
+      next(error);
     }
   },
 
   /**
    * Lista mensagens por usuário
    */
-  getMessagesByUser: async (req, res) => {
+  getMessagesByUser: async (req, res, next) => {
     try {
-      const { userId } = req.params;
 
-      const messages = await messagesService.getMessagesByUser(userId);
+      const messages = await messagesService.getMessagesByUser(req.user.id);
 
       res.status(200).json(messages);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao buscar mensagens',
-        details: error.message,
-      });
+      next(error);
     }
   },
 
   /**
    * Busca mensagem por ID
    */
-  findMessageById: async (req, res) => {
+  findMessageById: async (req, res, next) => {
     try {
-      const { id } = req.params;
 
-      const message = await messagesService.getMessageById(id);
+      const message = await messagesService.getMessageById(req.params);
 
       res.status(200).json(message);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao buscar mensagem',
-        details: error.message,
-      });
+      next(error);
     }
   },
 
   /**
    * Remove mensagem
    */
-  deleteMessageById: async (req, res) => {
+  deleteMessageById: async (req, res, next) => {
     try {
-      const { id } = req.params;
 
-      await messagesService.deleteMessageById(id);
+      await messagesService.deleteMessageById( req.params);
 
       res.status(200).json({
         message: 'Mensagem deletada com sucesso',
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao deletar mensagem',
-        details: error.message,
-      });
+      next(error);
     }
   },
 
   /**
    * Marca mensagens como lidas
    */
-  markMessagesAsRead: async (req, res) => {
+  markMessagesAsRead: async (req, res, next) => {
     try {
-      const { userId, productId, otherUserId } = req.body;
 
-      await messagesService.markMessagesAsRead(userId, productId, otherUserId);
+      await messagesService.markMessagesAsRead(req.body);
 
       res.status(200).json({ message: 'Mensagens marcadas como lidas' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao marcar mensagens como lidas',
-        details: error.message,
-      });
+      next(error);
     }
   },
 
   /**
    * Deleta toda a conversa entre dois usuários sobre um produto
    */
-  deleteConversation: async (req, res) => {
+  deleteConversation: async (req, res, next) => {
     try {
-      const { userId, productId, otherUserId } = req.body;
+      const { productId, otherUserId } = req.body;
 
-      await messagesService.deleteConversation(userId, productId, otherUserId);
+      await messagesService.deleteConversation(req.body, req.user.id);
 
       res.status(200).json({ message: 'Conversa deletada com sucesso' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: 'Erro ao deletar conversa',
-        details: error.message,
-      });
+      next(error);
     }
   },
 };

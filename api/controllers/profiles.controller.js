@@ -1,95 +1,81 @@
 import { profilesService } from '../services/profiles.service.js';
 const profilesController = {
-  findAllProfiles: async (req, res) => {
+  findAllProfiles: async (req, res, next) => {
     try {
       const profiles = await profilesService.getAllProfiles();
       res.status(200).json(profiles);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  findProfileById: async (req, res) => {
+  findProfileById: async (req, res, next) => {
     try {
-      const { id } = req.params;
 
-      const profile = await profilesService.getProfileById(id);
+      const profile = await profilesService.getProfileById(req.params);
       res.status(200).json(profile);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  deleteProfileById: async (req, res) => {
+  deleteProfileById: async (req, res, next) => {
     try {
-      const { id } = req.params;
 
-      await profilesService.deleteProfileById(id);
+      await profilesService.deleteProfileById(req.user.id);
       res.status(200).json({ message: 'Perfil deletado com sucesso!' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  updateProfileById: async (req, res) => {
+  updateProfileById: async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const updatedData = req.body;
 
       const [updatedProfile] = await profilesService.updateProfileById(
-        id,
-        updatedData,
+        req.user.id,
+        req.body,
       );
 
       res.status(200).json(updatedProfile);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  getProfileImage: async (req, res) => {
+  getProfileImage: async (req, res, next) => {
     try {
-      const { id } = req.params;
-
-      const image = await profilesService.getProfileImage(id);
+      const image = await profilesService.getProfileImage(req.params);
       res.status(200).json({ imageUrl: image.image_url });
     } catch (error) {
-      res.status(404).json({ error: 'Imagem não encontrada' });
+      next(error);
     }
   },
 
-  createProfileImage: async (req, res) => {
+  createProfileImage: async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const { imageUrl } = req.body;
-
-      const image = await profilesService.createProfileImage(id, imageUrl);
+      const image = await profilesService.createProfileImage(req.user.id, req.body);
       res.status(201).json(image);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  updateProfileImage: async (req, res) => {
+  updateProfileImage: async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const { imageUrl } = req.body;
-
-      const image = await profilesService.updateProfileImage(id, imageUrl);
+      const image = await profilesService.updateProfileImage(req.user.id, req.body);
       res.status(200).json(image);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  deleteProfileImage: async (req, res) => {
+  deleteProfileImage: async (req, res, next) => {
     try {
-      const { id } = req.params;
-
-      await profilesService.deleteProfileImage(id);
+      await profilesService.deleteProfileImage(req.user.id);
       res.status(200).json({ message: 'Imagem deletada com sucesso' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 };

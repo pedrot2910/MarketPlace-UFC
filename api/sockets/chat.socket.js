@@ -1,6 +1,6 @@
 import { messagesService } from "../services/messages.service.js";
 import { messagesSchema } from "../schemas/messages.schema.js";
-import { createNotification } from "../services/notifications.service.js";
+import { notificationsService } from "../services/notifications.service.js";
 
 /**
  * Gera um ID determinístico de sala para garantir
@@ -94,7 +94,7 @@ export function RegisterChatSocket(io) {
 
         console.log("📩 Criando notificação para:", receiver_id);
 
-        const notification = await createNotification({
+        const notification = await notificationsService.createNotification({
           userId: receiver_id,
           type: "message",
           title: "Nova mensagem",

@@ -1,31 +1,39 @@
 import supabase from '../supabase.js'; 
+import { appError } from '../utils/appError.utils.js';
 
 const favoritesService = {
 
     
-    createFavorite: async (favoriteData) => { 
+    createFavorite: async (body, user_id) => { 
+
+        const { product_id } = body;
+
+        const favoriteData = { user_id: user_id, product_id: product_id };
+        
         const { data, error } = await supabase 
             .from('favorites') 
             .insert([favoriteData]) 
             .select(); 
     
-        if (error) throw new Error(error.message); 
+        if (error) throw new appError(error.message); 
         return data;  
     },
     
-    getByUserAndProduct: async (userId, productId) => {
+    getByUserAndProduct: async (body, user_id) => {
+        const { product_id } = body;
+        
         const { data, error } = await supabase
             .from('favorites')
             .select('*')
-            .eq('user_id', userId)
-            .eq('product_id', productId)
+            .eq('user_id', user_id)
+            .eq('product_id', product_id)
             .maybeSingle(); // .maybeSingle() é perfeito aqui: retorna null se não achar (sem dar erro)
     
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message);
         return data;
     },
 
-    getAllFavoritesByUserId: async (userId) => {
+    getAllFavoritesByUserId: async (user_id) => {
         const {data, error} = await supabase
             .from('favorites')
             // TRADUÇÃO DO SELECT: 
@@ -41,32 +49,22 @@ const favoritesService = {
                     product_images ( image_url )
                 )
             `)
-            .eq('user_id', userId);
+            .eq('user_id', user_id);
     
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message);
         return data;
-    },
-    
-    
-    deleteFavoriteById: async (id) => {
-        const {error} = await supabase
-            .from('favorites')
-            .delete()
-            .eq('id', id);
-    
-        if (error) throw new Error(error.message);
-        return true;
     },
 
     
-    deleteByUserAndProduct: async (userId, productId) => {
+    deleteByUserAndProduct: async (body, user_id) => {
+        const { product_id } = body;
         const { error } = await supabase
             .from('favorites')
             .delete()
-            .eq('user_id', userId)
-            .eq('product_id', productId);
+            .eq('user_id', user_id)
+            .eq('product_id', product_id);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message);
         return true;
     }
     

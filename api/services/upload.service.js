@@ -1,4 +1,5 @@
 import supabase from '../supabase.js';
+import { appError } from '../utils/appError.utils.js';
 
 const uploadService = {
     uploadToStorage: async (file) => {
@@ -15,7 +16,7 @@ const uploadService = {
             });
 
         if (error) {
-            throw new Error(`Erro no Supabase: ${error.message}`);
+            throw new appError(`Erro no Supabase: ${error.message}`);
         }
 
         const { data: publicUrl } = supabase

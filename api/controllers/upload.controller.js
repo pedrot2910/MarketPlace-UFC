@@ -1,7 +1,7 @@
 import { uploadService } from '../services/upload.service.js';
 
 export const uploadController = {
-    uploadImage: async (req, res) => {
+    uploadImage: async (req, res, next) => {
         try {
             const file = req.file;
             if (!file) {
@@ -16,7 +16,7 @@ export const uploadController = {
             });
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }
     }
 };

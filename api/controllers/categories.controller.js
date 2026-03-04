@@ -2,64 +2,58 @@ import { categoriesService } from "../services/categories.service.js";
 
 const categoriesController = {
 
-createCategory: async (req, res) => { 
+createCategory: async (req, res, next) => { 
         try { 
-            const { namecategories, icon } = req.body; 
 
-            const [newCategorie] = await categoriesService.createCategory({ 
-                namecategories, icon
-            });
+            const [newCategorie] = await categoriesService.createCategory(req.body);
 
             // Success
             res.status(201).json(newCategorie); 
         } catch (error) { 
             // Internal Error
-            res.status(500).json({ error: error.message }); 
+            next(error);
         }
     },
-findAllCategories: async (req, res) => {
+    
+findAllCategories: async (req, res, next) => {
     try {
         const Categories = await categoriesService.getAllCategories();
         res.status(200).json(Categories);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 
 },
 
-findCategoryById: async (req, res) => {
+findCategoryById: async (req, res, next) => {
         try {
-            const { id } = req.params;
             
-            const Categories = await categoriesService.getCategoryById(id);
+            const Categories = await categoriesService.getCategoryById(req.params.id);
             res.status(200).json(Categories);
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }
     },
-deleteCategoryById: async (req, res) => {
+deleteCategoryById: async (req, res, next) => {
         try {
-            const { id } = req.params;
 
-            await categoriesService.deleteCategorieById(id);
+            await categoriesService.deleteCategoryById(req.params.id);
             res.status(200).json({ message: 'Categoria deletada com sucesso!' });
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }
     },
-updateCategoryById: async (req, res) => {
+updateCategoryById: async (req, res, next) => {
         try {
-            const { id } = req.params;
-            const updatedData = req.body;
 
-            const [updatedCategories] = await categoriesService.updateCategoryById(id, updatedData);
+            const [updatedCategories] = await categoriesService.updateCategoryById(req.params.id, req.body);
             
             res.status(200).json(updatedCategories);
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            next(error);
         }       
     },
 

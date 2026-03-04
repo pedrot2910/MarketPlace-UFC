@@ -2,24 +2,23 @@ import { authService } from "../services/auth.service.js";
 
 const authController = {
   // 1. CADASTRO (Sign Up)
-  signUp: async (req, res) => {
+  signUp: async (req, res, next) => {
     try {
-      const { email, password, name, role } = req.body;
 
-      const result = await authService.signUp(email, password, name, role);
+      const result = await authService.signUp(req.body);
       res.status(201).json(result);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
+  
   // 2. LOGIN (Sign In)
-  signIn: async (req, res) => {
+  signIn: async (req, res, next) => {
     try {
-      const { email, password } = req.body;
-      const result = await authService.signIn(email, password);
+      const result = await authService.signIn(req.body);
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 };

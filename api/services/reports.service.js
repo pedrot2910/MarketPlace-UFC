@@ -1,14 +1,21 @@
 import supabase from '../supabase.js'; 
+import { appError } from '../utils/appError.utils.js';
 
-export const reportsService = {
+const reportsService = {
 
-    createReport: async (reportData) => { 
+    createReport: async (body, reporter_id) => { 
+
+        const reportData = {
+            ...body,
+            reporter_id: reporter_id
+        };
+
         const { data, error } = await supabase 
             .from('reports') 
             .insert([reportData]) 
             .select(); 
     
-        if (error) throw new Error(error.message); 
+        if (error) throw new appError(error.message, 500);
         return data;  
     },
 
@@ -22,7 +29,7 @@ export const reportsService = {
             `)
             .order('created_at', { ascending: false });
 
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message, 500);
         return data;
     },
 
@@ -37,7 +44,7 @@ export const reportsService = {
             .eq('id', id)
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message, 500);
         return data;
     },
 
@@ -47,7 +54,7 @@ export const reportsService = {
             .delete()
             .eq('id', id);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message, 500);
         return true;
     },
 
@@ -58,7 +65,9 @@ export const reportsService = {
             .eq('id', id)
             .select();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new appError(error.message, 500);
         return data;
     }
 };
+
+export { reportsService };

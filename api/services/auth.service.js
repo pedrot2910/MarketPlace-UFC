@@ -1,4 +1,5 @@
 import supabase from "../supabase.js";
+import { appError } from "../utils/appError.utils.js";
 
 function generateMatricula() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -17,19 +18,20 @@ async function generateUniqueMatricula() {
     if (!data) return matricula;
   }
 
-  throw new Error("Falha ao gerar matrícula única");
+  throw new appError("Falha ao gerar matrícula única");
 }
 
 const authService = {
   // 1. CADASTRO (Sign Up)
-  signUp: async (email, password, name, role) => {
+  signUp: async (body) => {
+    const { email, password, name, role } = body;
     // A. Cria login seguro
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (authError) throw new Error(authError.message);
+    if (authError) throw new appError(authError.message, 400);
 
     // B. Cria perfil público (Se o login deu certo)
     if (authData.user) {
@@ -49,20 +51,22 @@ const authService = {
         .select();
 
       if (profileError)
-        throw new Error(`Erro ao criar perfil: ${profileError.message}`);
+        throw new appError(`Erro ao criar perfil: ${profileError.message}`, 500);
 
       return { user: authData.user, profile: profileData[0] };
     }
   },
 
   // 2. LOGIN (Sign In)
-  signIn: async (email, password) => {
+  signIn: async (body) => {
+    const { email, password } = body;
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw new Error("Email ou senha incorretos.");
+    if (error) throw new appError("Email ou senha incorretos.", 400);
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -71,7 +75,7 @@ const authService = {
       .single();
 
     if (profileError) {
-      throw new Error("Erro ao buscar perfil.");
+      throw new appError("Erro ao buscar perfil.", 500);
     }
 
     return {

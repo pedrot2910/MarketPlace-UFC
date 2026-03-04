@@ -10,6 +10,7 @@ const validateSchema = (schema) => (req, res, next) => {
 
     if (result.body) req.body = result.body;
     if (result.params) req.params = result.params;
+    if (result.query) req.query = result.query;
 
     next();
   } catch (err) {

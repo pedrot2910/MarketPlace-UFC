@@ -3,75 +3,45 @@ import { productsImagesService } from '../services/productsImages.service.js';
 import supabase from '../supabase.js';
 
 const productController = {
-  createProduct: async (req, res) => {
+  createProduct: async (req, res, next) => {
     try {
-      const {
-        title,
-        description,
-        price,
-        category_id,
-        condition,
-        type,
-        product_images,
-      } = req.body;
 
-      const profile_id = req.user.id;
+      const { product_images} = req.body;
 
-      const [newProduct] = await productService.createProduct({
-        title,
-        description,
-        price,
-        profile_id,
-        category_id,
-        condition,
-        type,
-      });
-
-      if (product_images && product_images.length > 0) {
-        for (const url of product_images) {
-          await productsImagesService.createProdImages(
-            newProduct.id,
-            url,
-            true,
-          );
-        }
-      }
+      const [newProduct] = await productService.createProduct(req.body, req.user.id);
 
       res.status(201).json({
         message: 'Produto criado com sucesso!',
         product: newProduct,
         images: product_images,
       });
+      
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  findAllProducts: async (req, res) => {
+  getAllProducts: async (req, res, next) => {
     try {
-      const { search, categoryId } = req.query;
-      const products = await productService.getAllProducts({
-        search,
-        categoryId,
-      });
+      const products = await productService.getAllProducts(req.query);
       res.status(200).json(products);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  findProductById: async (req, res) => {
+  getProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
 
       const product = await productService.getProductById(id);
       res.status(200).json(product);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  findProductsByProfile: async (req, res) => {
+  getProductsByProfileId: async (req, res, next ) => {
     try {
       const { profileId } = req.params;
 
@@ -79,22 +49,22 @@ const productController = {
 
       res.status(200).json(products);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  deleteProductById: async (req, res) => {
+  deleteProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
 
-      await productService.deleteProductById(id);
+      await productService.deleteProductById(id, req.user.id);
       res.status(200).json({ message: 'Produto deletado com sucesso!' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  updateProductById: async (req, res) => {
+  updateProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
       const {
@@ -144,7 +114,7 @@ const productController = {
       // Atualizar dados do produto (sem as imagens)
       const [updatedProduct] = await productService.updateProductById(
         id,
-        updatedData,
+        req.body,
       );
 
       // Se foram enviadas novas imagens, adicionar à tabela product_images
@@ -189,9 +159,10 @@ const productController = {
       res.status(200).json(updatedProduct);
     } catch (error) {
       console.error('❌ Erro ao atualizar produto:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
+
 };
 
 export { productController };

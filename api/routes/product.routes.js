@@ -12,15 +12,18 @@ productRoutes.post(
   validateSchema(productSchema.create),
   productController.createProduct
 );
-productRoutes.get("/", productController.findAllProducts);
+productRoutes.get(
+  "/",
+   productController.getAllProducts
+  );
 productRoutes.get(
   "/profile/:profileId",
-  productController.findProductsByProfile
+  productController.getProductsByProfileId
 );
 productRoutes.get(
   "/:id",
   validateSchema(productSchema.getProductById),
-  productController.findProductById
+  productController.getProductById
 );
 productRoutes.delete(
   "/:id",
@@ -34,4 +37,5 @@ productRoutes.put(
   validateSchema(productSchema.update),
   productController.updateProductById
 );
+
 export { productRoutes };
