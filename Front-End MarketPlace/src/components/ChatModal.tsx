@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ArrowLeft, User, Phone, Video, MoreVertical } from "lucide-react";
+import {
+  Send,
+  ArrowLeft,
+  User,
+  Phone,
+  Video,
+  MoreVertical,
+} from "lucide-react";
 
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal, getOtherUser } from "../hooks/useChatModal";
 import { useInboxModal } from "../hooks/useInboxModal";
-import { getMessagesByUser, markMessagesAsRead } from "../services/messages.service";
+import {
+  getMessagesByUser,
+  markMessagesAsRead,
+} from "../services/messages.service";
 import { fetchProfileById } from "../services/profile";
 import { getListingById } from "../services/listings";
 
@@ -61,7 +71,9 @@ export default function ChatModal() {
         if (senderId === receiverId && user) {
           markMessagesAsRead(user.id, String(productId), String(receiverId))
             .then(() => console.log("✅ Nova mensagem marcada como lida"))
-            .catch((err) => console.error("Erro ao marcar nova mensagem como lida:", err));
+            .catch((err) =>
+              console.error("Erro ao marcar nova mensagem como lida:", err),
+            );
         }
 
         return updated;
@@ -93,7 +105,7 @@ export default function ChatModal() {
         })
         .sort(
           (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
         );
 
       setMessages((prev) => {
@@ -102,8 +114,12 @@ export default function ChatModal() {
           // Marcar novas mensagens como lidas
           if (user) {
             markMessagesAsRead(user.id, String(productId), String(receiverId))
-              .then(() => console.log("✅ Mensagens do polling marcadas como lidas"))
-              .catch((err) => console.error("Erro ao marcar mensagens do polling:", err));
+              .then(() =>
+                console.log("✅ Mensagens do polling marcadas como lidas"),
+              )
+              .catch((err) =>
+                console.error("Erro ao marcar mensagens do polling:", err),
+              );
           }
           return filtered;
         }
@@ -130,17 +146,20 @@ export default function ChatModal() {
       try {
         const profile = await fetchProfileById(String(receiverId));
         setOtherUser(profile);
-        
+
         console.log("👤 PERFIL COMPLETO:", profile);
-        
+
         // Buscar foto de perfil
         if (profile?.profile_images?.[0]?.image_url) {
           setOtherUserPhoto(profile.profile_images[0].image_url);
-          console.log("📸 FOTO ENCONTRADA:", profile.profile_images[0].image_url);
+          console.log(
+            "📸 FOTO ENCONTRADA:",
+            profile.profile_images[0].image_url,
+          );
         } else {
           console.log("⚠️ SEM FOTO DE PERFIL NO BANCO");
         }
-        
+
         console.log("👤 PERFIL DO OUTRO USUÁRIO:", profile);
       } catch (err) {
         console.error("Erro ao buscar perfil:", err);
@@ -166,13 +185,13 @@ export default function ChatModal() {
         })
         .sort(
           (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
         );
 
       console.log("📜 HISTÓRICO FILTRADO:", filtered);
 
       setMessages(filtered);
-      
+
       // Buscar título do produto diretamente (não depende de mensagens existentes)
       try {
         const product = await getListingById(String(productId));
@@ -181,13 +200,17 @@ export default function ChatModal() {
       } catch (err) {
         console.error("Erro ao buscar produto:", err);
         // Fallback: tentar extrair das mensagens
-        const title = filtered[0]?.product?.title ?? 'Produto';
+        const title = filtered[0]?.product?.title ?? "Produto";
         setProductTitle(title);
       }
 
       // Marcar mensagens como lidas
       try {
-        await markMessagesAsRead(user.id, String(productId), String(receiverId));
+        await markMessagesAsRead(
+          user.id,
+          String(productId),
+          String(receiverId),
+        );
         console.log("✅ Mensagens marcadas como lidas");
       } catch (err) {
         console.error("Erro ao marcar mensagens como lidas:", err);
@@ -217,6 +240,7 @@ export default function ChatModal() {
     }
 
     chatService.sendMessage({
+      sender_id: String(user?.id),
       receiver_id: String(receiverId),
       product_id: String(productId),
       message: text,
@@ -234,17 +258,29 @@ export default function ChatModal() {
       const msgDate = new Date(msg.created_at);
       // Ajustar timezone (Brasil = UTC-3)
       msgDate.setHours(msgDate.getHours() - 3);
-      
+
       const today = new Date();
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
       let dateLabel = "";
-      
+
       // Normalizar datas para comparação (ignorar horas)
-      const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-      const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+      const msgDateOnly = new Date(
+        msgDate.getFullYear(),
+        msgDate.getMonth(),
+        msgDate.getDate(),
+      );
+      const todayOnly = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
+      const yesterdayOnly = new Date(
+        yesterday.getFullYear(),
+        yesterday.getMonth(),
+        yesterday.getDate(),
+      );
 
       if (msgDateOnly.getTime() === todayOnly.getTime()) {
         dateLabel = "Hoje";
@@ -288,17 +324,18 @@ export default function ChatModal() {
             className="fixed z-50 top-1/2 left-1/2 w-[480px] max-w-[95%] h-[600px]
               -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             style={{
-              boxShadow: "0 8px 32px rgba(124, 92, 250, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1)"
+              boxShadow:
+                "0 8px 32px rgba(124, 92, 250, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
           >
             {/* HEADER com gradiente roxo */}
-            <div 
+            <div
               className="px-4 py-3 text-white shrink-0"
               style={{
-                background: "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)"
+                background: "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)",
               }}
             >
               <div className="flex items-center gap-3">
@@ -331,7 +368,9 @@ export default function ChatModal() {
 
                 {/* Nome e status */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white/90 truncate">{productTitle}</p>
+                  <p className="text-xs text-white/90 truncate">
+                    {productTitle}
+                  </p>
                   <h2 className="font-semibold truncate">
                     {otherUser ? otherUser.name : "Carregando..."}
                   </h2>
@@ -369,12 +408,12 @@ export default function ChatModal() {
                   {group.messages.map((msg, index) => {
                     const senderId = msg.sender?.id ?? msg.sender_id;
                     const isMine = senderId === user?.id;
-                    
+
                     // Criar objeto Date e ajustar timezone (Brasil = UTC-3)
                     const msgDate = new Date(msg.created_at);
                     // Subtrair 3 horas para corrigir o fuso horário
                     msgDate.setHours(msgDate.getHours() - 3);
-                    
+
                     const time = msgDate.toLocaleTimeString("pt-BR", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -383,16 +422,17 @@ export default function ChatModal() {
                     // Verificar se é a última mensagem do mesmo remetente com o mesmo horário
                     const nextMsg = group.messages[index + 1];
                     let showTime = true;
-                    
+
                     if (nextMsg) {
-                      const nextSenderId = nextMsg.sender?.id ?? nextMsg.sender_id;
+                      const nextSenderId =
+                        nextMsg.sender?.id ?? nextMsg.sender_id;
                       const nextMsgDate = new Date(nextMsg.created_at);
                       nextMsgDate.setHours(nextMsgDate.getHours() - 3);
                       const nextTime = nextMsgDate.toLocaleTimeString("pt-BR", {
                         hour: "2-digit",
                         minute: "2-digit",
                       });
-                      
+
                       // Ocultar horário se próxima mensagem for do mesmo remetente e mesmo horário
                       if (senderId === nextSenderId && time === nextTime) {
                         showTime = false;
@@ -416,7 +456,7 @@ export default function ChatModal() {
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                             ) : (
-                              <div 
+                              <div
                                 className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
                                 style={{ backgroundColor: "#7C5CFA" }}
                               >
@@ -427,16 +467,21 @@ export default function ChatModal() {
                         )}
 
                         {/* Mensagem */}
-                        <div className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
+                        <div
+                          className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
+                        >
                           <div
                             className={`px-4 py-2 rounded-2xl max-w-[320px] shadow-sm ${
-                              isMine
-                                ? "text-white"
-                                : "bg-white text-gray-800"
+                              isMine ? "text-white" : "bg-white text-gray-800"
                             }`}
-                            style={isMine ? {
-                              background: "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)"
-                            } : {}}
+                            style={
+                              isMine
+                                ? {
+                                    background:
+                                      "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)",
+                                  }
+                                : {}
+                            }
                           >
                             <p className="text-sm leading-relaxed break-words">
                               {msg.message}
@@ -473,7 +518,8 @@ export default function ChatModal() {
                   onClick={handleSend}
                   className="p-3 text-white rounded-full transition-all hover:scale-105"
                   style={{
-                    background: "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)"
+                    background:
+                      "linear-gradient(135deg, #7C5CFA 0%, #6B46E5 100%)",
                   }}
                 >
                   <Send size={18} />

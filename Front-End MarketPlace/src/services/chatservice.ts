@@ -54,6 +54,7 @@ export const chatService = {
   },
 
   sendMessage(payload: {
+    sender_id: string;
     receiver_id: string;
     product_id: string;
     message: string;
