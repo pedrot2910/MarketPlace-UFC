@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { RegisterChatSocket } from "../sockets/chat.socket.js";
+import { chatSocket } from "../sockets/chat.socket.js";
 import { socketAuthMiddleware } from "../middlewares/socketAuth.middleware.js";
 import { originProcess } from "../configs/server.configs.js";
 
@@ -8,7 +8,7 @@ class ioServer {
 
         this.middlewares(server);
 
-        RegisterChatSocket(this.io);
+        chatSocket.RegisterChatSocket(this.io);
     }
 
     middlewares(server) {

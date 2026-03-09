@@ -1,4 +1,5 @@
 import { productsImagesService } from "../services/productsImages.service.js";
+
 const productsImagesController = {
 
     createProductImage: async (req, res, next) => { 
