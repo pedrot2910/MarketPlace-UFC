@@ -17,19 +17,19 @@ const chatSocket = {
 
     io.on("connection", (socket) => {
       console.log("Usuario Conectado:", socket.id);
-      if(socket.data.user?.id){
+      if (socket.data.user?.id) {
         const userRoom = `user:${socket.data.user.id}`;
         socket.join(userRoom);
         console.log("✅ Socket entrou na sala pessoal:", userRoom);
-      }else{
-        console.log("❌ Socket conectado sem usuário autenticado")
+      } else {
+        console.log("❌ Socket conectado sem usuário autenticado");
       }
 
-      socket.on("join-chat", ({sender_id, receiver_id, product_id}) => {
+      socket.on("join-chat", ({ sender_id, receiver_id, product_id }) => {
         const roomId = buildRoomId({
           senderId: sender_id,
           receiverId: receiver_id,
-          productId: product_id
+          productId: product_id,
         });
 
         socket.join(roomId);
@@ -40,13 +40,16 @@ const chatSocket = {
         socket.on("send-message", async (payload) => {
           try {
             console.log("🧪 SOCKET USER:", socket.user);
-            console.log("🧪 SOCKET DATA:", socket.data)
-            if(!socket.data.user){
-              return socket.emit("chat-error", "Usuário não autenticado no socket.")
+            console.log("🧪 SOCKET DATA:", socket.data);
+            if (!socket.data.user) {
+              return socket.emit(
+                "chat-error",
+                "Usuário não autenticado no socket.",
+              );
             }
             const sender_id = socket.data.user.id;
 
-            const { receiver_id, product_id, message, image_url } = payload
+            const { receiver_id, product_id, message, image_url } = payload;
             // Validação usando o mesmo schema do REST
             // OBS: Poderíamos criar um schema específico para o socket, mas para evitar duplicação, vamos usar o mesmo do REST
             // A única diferença é que o sender_id vem do socket.data.user.id, garantindo que o usuário autenticado seja sempre o remetente
@@ -57,8 +60,8 @@ const chatSocket = {
                 receiver_id,
                 product_id,
                 message,
-                image_url
-              }
+                image_url,
+              },
             });
 
             if (!parsed.success) {
@@ -68,17 +71,19 @@ const chatSocket = {
             const roomId = buildRoomId({
               senderId: sender_id,
               receiverId: receiver_id,
-              productId: product_id
+              productId: product_id,
             });
 
             // Persistência
-            const savedMessage = await messagesService.createMessage({
+            const savedMessage = await messagesService.createMessage(
+              {
+                receiver_id,
+                product_id,
+                message,
+                image_url,
+              },
               sender_id,
-              receiver_id,
-              product_id,
-              message,
-              image_url
-            });
+            );
             // Broadcast para todos da sala
             io.to(roomId).emit("new-message", savedMessage);
             console.log("📩 Criando notificação para:", receiver_id);
@@ -104,5 +109,3 @@ const chatSocket = {
 };
 
 export { chatSocket };
-
-

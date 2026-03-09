@@ -1,4 +1,4 @@
-import { profilesService } from '../services/profiles.service.js';
+import { profilesService } from "../services/profiles.service.js";
 const profilesController = {
   findAllProfiles: async (req, res, next) => {
     try {
@@ -11,8 +11,7 @@ const profilesController = {
 
   findProfileById: async (req, res, next) => {
     try {
-
-      const profile = await profilesService.getProfileById(req.params);
+      const profile = await profilesService.getProfileById(req.params.id);
       res.status(200).json(profile);
     } catch (error) {
       next(error);
@@ -21,9 +20,8 @@ const profilesController = {
 
   deleteProfileById: async (req, res, next) => {
     try {
-
       await profilesService.deleteProfileById(req.user.id);
-      res.status(200).json({ message: 'Perfil deletado com sucesso!' });
+      res.status(200).json({ message: "Perfil deletado com sucesso!" });
     } catch (error) {
       next(error);
     }
@@ -31,7 +29,6 @@ const profilesController = {
 
   updateProfileById: async (req, res, next) => {
     try {
-
       const [updatedProfile] = await profilesService.updateProfileById(
         req.user.id,
         req.body,
@@ -45,7 +42,7 @@ const profilesController = {
 
   getProfileImage: async (req, res, next) => {
     try {
-      const image = await profilesService.getProfileImage(req.params);
+      const image = await profilesService.getProfileImage(req.params.id);
       res.status(200).json({ imageUrl: image.image_url });
     } catch (error) {
       next(error);
@@ -54,7 +51,10 @@ const profilesController = {
 
   createProfileImage: async (req, res, next) => {
     try {
-      const image = await profilesService.createProfileImage(req.user.id, req.body);
+      const image = await profilesService.createProfileImage(
+        req.user.id,
+        req.body,
+      );
       res.status(201).json(image);
     } catch (error) {
       next(error);
@@ -63,7 +63,10 @@ const profilesController = {
 
   updateProfileImage: async (req, res, next) => {
     try {
-      const image = await profilesService.updateProfileImage(req.user.id, req.body);
+      const image = await profilesService.updateProfileImage(
+        req.user.id,
+        req.body,
+      );
       res.status(200).json(image);
     } catch (error) {
       next(error);
@@ -73,7 +76,7 @@ const profilesController = {
   deleteProfileImage: async (req, res, next) => {
     try {
       await profilesService.deleteProfileImage(req.user.id);
-      res.status(200).json({ message: 'Imagem deletada com sucesso' });
+      res.status(200).json({ message: "Imagem deletada com sucesso" });
     } catch (error) {
       next(error);
     }
