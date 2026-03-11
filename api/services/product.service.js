@@ -2,6 +2,7 @@ import supabase from "../supabase.js";
 import { productsImagesService } from "./productsImages.service.js";
 import { appError } from "../utils/appError.utils.js";
 const productService = {
+  
   createProduct: async (body, userId) => {
 
     const { lat, lng, product_images, images_to_remove, cover_image_url, ...rest } = body;
@@ -21,7 +22,7 @@ const productService = {
 
   if (error) throw new appError(error.message, 500);
   
-  await Promise.all(
+ const {error: imgError} = await Promise.all(
     product_images.map((image, index) =>
       productsImagesService.createProdImages({
         product_id: newProduct.id,
@@ -31,7 +32,8 @@ const productService = {
     ),
   );
 
-    if (error) throw new appError(error.message, 500);
+    if (imgError) throw new appError(imgError.message, 500);
+    
     return newProduct;
   },
 
@@ -246,7 +248,7 @@ const productService = {
   },
 
   // 5. Atualizar
-  updateProductById: async (id, body) => {
+  updateProductById: async (userId, id, body) => {
     const { lat, lng,
       product_images,
       images_to_remove,
@@ -259,13 +261,34 @@ const productService = {
       payload.location = `POINT(${lng} ${lat})`;
     }
 
-    const { data, error } = await supabase
+    const {data: existingProduct, error: existingProductError } = await supabase
       .from("products")
+      .select("id, profile_id")
+      .eq("id", id)
+      .single();
+
+    if (existingProductError) {
+      throw new appError(existingProductError.message, 404);
+    }
+
+    if (existingProduct.profile_id !== userId) {
+      throw new appError("Usuário não autorizado para atualizar este produto", 403);
+    }
+    let prodData;
+    if (Object.keys(payload).length > 0) {
+
+      const { data, error } = await supabase.from("products")
       .update(payload)
       .eq("id", id)
-      .select();
+      .eq("profile_id", userId)
+      .select()
+      .single();
 
-    if (error) throw new appError(error.message, 500);
+      if (error) throw new appError(error.message);
+
+      prodData = data;
+    }
+
 
     // const {
     //     product_images,
@@ -281,6 +304,8 @@ const productService = {
         cover_image_url,
         updatedData: rest,
       });
+
+      
 
       // Remover imagens antigas se solicitado
       if (
@@ -368,9 +393,9 @@ const productService = {
 
       }
       
+      console.log('Produto atualizado com sucesso:', prodData);
 
-
-      return data;
+      return prodData;
   },
 
 };

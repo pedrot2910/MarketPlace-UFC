@@ -7,7 +7,6 @@ const idParam = z.object({ id: z.string().uuid("ID inválido") });
 const userIdParam = z.object({ userId: z.string().uuid("ID de usuário inválido") });
 
 const baseSchema = z.object({
-    sender_id: z.string().uuid("ID do remetente inválido"),
     receiver_id: z.string().uuid("ID do destinatário inválido"),
     product_id: z.string().uuid("ID do produto inválido"), 
     message: z.string()

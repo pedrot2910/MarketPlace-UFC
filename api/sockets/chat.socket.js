@@ -17,13 +17,19 @@ const chatSocket = {
 
     io.on("connection", (socket) => {
       console.log("Usuario Conectado:", socket.id);
-      if (socket.data.user?.id) {
-        const userRoom = `user:${socket.data.user.id}`;
-        socket.join(userRoom);
-        console.log("✅ Socket entrou na sala pessoal:", userRoom);
-      } else {
-        console.log("❌ Socket conectado sem usuário autenticado");
+
+      const userId = socket.data.user?.id;
+
+      if(!userId){
+        console.log("Socket conectado sem usuario autenticado");
+        socket.on('disconnect', () => 
+          console.log("Usuario desconectado por falta de autenticação"));
       }
+      
+      const userRoom = `user:${userId}`;
+      socket.join(userRoom);
+      console.log("✅ Socket entrou na sala pessoal:", userRoom);
+      
 
       socket.on("join-chat", ({ sender_id, receiver_id, product_id }) => {
         const roomId = buildRoomId({

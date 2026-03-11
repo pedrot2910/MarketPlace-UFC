@@ -1,33 +1,23 @@
-import supabase from "../supabase.js";
+export const socketAuthMiddleware = async (socket, next) => {
+  
+  const token = socket.handshake.auth?.token;
 
-/**
- * Middleware de autenticação para Socket.IO
- * Valida o token no handshake e injeta o usuário no socket.
- */
-export async function socketAuthMiddleware(socket, next) {
+  if (!token) {
+    return next(new Error("Acesso negado: Token não fornecido."));
+  }
+
   try {
-    const token = socket.handshake.auth?.token;
-
-    console.log("🔐 Token recebido no socket:", token?.slice(0, 20));
-
-    if (!token) {
-      return next(new Error("Token de autenticação não fornecido."));
-    }
-
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
+    // Em produção, aqui você validaria o JWT localmente com a sua SECRET
+    const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      return next(new Error("Token inválido ou expirado."));
+      return next(new Error("Acesso negado: Token inválido."));
     }
 
-    // Injeta o usuário autenticado no socket
-    socket.data.user = user;
-
+    socket.data.user = { id: user.id, email: user.email };
     next();
-  } catch (error) {
-    next(new Error("Erro interno na autenticação do socket."));
+  } catch (err) {
+    console.error("Erro crítico no Socket Auth:", err);
+    next(new Error("Erro de servidor na autenticação."));
   }
-}
+};
