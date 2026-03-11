@@ -1,21 +1,22 @@
-import { productService } from '../services/product.service.js';
-import { productsImagesService } from '../services/productsImages.service.js';
-import supabase from '../supabase.js';
+import { productService } from "../services/product.service.js";
+import { productsImagesService } from "../services/productsImages.service.js";
+import supabase from "../supabase.js";
 
 const productController = {
   createProduct: async (req, res, next) => {
     try {
+      const { product_images } = req.body;
 
-      const { product_images} = req.body;
-
-      const [newProduct] = await productService.createProduct(req.body, req.user.id);
+      const newProduct = await productService.createProduct(
+        req.body,
+        req.user.id,
+      );
 
       res.status(201).json({
-        message: 'Produto criado com sucesso!',
+        message: "Produto criado com sucesso!",
         product: newProduct,
         images: product_images,
       });
-      
     } catch (error) {
       next(error);
     }
@@ -41,7 +42,7 @@ const productController = {
     }
   },
 
-  getProductsByProfileId: async (req, res, next ) => {
+  getProductsByProfileId: async (req, res, next) => {
     try {
       const { profileId } = req.params;
 
@@ -58,7 +59,7 @@ const productController = {
       const { id } = req.params;
 
       await productService.deleteProductById(id, req.user.id);
-      res.status(200).json({ message: 'Produto deletado com sucesso!' });
+      res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {
       next(error);
     }
@@ -74,7 +75,7 @@ const productController = {
         ...updatedData
       } = req.body;
 
-      console.log('📝 UPDATE PRODUTO:', {
+      console.log("📝 UPDATE PRODUTO:", {
         id,
         product_images,
         images_to_remove,
@@ -88,16 +89,16 @@ const productController = {
         Array.isArray(images_to_remove) &&
         images_to_remove.length > 0
       ) {
-        console.log('🗑️ Removendo imagens:', images_to_remove);
+        console.log("🗑️ Removendo imagens:", images_to_remove);
         for (const imageUrl of images_to_remove) {
           // Buscar a imagem pelo URL e deletar
           const { data: images, error: searchError } = await supabase
-            .from('product_images')
-            .select('id')
-            .eq('product_id', id)
-            .eq('image_url', imageUrl);
+            .from("product_images")
+            .select("id")
+            .eq("product_id", id)
+            .eq("image_url", imageUrl);
 
-          console.log('🔍 Busca imagem:', {
+          console.log("🔍 Busca imagem:", {
             imageUrl,
             found: images?.length,
             error: searchError,
@@ -106,7 +107,7 @@ const productController = {
           if (images && images.length > 0) {
             const deleteResult =
               await productsImagesService.deleteProdImagesById(images[0].id);
-            console.log('✅ Imagem deletada:', images[0].id, deleteResult);
+            console.log("✅ Imagem deletada:", images[0].id, deleteResult);
           }
         }
       }
@@ -123,7 +124,7 @@ const productController = {
         Array.isArray(product_images) &&
         product_images.length > 0
       ) {
-        console.log('➕ Adicionando novas imagens:', product_images);
+        console.log("➕ Adicionando novas imagens:", product_images);
         // Adicionar novas imagens
         for (const url of product_images) {
           await productsImagesService.createProdImages(
@@ -136,33 +137,32 @@ const productController = {
 
       // Atualizar imagem de capa se especificada
       if (cover_image_url) {
-        console.log('🖼️ Atualizando capa para:', cover_image_url);
+        console.log("🖼️ Atualizando capa para:", cover_image_url);
 
         // Primeiro, remover is_cover de todas as imagens do produto
         const { error: resetError } = await supabase
-          .from('product_images')
+          .from("product_images")
           .update({ is_cover: false })
-          .eq('product_id', id);
+          .eq("product_id", id);
 
-        console.log('🔄 Reset is_cover:', resetError || 'OK');
+        console.log("🔄 Reset is_cover:", resetError || "OK");
 
         // Depois, definir a nova capa
         const { error: setCoverError } = await supabase
-          .from('product_images')
+          .from("product_images")
           .update({ is_cover: true })
-          .eq('product_id', id)
-          .eq('image_url', cover_image_url);
+          .eq("product_id", id)
+          .eq("image_url", cover_image_url);
 
-        console.log('✅ Set nova capa:', setCoverError || 'OK');
+        console.log("✅ Set nova capa:", setCoverError || "OK");
       }
 
       res.status(200).json(updatedProduct);
     } catch (error) {
-      console.error('❌ Erro ao atualizar produto:', error);
+      console.error("❌ Erro ao atualizar produto:", error);
       next(error);
     }
   },
-
 };
 
 export { productController };
