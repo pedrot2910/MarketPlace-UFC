@@ -55,8 +55,11 @@ const productController = {
     try {
       const { id } = req.params;
       
-      await productService.deleteProductById(id, req.user.id);
-      res.status(200).json({ message: "Produto deletado com sucesso!" });
+      const data = await productService.deleteProductById(id, req.user.id);
+      res.status(200).json({ message: "Produto deletado com sucesso!", data });
+      console.log('Produto deletado:', {data });
+      //
+     // res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {
       next(error);
     }

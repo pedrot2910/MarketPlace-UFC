@@ -201,7 +201,7 @@ const productService = {
         throw new appError(`Erro ao deletar produto: ${error.message}`, 500);
       }
 
-      return true;
+      return data;
   },
 
   // 5. Atualizar
