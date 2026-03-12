@@ -142,6 +142,10 @@ export default function ChatModal() {
       if (!user) return;
       console.log("📜 CARREGANDO HISTÓRICO", { receiverId, productId });
 
+      // Limpar estados anteriores ao carregar novo chat
+      setOtherUser(null);
+      setOtherUserPhoto("");
+
       // Buscar o perfil do outro usuário diretamente
       try {
         const profile = await fetchProfileById(String(receiverId));
@@ -157,6 +161,7 @@ export default function ChatModal() {
             profile.profile_images[0].image_url,
           );
         } else {
+          setOtherUserPhoto("");
           console.log("⚠️ SEM FOTO DE PERFIL NO BANCO");
         }
 
