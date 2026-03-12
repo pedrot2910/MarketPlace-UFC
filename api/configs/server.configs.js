@@ -2,6 +2,7 @@
 const originProcess = {
      allowedOriginPatterns : [
         /^http:\/\/localhost:5173$/,
+        /^https:\/\/localhost:5173$/,
         /^https:\/\/market-place-ufc\.vercel\.app$/,
         /^https:\/\/.*\.vercel\.app$/, // fallback seguro
     ],

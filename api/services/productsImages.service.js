@@ -57,6 +57,13 @@ getProdImagesById: async (params) => {
 
 deleteProdImagesById: async (params) => {
     const { id } = params;
+    const { error: storageError } = await supabase.storage.from('product-images').remove([id]);
+
+    if (storageError) {
+        console.error("Erro ao deletar imagem do storage:", storageError);
+        throw new appError(storageError.message, 500);
+    }
+
     const {error} = await supabase
         .from('product_images')
         .delete()
@@ -64,6 +71,35 @@ deleteProdImagesById: async (params) => {
 
     if (error) {
         throw new appError(error.message, 500);
+    }
+
+    return true;
+},
+
+deleteProdImagesByProductId: async (productId) => {
+    const { data: imagesToDelet, error: Error } = await supabase
+        .from('product_images')
+        .select('image_url')
+        .eq('product_id', productId);
+
+    if (Error) {
+        throw new appError(Error.message);
+    }
+
+     const patchImages = imagesToDelet.map(image => {
+        const imagePath = image.image_url.split('/');
+        return imagePath[imagePath.length - 1];
+    });
+
+    if (patchImages.length === 0) {
+        return true; // Não há imagens para deletar, então retornamos true
+     }
+    
+    const { error: storageError } = await supabase.storage.from('Marketplace-Images').remove(patchImages);
+
+    if (storageError) {
+        console.error("Erro ao deletar imagens do storage:", storageError);
+        throw new appError(storageError.message, 500);
     }
 
     return true;

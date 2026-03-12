@@ -6,14 +6,12 @@ const productController = {
   createProduct: async (req, res, next) => {
     try {
 
-      const { product_images} = req.body;
-
-      const [newProduct] = await productService.createProduct(req.body, req.user.id);
+      const newProduct = await productService.createProduct(req.body, req.user.id);
 
       res.status(201).json({
         message: 'Produto criado com sucesso!',
         product: newProduct,
-        images: product_images,
+        
       });
       
     } catch (error) {
@@ -66,7 +64,7 @@ const productController = {
 
   updateProductById: async (req, res, next) => {
     try {
-      
+      console.log('🔍 Atualizando produto - ID:', req.params.id, 'User ID:', req.user.id, 'Payload:', req.body);
       const prodData = await productService.updateProductById(req.user.id, req.params.id, req.body);
       console.log(prodData);
       res.status(200).json({

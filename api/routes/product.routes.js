@@ -33,7 +33,7 @@ productRoutes.delete(
 );
 productRoutes.put(
   "/:id",
-  authMiddleware,
+  authMiddleware, 
   validateSchema(productSchema.update),
   productController.updateProductById
 );

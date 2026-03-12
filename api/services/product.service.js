@@ -20,20 +20,22 @@ const productService = {
       .select()
       .single();
 
-  if (error) throw new appError(error.message, 500);
-  
- const {error: imgError} = await Promise.all(
-    product_images.map((image, index) =>
-      productsImagesService.createProdImages({
-        product_id: newProduct.id,
-        image_url: image,
-        is_cover: index === 0,
-      }),
-    ),
-  );
+  if (error) throw new appError(error.message);
 
-    if (imgError) throw new appError(imgError.message, 500);
-    
+  if (product_images && Array.isArray(product_images) && product_images.length > 0) {
+    await Promise.all(
+      product_images.map((image, index) =>
+        productsImagesService.createProdImages({
+          product_id: newProduct.id,
+          image_url: image,
+          is_cover: index === 0,
+        }),
+      ),
+    );
+
+  }else {
+    throw new appError('Pelo menos uma imagem é obrigatória', 400);
+  }
     return newProduct;
   },
 
@@ -176,60 +178,9 @@ const productService = {
 
   // 4. Deletar
   deleteProductById: async (id, userId) => {
-      // Primeiro, deletar todas as mensagens relacionadas ao produto
-
-      const { data: product, error: productError } = await supabase
-        .from("products")
-        .select("id, profile_id")
-        .eq("id", id)
-        .single();
-
-      if (productError) {
-        console.error("Erro ao buscar produto:", productError);
-        throw new appError(`Erro ao buscar produto: ${productError.message}`, 500);
-      }
-
-      if (product.profile_id !== userId) {
-        throw new appError("Usuário não autorizado para deletar este produto", 403);
-      }
-
-      const { error: messagesError } = await supabase
-        .from("messages")
-        .delete()
-        .eq("product_id", id);
-
-      if (messagesError) {
-        console.error("Erro ao deletar mensagens:", messagesError);
-        throw new appError(`Erro ao deletar mensagens: ${messagesError.message}`, 500);
-      }
-
-      // Deletar todos os relatórios relacionados ao produto
-      const { error: reportsError } = await supabase
-        .from("reports")
-        .delete()
-        .eq("product_id", id);
-
-      if (reportsError) {
-        console.error("Erro ao deletar relatórios:", reportsError);
-        throw new appError(`Erro ao deletar relatórios: ${reportsError.message}`, 500);
-      }
-
-      // Deletar todos os favoritos relacionados ao produto
-      const { error: favoritesError } = await supabase
-        .from("favorites")
-        .delete()
-        .eq("product_id", id);
-
-      if (favoritesError) {
-        console.error("Erro ao deletar favoritos:", favoritesError);
-        throw new appError(`Erro ao deletar favoritos: ${favoritesError.message}`, 500);
-      }
 
       // Deletar as imagens do produto
-      const { error: imagesError } = await supabase
-        .from("product_images")
-        .delete()
-        .eq("product_id", id);
+      const { error: imagesError } = await productsImagesService.deleteProdImagesByProductId(id);
 
       if (imagesError) {
         console.error("Erro ao deletar imagens:", imagesError);
@@ -237,7 +188,9 @@ const productService = {
       }
 
       // Por fim, deletar o produto
-      const { error } = await supabase.from("products").delete().eq("id", id);
+      const { data, error } = await supabase.from("products").delete().eq("id", id).eq("profile_id", userId);
+
+      console.log('Deletar produto:', { id, userId, data, error });
 
       if (error) {
         console.error("Erro ao deletar produto:", error);
@@ -261,11 +214,14 @@ const productService = {
       payload.location = `POINT(${lng} ${lat})`;
     }
 
+    console.log('🛠️ Atualizando produto:', { id, userId, payload });
+
     const {data: existingProduct, error: existingProductError } = await supabase
       .from("products")
       .select("id, profile_id")
       .eq("id", id)
-      .single();
+      .eq("profile_id", userId)
+      ;
 
     if (existingProductError) {
       throw new appError(existingProductError.message, 404);
@@ -274,23 +230,24 @@ const productService = {
     if (existingProduct.profile_id !== userId) {
       throw new appError("Usuário não autorizado para atualizar este produto", 403);
     }
-    let prodData;
+    let prodData = existingProduct; // Inicia com os dados existentes
+
     if (Object.keys(payload).length > 0) {
 
       const { data, error } = await supabase.from("products")
       .update(payload)
       .eq("id", id)
       .eq("profile_id", userId)
-      .select()
-      .single();
+      .select();
 
       if (error) throw new appError(error.message);
+      if (!data || data.length === 0) throw new appError("Produto não encontrado ou não pertence ao usuário", 404);
 
-      prodData = data;
+      prodData = data[0]; // Atualiza com os dados do update, se houver
     }
 
 
-    // const {
+    // const 
     //     product_images,
     //     images_to_remove,
     //     cover_image_url,
