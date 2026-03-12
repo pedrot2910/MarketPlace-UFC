@@ -100,8 +100,12 @@ export default function ListingDetails() {
   }
 
   async function handleMarkAsSold() {
+    if (sold) return;
     setSold(true);
-    console.log("Anúncio marcado como vendido (simulado)");
+    console.log(
+      "Anúncio marcado como vendido (simulado)",
+      showSuccessMarkAsSold,
+    );
     setShowSuccessMarkAsSold(true);
     setTimeout(() => {
       navigate("/marketplace");
