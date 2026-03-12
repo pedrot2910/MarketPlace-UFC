@@ -1,3 +1,4 @@
+import { url } from 'zod';
 import supabase from '../supabase.js'; 
 import { appError } from '../utils/appError.utils.js';
 
@@ -57,12 +58,8 @@ getProdImagesById: async (params) => {
 
 deleteProdImagesById: async (params) => {
     const { id } = params;
-    const { error: storageError } = await supabase.storage.from('product-images').remove([id]);
 
-    if (storageError) {
-        console.error("Erro ao deletar imagem do storage:", storageError);
-        throw new appError(storageError.message, 500);
-    }
+    
 
     const {error} = await supabase
         .from('product_images')
@@ -72,6 +69,36 @@ deleteProdImagesById: async (params) => {
     if (error) {
         throw new appError(error.message, 500);
     }
+
+    return true;
+},
+
+deleteProdImagesByUrls: async (id, Urls) => {
+    
+
+     const patchImages = Urls.map(url => {
+        const imagePath = url.split('/');
+        return imagePath[imagePath.length - 1];
+    });
+
+    if (patchImages.length === 0) {
+        return true; // Não há imagens para deletar, então retornamos true
+     }
+    
+    const { error: storageError } = await supabase.storage.from('Marketplace-Images').remove(patchImages);
+
+    if (storageError) {
+        console.error("Erro ao deletar imagens do storage:", storageError);
+        throw new appError(storageError.message, 500);
+    }
+
+    const { error: dbError } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('product_id', id)
+        .in('image_url', Urls);
+
+    if (dbError) throw new appError("Erro ao limpar registros de imagem", 500);
 
     return true;
 },

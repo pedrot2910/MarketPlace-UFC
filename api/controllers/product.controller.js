@@ -54,7 +54,7 @@ const productController = {
   deleteProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
-
+      
       await productService.deleteProductById(id, req.user.id);
       res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {

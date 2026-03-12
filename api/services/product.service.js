@@ -11,8 +11,12 @@ const productService = {
     const payload = {
       ...rest,
       profile_id: userId,
-      location: lat && lng ? `POINT(${lng} ${lat})` : null,
     };
+
+    // Só inclui location se as coordenadas forem fornecidas
+    if (lat && lng) {
+      payload.location = `POINT(${lng} ${lat})`;
+    }
 
     const { data: newProduct, error } = await supabase
       .from("products")
@@ -33,8 +37,6 @@ const productService = {
       ),
     );
 
-  }else {
-    throw new appError('Pelo menos uma imagem é obrigatória', 400);
   }
     return newProduct;
   },
@@ -221,15 +223,21 @@ const productService = {
       .select("id, profile_id")
       .eq("id", id)
       .eq("profile_id", userId)
-      ;
+      .maybeSingle();
+      
 
     if (existingProductError) {
       throw new appError(existingProductError.message, 404);
     }
 
+    if (!existingProduct) { // <--- Verifique se o objeto existe
+      throw new appError("Produto não encontrado ou não pertence ao usuário", 404);
+    }
+
     if (existingProduct.profile_id !== userId) {
       throw new appError("Usuário não autorizado para atualizar este produto", 403);
     }
+
     let prodData = existingProduct; // Inicia com os dados existentes
 
     if (Object.keys(payload).length > 0) {
@@ -270,30 +278,14 @@ const productService = {
         Array.isArray(images_to_remove) &&
         images_to_remove.length > 0
       ) {
+        
         console.log('🗑️ Removendo imagens:', images_to_remove);
 
-          // Buscar a imagem pelo URL e deletar
-          const { data: images, error: searchError } = await supabase
-            .from('product_images')
-            .select('id')
-            .eq('product_id', id)
-            .in('image_url', images_to_remove);
-
-            if (searchError) {
-              console.error('Erro ao buscar imagens para remoção:', searchError);
-              throw new appError(`Erro ao buscar imagens para remoção: ${searchError.message}`, 500);
-            }
-
-          if (images && images.length > 0) {
-            const deleteResult =
-              await Promise.all(
-                images.map((img) =>
-                  productsImagesService.deleteProdImagesById(img.id),
-                ),
-              );
-            console.log('✅ Imagem deletada:', deleteResult);
-          }
-        }
+        await productsImagesService.deleteProdImagesByUrls(id, images_to_remove);
+    
+    console.log('✅ Storage e Banco limpos com sucesso');
+          
+      }
       
 
       // Se foram enviadas novas imagens, adicionar à tabela product_images
