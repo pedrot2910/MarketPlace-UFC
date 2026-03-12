@@ -180,7 +180,7 @@ const productService = {
 
   // 4. Deletar
   deleteProductById: async (id, userId) => {
-
+      const profile_id = userId;
       // Deletar as imagens do produto
       const { error: imagesError } = await productsImagesService.deleteProdImagesByProductId(id);
 
@@ -190,7 +190,7 @@ const productService = {
       }
 
       // Por fim, deletar o produto
-      const { data, error } = await supabase.from("products").delete().eq("id", id).eq("profile_id", userId);
+      const { data, error } = await supabase.from("products").delete().eq("id", id).eq("profile_id", profile_id);
 
       console.log('Deletar produto:', { id, userId, data, error });
 
