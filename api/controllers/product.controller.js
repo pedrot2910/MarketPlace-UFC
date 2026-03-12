@@ -1,19 +1,19 @@
-import { productService } from '../services/product.service.js';
-import { productsImagesService } from '../services/productsImages.service.js';
-import supabase from '../supabase.js';
+import { productService } from "../services/product.service.js";
+import { productsImagesService } from "../services/productsImages.service.js";
+import supabase from "../supabase.js";
 
 const productController = {
   createProduct: async (req, res, next) => {
     try {
+      const { product_images } = req.body;
 
       const newProduct = await productService.createProduct(req.body, req.user.id);
 
       res.status(201).json({
-        message: 'Produto criado com sucesso!',
+        message: "Produto criado com sucesso!",
         product: newProduct,
         
       });
-      
     } catch (error) {
       next(error);
     }
@@ -39,7 +39,7 @@ const productController = {
     }
   },
 
-  getProductsByProfileId: async (req, res, next ) => {
+  getProductsByProfileId: async (req, res, next) => {
     try {
       const { profileId } = req.params;
 
@@ -56,7 +56,7 @@ const productController = {
       const { id } = req.params;
 
       await productService.deleteProductById(id, req.user.id);
-      res.status(200).json({ message: 'Produto deletado com sucesso!' });
+      res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {
       next(error);
     }
@@ -73,11 +73,10 @@ const productController = {
       });
 
     } catch (error) {
-      console.error('❌ Erro ao atualizar produto:', error);
+      console.error("❌ Erro ao atualizar produto:", error);
       next(error);
     }
   },
-
 };
 
 export { productController };

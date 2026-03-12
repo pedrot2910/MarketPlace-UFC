@@ -97,7 +97,10 @@ const chatSocket = {
               userId: receiver_id,
               type: "message",
               title: "Nova mensagem",
-              content: "Você recebeu uma nova mensagem",
+              content:
+                message.length > 100
+                  ? message.substring(0, 100) + "..."
+                  : message,
               link: `/chat?user=${sender_id}&product=${product_id}`,
             });
 

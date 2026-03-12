@@ -1,7 +1,21 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { AlertCircle, Check, X, ChevronLeft, ChevronRight, ZoomIn, User, Heart } from "lucide-react";
-import { getListingById, deleteListing, fetchListings, type Product } from "../services/listings";
+import {
+  AlertCircle,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  User,
+  Heart,
+} from "lucide-react";
+import {
+  getListingById,
+  deleteListing,
+  fetchListings,
+  type Product,
+} from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
 import { toggleFavorite, checkIsFavorite } from "../services/favorites.service";
@@ -36,6 +50,8 @@ export default function ListingDetails() {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sold, setSold] = useState(false);
+  const [showSuccessMarkAsSold, setShowSuccessMarkAsSold] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -54,12 +70,14 @@ export default function ListingDetails() {
       try {
         const data = await getListingById(id);
         setListing(data);
-        
+
         // Buscar outros anúncios do mesmo vendedor
         const allListings = await fetchListings();
-        const otherListings = allListings.filter(
-          (item) => item.profile_id === data.profile_id && item.id !== id
-        ).slice(0, 4); // Limitar a 4 anúncios
+        const otherListings = allListings
+          .filter(
+            (item) => item.profile_id === data.profile_id && item.id !== id,
+          )
+          .slice(0, 4); // Limitar a 4 anúncios
         setSellerListings(otherListings);
 
         // Verificar se está nos favoritos
@@ -81,6 +99,19 @@ export default function ListingDetails() {
     setShowDeleteModal(true);
   }
 
+  async function handleMarkAsSold() {
+    if (sold) return;
+    setSold(true);
+    console.log(
+      "Anúncio marcado como vendido (simulado)",
+      showSuccessMarkAsSold,
+    );
+    setShowSuccessMarkAsSold(true);
+    setTimeout(() => {
+      navigate("/marketplace");
+    }, 2000);
+  }
+
   async function confirmDelete() {
     if (!id || !listing) return;
 
@@ -99,15 +130,15 @@ export default function ListingDetails() {
 
   function nextImage() {
     if (!listing) return;
-    setCurrentImageIndex((prev) => 
-      prev === listing.product_images.length - 1 ? 0 : prev + 1
+    setCurrentImageIndex((prev) =>
+      prev === listing.product_images.length - 1 ? 0 : prev + 1,
     );
   }
 
   function prevImage() {
     if (!listing) return;
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? listing.product_images.length - 1 : prev - 1
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? listing.product_images.length - 1 : prev - 1,
     );
   }
 
@@ -175,7 +206,8 @@ export default function ListingDetails() {
               Deletar Anúncio?
             </h3>
             <p className="text-[var(--color-text-muted)] text-center mb-6">
-              Tem certeza que deseja deletar este anúncio? Esta ação não pode ser desfeita.
+              Tem certeza que deseja deletar este anúncio? Esta ação não pode
+              ser desfeita.
             </p>
             <div className="flex gap-3">
               <button
@@ -184,10 +216,7 @@ export default function ListingDetails() {
               >
                 Cancelar
               </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 btn-critical"
-              >
+              <button onClick={confirmDelete} className="flex-1 btn-critical">
                 Deletar
               </button>
             </div>
@@ -237,7 +266,7 @@ export default function ListingDetails() {
 
       {/* Lightbox */}
       {showLightbox && listing && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
           onClick={() => setShowLightbox(false)}
         >
@@ -286,228 +315,252 @@ export default function ListingDetails() {
 
       <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-bg)] py-6 px-4">
         <div className="max-w-2xl mx-auto mt-10 bg-[var(--color-card)] p-6 rounded-2xl shadow-lg">
-        {/* Carrossel de Imagens */}
-        <div className="relative mb-4 group">
-          <div 
-            className="relative w-full aspect-square rounded-xl overflow-hidden cursor-zoom-in"
-            onClick={() => setShowLightbox(true)}
-          >
-            <img
-              src={listing.product_images[currentImageIndex]?.image_url || coverImage}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
-            
-            {/* Ícone de zoom */}
-            <div className="absolute top-3 right-3 bg-black/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition">
-              <ZoomIn className="w-5 h-5 text-white" />
-            </div>
-          </div>
-
-          {/* Navegação do carrossel */}
-          {listing.product_images.length > 1 && (
-            <>
-              <button
-                onClick={prevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-
-              {/* Indicadores */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                {listing.product_images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full transition ${
-                      index === currentImageIndex
-                        ? 'bg-white w-6'
-                        : 'bg-white/50 hover:bg-white/75'
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Miniaturas */}
-        {listing.product_images.length > 1 && (
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            {listing.product_images.map((img, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
-                  index === currentImageIndex
-                    ? 'border-[var(--color-primary)]'
-                    : 'border-transparent hover:border-gray-300'
-                }`}
-              >
-                <img
-                  src={img.image_url}
-                  alt={`${listing.title} - ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-
-        <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
-          {listing.title}
-        </h1>
-
-        <p className="text-[var(--color-text-muted)] mb-3 whitespace-pre-wrap">
-          {listing.description}
-        </p>
-
-        <p className="text-lg font-semibold text-[var(--color-primary-light)] mb-2">
-          R$ {listing.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </p>
-
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          <span className="font-medium">Categoria:</span>{" "}
-          {listing.categories?.namecategories ?? "Sem categoria"}
-        </p>
-
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          <span className="font-medium">Condição:</span>{" "}
-          <span className="capitalize">{listing.condition}</span>
-        </p>
-
-        <div className="flex gap-2 mt-4">
-          <span
-            className={`text-xs font-semibold rounded-full px-3 py-1 ${
-              listing.type === "venda"
-                ? "bg-green-100 text-green-700"
-                : "bg-blue-100 text-blue-700"
-            }`}
-          >
-            {listing.type === "venda" ? "Venda" : "Troca"}
-          </span>
-        </div>
-
-        {/* Botões de ação */}
-        {user && listing.profile_id === user.id ? (
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={() => navigate(`/edit-listing/${listing.id}`)}
-              className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+          {/* Carrossel de Imagens */}
+          <div className="relative mb-4 group">
+            <div
+              className="relative w-full aspect-square rounded-xl overflow-hidden cursor-zoom-in"
+              onClick={() => setShowLightbox(true)}
             >
-              Editar Anúncio
-            </button>
-            <button
-              onClick={handleDelete}
-              className="flex-1 btn-critical"
-            >
-              Deletar Anúncio
-            </button>
-          </div>
-        ) : user ? (
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={handleChat}
-              className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-            >
-              Conversar com o vendedor
-            </button>
-            <button
-              onClick={() => {
-                if (!user) return;
-                setIsFavorite(!isFavorite);
-                toggleFavorite(user.id, listing.id);
-              }}
-              className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
-              title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            >
-              <Heart 
-                className={`w-6 h-6 transition-colors ${
-                  isFavorite 
-                    ? 'fill-red-500 text-red-500' 
-                    : 'text-gray-600 group-hover:text-red-500'
-                }`}
+              <img
+                src={
+                  listing.product_images[currentImageIndex]?.image_url ||
+                  coverImage
+                }
+                alt={listing.title}
+                className="w-full h-full object-cover"
               />
-            </button>
-          </div>
-        ) : null}
 
-        {/* Seção do Vendedor */}
-        <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Sobre o Anunciante</h3>
-          
-          <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] rounded-xl">
-            {/* Avatar do vendedor */}
-            <div className="flex-shrink-0 w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center overflow-hidden">
-              {listing.profile_images?.[0]?.image_url ? (
-                <img 
-                  src={listing.profile_images[0].image_url} 
-                  alt={listing.profiles?.name ?? "Vendedor"}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User className="w-8 h-8 text-white" />
-              )}
-            </div>
-            
-            {/* Informações do vendedor */}
-            <div className="flex-1">
-              <p className="font-semibold text-[var(--color-text)] text-lg">
-                {listing.profiles?.name ?? "Vendedor"}
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                {listing.profiles?.email ?? ""}
-              </p>
-            </div>
-          </div>
-
-          {/* Outros anúncios do vendedor */}
-          {sellerListings.length > 0 && (
-            <div className="mt-6">
-              <h4 className="text-md font-semibold text-[var(--color-text)] mb-3">
-                Outros anúncios deste vendedor ({sellerListings.length})
-              </h4>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {sellerListings.map((item) => {
-                  const coverImage = item.product_images[0]?.image_url;
-                  
-                  return (
-                    <Link
-                      key={item.id}
-                      to={`/listing/${item.id}`}
-                      className="group bg-white rounded-lg overflow-hidden border border-[var(--color-border)] hover:shadow-md transition-all"
-                      onClick={() => window.scrollTo(0, 0)}
-                    >
-                      <div className="aspect-square overflow-hidden bg-gray-100">
-                        <img
-                          src={coverImage}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-3">
-                        <h5 className="text-sm font-semibold text-[var(--color-text)] line-clamp-2 mb-1">
-                          {item.title}
-                        </h5>
-                        <p className="text-base font-bold" style={{ color: 'hsl(263, 70%, 50%)' }}>
-                          R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
+              {/* Ícone de zoom */}
+              <div className="absolute top-3 right-3 bg-black/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition">
+                <ZoomIn className="w-5 h-5 text-white" />
               </div>
             </div>
+
+            {/* Navegação do carrossel */}
+            {listing.product_images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+
+                {/* Indicadores */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                  {listing.product_images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition ${
+                        index === currentImageIndex
+                          ? "bg-white w-6"
+                          : "bg-white/50 hover:bg-white/75"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Miniaturas */}
+          {listing.product_images.length > 1 && (
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              {listing.product_images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
+                    index === currentImageIndex
+                      ? "border-[var(--color-primary)]"
+                      : "border-transparent hover:border-gray-300"
+                  }`}
+                >
+                  <img
+                    src={img.image_url}
+                    alt={`${listing.title} - ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           )}
-        </div>
+
+          <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
+            {listing.title}
+          </h1>
+
+          <p className="text-[var(--color-text-muted)] mb-3 whitespace-pre-wrap">
+            {listing.description}
+          </p>
+
+          <p className="text-lg font-semibold text-[var(--color-primary-light)] mb-2">
+            R${" "}
+            {listing.price.toLocaleString("pt-BR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            <span className="font-medium">Categoria:</span>{" "}
+            {listing.categories?.namecategories ?? "Sem categoria"}
+          </p>
+
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            <span className="font-medium">Condição:</span>{" "}
+            <span className="capitalize">{listing.condition}</span>
+          </p>
+
+          <div className="flex gap-2 mt-4">
+            <span
+              className={`text-xs font-semibold rounded-full px-3 py-1 ${
+                listing.type === "venda"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
+              {listing.type === "venda" ? "Venda" : "Troca"}
+            </span>
+          </div>
+
+          {/* Botões de ação */}
+          {user && listing.profile_id === user.id ? (
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              >
+                Editar Anúncio
+              </button>
+              <button onClick={handleDelete} className="flex-1 btn-critical">
+                Deletar Anúncio
+              </button>
+
+              <button
+                onClick={handleMarkAsSold}
+                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              >
+                Marcar como Vendido
+              </button>
+            </div>
+          ) : user ? (
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleChat}
+                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+              >
+                Conversar com o vendedor
+              </button>
+              <button
+                onClick={() => {
+                  if (!user) return;
+                  setIsFavorite(!isFavorite);
+                  toggleFavorite(user.id, listing.id);
+                }}
+                className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
+                title={
+                  isFavorite
+                    ? "Remover dos favoritos"
+                    : "Adicionar aos favoritos"
+                }
+              >
+                <Heart
+                  className={`w-6 h-6 transition-colors ${
+                    isFavorite
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-600 group-hover:text-red-500"
+                  }`}
+                />
+              </button>
+            </div>
+          ) : null}
+
+          {/* Seção do Vendedor */}
+          <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+              Sobre o Anunciante
+            </h3>
+
+            <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] rounded-xl">
+              {/* Avatar do vendedor */}
+              <div className="flex-shrink-0 w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center overflow-hidden">
+                {listing.profile_images?.[0]?.image_url ? (
+                  <img
+                    src={listing.profile_images[0].image_url}
+                    alt={listing.profiles?.name ?? "Vendedor"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-white" />
+                )}
+              </div>
+
+              {/* Informações do vendedor */}
+              <div className="flex-1">
+                <p className="font-semibold text-[var(--color-text)] text-lg">
+                  {listing.profiles?.name ?? "Vendedor"}
+                </p>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  {listing.profiles?.email ?? ""}
+                </p>
+              </div>
+            </div>
+
+            {/* Outros anúncios do vendedor */}
+            {sellerListings.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-md font-semibold text-[var(--color-text)] mb-3">
+                  Outros anúncios deste vendedor ({sellerListings.length})
+                </h4>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {sellerListings.map((item) => {
+                    const coverImage = item.product_images[0]?.image_url;
+
+                    return (
+                      <Link
+                        key={item.id}
+                        to={`/listing/${item.id}`}
+                        className="group bg-white rounded-lg overflow-hidden border border-[var(--color-border)] hover:shadow-md transition-all"
+                        onClick={() => window.scrollTo(0, 0)}
+                      >
+                        <div className="aspect-square overflow-hidden bg-gray-100">
+                          <img
+                            src={coverImage}
+                            alt={item.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <h5 className="text-sm font-semibold text-[var(--color-text)] line-clamp-2 mb-1">
+                            {item.title}
+                          </h5>
+                          <p
+                            className="text-base font-bold"
+                            style={{ color: "hsl(263, 70%, 50%)" }}
+                          >
+                            R${" "}
+                            {item.price.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

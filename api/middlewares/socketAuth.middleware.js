@@ -1,5 +1,6 @@
+import supabase from "../supabase.js";
+
 export const socketAuthMiddleware = async (socket, next) => {
-  
   const token = socket.handshake.auth?.token;
 
   if (!token) {
@@ -7,8 +8,14 @@ export const socketAuthMiddleware = async (socket, next) => {
   }
 
   try {
+    const cleanToken = token.startsWith("Bearer ")
+      ? token.replace("Bearer ", "")
+      : token;
     // Em produção, aqui você validaria o JWT localmente com a sua SECRET
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(cleanToken);
 
     if (error || !user) {
       return next(new Error("Acesso negado: Token inválido."));
