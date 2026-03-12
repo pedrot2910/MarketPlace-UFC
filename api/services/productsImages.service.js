@@ -21,7 +21,7 @@ const productsImagesService = {
         .select(); 
 
     if (error) { 
-        throw new appError(error.message, 500); 
+        throw new appError("Erro ao criar imagem de produto", 500); 
     }
 
     return data;  
@@ -110,7 +110,7 @@ deleteProdImagesByProductId: async (productId) => {
         .eq('product_id', productId);
 
     if (Error) {
-        throw new appError(Error.message);
+        throw new appError("Erro ao buscar imagens do produto", 500);
     }
 
      const patchImages = imagesToDelet.map(image => {
