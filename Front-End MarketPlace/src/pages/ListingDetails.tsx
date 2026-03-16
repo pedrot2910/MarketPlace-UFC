@@ -23,6 +23,7 @@ import { useChatModal } from "../hooks/useChatModal";
 import { toggleFavorite, checkIsFavorite } from "../services/favorites.service";
 import type { Profile } from "../types/profile";
 import { StarRating } from "../components/StarRating";
+import api from "@/services/api";
 
 type ProductDetails = {
   id: string;
@@ -103,6 +104,26 @@ export default function ListingDetails() {
 
     fetchData();
   }, [id, user]);
+
+  async function getSellerStats(profileId: string) {
+    try {
+      const response = await api.get(`/reviews/seller/${profileId}`);
+
+      // Mapeando do formato do backend para o estado do frontend
+      setSellerStats({
+        averageRating: response.data.stats.average || 0,
+        totalReviews: response.data.stats.total || 0,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas do vendedor:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (listing?.profile_id) {
+      getSellerStats(listing.profile_id);
+    }
+  }, [listing?.profile_id]);
 
   async function handleDelete() {
     setShowDeleteModal(true);
@@ -593,13 +614,11 @@ export default function ListingDetails() {
                 <p className="text-sm text-[var(--color-text-muted)]">
                   {listing.profiles?.email ?? ""}
                 </p>
+                <StarRating
+                  rating={sellerStats.averageRating}
+                  totalReviews={sellerStats.totalReviews}
+                />
               </div>
-
-              {/* Avaliação do vendedor */}
-              <StarRating
-                rating={sellerStats.averageRating}
-                totalReviews={sellerStats.totalReviews}
-              />
             </div>
 
             {/* Outros anúncios do vendedor */}
