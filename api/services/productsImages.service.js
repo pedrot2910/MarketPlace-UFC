@@ -75,7 +75,6 @@ deleteProdImagesById: async (params) => {
 
 deleteProdImagesByUrls: async (id, Urls) => {
     
-
      const patchImages = Urls.map(url => {
         const imagePath = url.split('/');
         return imagePath[imagePath.length - 1];
@@ -89,7 +88,7 @@ deleteProdImagesByUrls: async (id, Urls) => {
 
     if (storageError) {
         console.error("Erro ao deletar imagens do storage:", storageError);
-        throw new appError(storageError.message, 500);
+        throw new appError("Erro ao deletar imagens do storage");
     }
 
     const { error: dbError } = await supabase
@@ -98,7 +97,7 @@ deleteProdImagesByUrls: async (id, Urls) => {
         .eq('product_id', id)
         .in('image_url', Urls);
 
-    if (dbError) throw new appError("Erro ao limpar registros de imagem", 500);
+    if (dbError) throw new appError("Erro ao limpar registros de imagem do banco de dados: " + dbError.message, 500);
 
     return true;
 },
@@ -126,7 +125,7 @@ deleteProdImagesByProductId: async (productId) => {
 
     if (storageError) {
         console.error("Erro ao deletar imagens do storage:", storageError);
-        throw new appError(storageError.message, 500);
+        throw new appError("Erro ao deletar imagens do storage: " + storageError.message, 500);
     }
 
     return true;
