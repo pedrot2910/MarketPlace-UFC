@@ -14,6 +14,7 @@ import { Router } from "express";
 const router = Router();
 
 router.use("/products", productRoutes);
+router.use("/reviews", reviewRoutes);
 router.use("/categories", categoriesRoutes);
 router.use("/messages", messagesRoutes);
 router.use("/profiles", profilesRoutes);

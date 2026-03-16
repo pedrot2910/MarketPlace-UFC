@@ -22,6 +22,7 @@ import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
 import { toggleFavorite, checkIsFavorite } from "../services/favorites.service";
 import type { Profile } from "../types/profile";
+import { StarRating } from "../components/StarRating";
 
 type ProductDetails = {
   id: string;
@@ -54,6 +55,10 @@ export default function ListingDetails() {
   const [listing, setListing] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [Sold, setSold] = useState(false);
+  const [sellerStats, setSellerStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+  });
   const [isMarkingSold, setIsMarkingSold] = useState(false);
   const [showSuccessMarkAsSold, setShowSuccessMarkAsSold] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -101,6 +106,16 @@ export default function ListingDetails() {
 
   async function handleDelete() {
     setShowDeleteModal(true);
+  }
+
+  async function sellerReviews() {
+    try {
+      const response = await fetch(`/reviews/${listing?.profiles.id}`);
+      const data = await response.json();
+      setSellerStats(data);
+    } catch (error) {
+      console.error("Erro ao buscar avaliação do vendedor", error);
+    }
   }
 
   async function handleMarkAsSold() {
@@ -557,33 +572,6 @@ export default function ListingDetails() {
                   </button>
                 </>
               )}
-              <button
-                onClick={handleChat}
-                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-              >
-                Conversar com o vendedor
-              </button>
-              <button
-                onClick={() => {
-                  if (!user) return;
-                  setIsFavorite(!isFavorite);
-                  toggleFavorite(user.id, listing.id);
-                }}
-                className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
-                title={
-                  isFavorite
-                    ? "Remover dos favoritos"
-                    : "Adicionar aos favoritos"
-                }
-              >
-                <Heart
-                  className={`w-6 h-6 transition-colors ${
-                    isFavorite
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-600 group-hover:text-red-500"
-                  }`}
-                />
-              </button>
             </div>
           ) : null}
 
@@ -616,6 +604,12 @@ export default function ListingDetails() {
                   {listing.profiles?.email ?? ""}
                 </p>
               </div>
+
+              {/* Avaliação do vendedor */}
+              <StarRating
+                rating={sellerStats.averageRating}
+                totalReviews={sellerStats.totalReviews}
+              />
             </div>
 
             {/* Outros anúncios do vendedor */}
