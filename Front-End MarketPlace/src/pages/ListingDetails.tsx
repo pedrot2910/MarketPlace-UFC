@@ -467,15 +467,21 @@ export default function ListingDetails() {
           </p>
 
           <div className="flex gap-2 mt-4">
-            <span
-              className={`text-xs font-semibold rounded-full px-3 py-1 ${
-                listing.type === "venda"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
-              {listing.type === "venda" ? "Venda" : "Troca"}
-            </span>
+            {listing.status === "ativo" ? (
+              <span
+                className={`text-xs font-semibold rounded-full px-3 py-1 ${
+                  listing.type === "venda"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-blue-100 text-blue-700"
+                }`}
+              >
+                {listing.type === "venda" ? "Venda" : "Troca"}
+              </span>
+            ) : (
+              <span className="text-xs font-semibold rounded-full px-3 py-1 bg-gray-300 text-gray-700">
+                {listing.status === "vendido" ? "Vendido" : "Removido"}
+              </span>
+            )}
           </div>
 
           {/* Botões de ação */}

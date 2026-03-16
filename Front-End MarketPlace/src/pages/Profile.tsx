@@ -1,6 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import type { Listing } from "../types/listing";
-import { updateProfile, getProfileImage, uploadProfileImage, updateProfileImage, deleteProfileImage } from "../services/profile";
+import {
+  updateProfile,
+  getProfileImage,
+  uploadProfileImage,
+  updateProfileImage,
+  deleteProfileImage,
+} from "../services/profile";
 import { useAuth } from "../hooks/auth";
 import { fetchProfileById } from "../services/profile";
 import type { Profile as ProfileType } from "../types/profile";
@@ -25,7 +31,8 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {    function handleClickOutside(event: MouseEvent) {
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowImageMenu(false);
       }
@@ -36,7 +43,8 @@ export default function Profile() {
     };
   }, []);
 
-  useEffect(() => {    async function loadProfile() {
+  useEffect(() => {
+    async function loadProfile() {
       try {
         if (!user?.id) return;
 
@@ -77,10 +85,10 @@ export default function Profile() {
 
     try {
       setUploadingImage(true);
-      
+
       // Upload da imagem
       const imageUrl = await uploadImage(file);
-      
+
       // Verificar se já existe uma foto
       try {
         await getProfileImage(user.id);
@@ -90,9 +98,9 @@ export default function Profile() {
         // Se não existe, criar nova
         await uploadProfileImage(user.id, imageUrl);
       }
-      
+
       setProfileImageUrl(imageUrl);
-      
+
       // Atualizar localStorage
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
@@ -102,7 +110,7 @@ export default function Profile() {
       }
 
       // Disparar evento para atualizar a Navbar
-      window.dispatchEvent(new Event('profileImageUpdated'));
+      window.dispatchEvent(new Event("profileImageUpdated"));
     } catch (err) {
       console.error("Erro ao fazer upload da imagem:", err);
       alert("Erro ao fazer upload da imagem");
@@ -118,7 +126,7 @@ export default function Profile() {
       setUploadingImage(true);
       await deleteProfileImage(user.id);
       setProfileImageUrl(null);
-      
+
       // Atualizar localStorage
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
@@ -128,7 +136,7 @@ export default function Profile() {
       }
 
       // Disparar evento para atualizar a Navbar
-      window.dispatchEvent(new Event('profileImageUpdated'));
+      window.dispatchEvent(new Event("profileImageUpdated"));
     } catch (err) {
       console.error("Erro ao deletar imagem:", err);
       alert("Erro ao deletar imagem");
@@ -206,7 +214,7 @@ export default function Profile() {
                 </div>
               )}
             </div>
-            
+
             {/* Botão de lápis */}
             <button
               onClick={() => {
@@ -225,7 +233,7 @@ export default function Profile() {
                 <Pencil size={20} />
               )}
             </button>
-            
+
             {/* Menu dropdown */}
             {showImageMenu && profileImageUrl && (
               <div className="absolute top-7 left-30 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-10 min-w-[140px]">
@@ -243,15 +251,21 @@ export default function Profile() {
                     handleDeleteImage();
                     setShowImageMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm font-semibold transition-colors" style={{color: 'var(--color-critical)'}}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(179, 38, 30, 0.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  className="w-full px-4 py-2 text-left text-sm font-semibold transition-colors"
+                  style={{ color: "var(--color-critical)" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor =
+                      "rgba(179, 38, 30, 0.1)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "transparent")
+                  }
                 >
                   Deletar foto
                 </button>
               </div>
             )}
-            
+
             <input
               ref={fileInputRef}
               type="file"
@@ -346,15 +360,21 @@ export default function Profile() {
                     <span className="font-semibold">Preço:</span> R${" "}
                     {item.price}
                   </p>
-                  <span
-                    className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
-                      item.type === "offer"
-                        ? "bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)]"
-                        : "bg-[var(--color-secondary)] text-[var(--color-text-invert)]"
-                    } uppercase`}
-                  >
-                    {item.type}
-                  </span>
+                  {item.status === "vendido" ? (
+                    <span className="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)] uppercase">
+                      Vendido
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full ${
+                        item.type === "offer"
+                          ? "bg-[var(--color-secondary-light)] text-[var(--color-secondary-dark)]"
+                          : "bg-[var(--color-secondary)] text-[var(--color-text-invert)]"
+                      } uppercase`}
+                    >
+                      {item.type}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
