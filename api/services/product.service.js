@@ -197,8 +197,24 @@ const productService = {
 
     // Criar notificações para os usuários que favoritaram o produto
     if (favorites && favorites.length > 0) {
-      const notifications = await notificationsService.createNotification;
+      const notifications = await notificationsService.createNotification({
+        userId: favorites.map((fav) => fav.user_id),
+        message: `O produto ${product.title} foi marcado como vendido!`,
+        is_read: false,
+      });
+
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert(notifications);
+
+      if (notificationError)
+        throw new appError(
+          "Erro ao criar notificações: " + notificationError.message,
+          500,
+        );
     }
+
+    return updatedProduct;
   },
 
   getProductsByProfileId: async (profileId) => {

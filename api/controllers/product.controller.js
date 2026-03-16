@@ -15,7 +15,6 @@ const productController = {
       res.status(201).json({
         message: "Produto criado com sucesso!",
         product: newProduct,
-        images: product_images,
       });
     } catch (error) {
       next(error);
@@ -72,8 +71,11 @@ const productController = {
     try {
       const { id } = req.params;
 
-      await productService.deleteProductById(id, req.user.id);
-      res.status(200).json({ message: "Produto deletado com sucesso!" });
+      const data = await productService.deleteProductById(id, req.user.id);
+      res.status(200).json({ message: "Produto deletado com sucesso!", data });
+      console.log("Produto deletado:", { data });
+      //
+      // res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {
       next(error);
     }
@@ -81,6 +83,14 @@ const productController = {
 
   updateProductById: async (req, res, next) => {
     try {
+      console.log(
+        "🔍 Atualizando produto - ID:",
+        req.params.id,
+        "User ID:",
+        req.user.id,
+        "Payload:",
+        req.body,
+      );
       const prodData = await productService.updateProductById(
         req.user.id,
         req.params.id,
