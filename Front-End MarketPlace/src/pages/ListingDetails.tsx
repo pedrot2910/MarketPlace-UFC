@@ -9,12 +9,14 @@ import {
   ZoomIn,
   User,
   Heart,
+  Handbag,
 } from "lucide-react";
 import {
   getListingById,
   deleteListing,
   fetchListings,
   type Product,
+  markAsSold,
 } from "../services/listings";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
@@ -25,6 +27,7 @@ type ProductDetails = {
   id: string;
   title: string;
   description: string | null;
+  status: "ativo" | "vendido" | "removido";
   price: number;
   type: "venda" | "troca";
   condition: "novo" | "seminovo" | "usado";
@@ -50,7 +53,8 @@ export default function ListingDetails() {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sold, setSold] = useState(false);
+  const [Sold, setSold] = useState(false);
+  const [isMarkingSold, setIsMarkingSold] = useState(false);
   const [showSuccessMarkAsSold, setShowSuccessMarkAsSold] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -100,16 +104,34 @@ export default function ListingDetails() {
   }
 
   async function handleMarkAsSold() {
-    if (sold) return;
-    setSold(true);
-    console.log(
-      "Anúncio marcado como vendido (simulado)",
-      showSuccessMarkAsSold,
-    );
-    setShowSuccessMarkAsSold(true);
-    setTimeout(() => {
-      navigate("/marketplace");
-    }, 2000);
+    if (!id || !listing || listing.status === "vendido") return;
+
+    if (
+      !window.confirm(
+        "Tem certeza que deseja marcar este anúncio como vendido?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      console.log("🟢 MARCANDO ANÚNCIO COMO VENDIDO...", Sold);
+      setIsMarkingSold(true);
+      await markAsSold(id);
+
+      setListing({ ...listing, status: "vendido" });
+      setSold(true);
+      setShowSuccessMarkAsSold(true);
+
+      setTimeout(() => {
+        navigate("/marketplace");
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao marcar anúncio como vendido:", error);
+      alert("Não foi possível marcar o anúncio como vendido. Tente novamente.");
+    } finally {
+      setIsMarkingSold(false);
+    }
   }
 
   async function confirmDelete() {
@@ -224,6 +246,23 @@ export default function ListingDetails() {
         </div>
       )}
 
+      {/* Modal de Sucesso ao Marcar como Vendido */}
+      {showSuccessMarkAsSold && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
+          <div className="bg-[var(--color-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center mx-auto mb-4">
+              <Check className="w-16 h-16 text-[var(--color-success)]" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
+              Sucesso!
+            </h3>
+            <p className="text-[var(--color-text-muted)] text-center">
+              Anúncio marcado como vendido com sucesso! Redirecionando...
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Sucesso */}
       {showSuccessModal && (
         <div className="fixed inset-0 backdrop-blur-md bg-white/10 flex items-center justify-center z-50 px-4">
@@ -330,6 +369,14 @@ export default function ListingDetails() {
                 className="w-full h-full object-cover"
               />
 
+              {listing.status === "vendido" && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/30">
+                  <span className="bg-red-600 text-white px-8 py-3 rounded-lg font-black text-3xl tracking=widest transform -rotate-12 border-4 border-red-600 shadow-2xl">
+                    VENDIDO
+                  </span>
+                </div>
+              )}
+
               {/* Ícone de zoom */}
               <div className="absolute top-3 right-3 bg-black/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition">
                 <ZoomIn className="w-5 h-5 text-white" />
@@ -434,25 +481,76 @@ export default function ListingDetails() {
           {/* Botões de ação */}
           {user && listing.profile_id === user.id ? (
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => navigate(`/edit-listing/${listing.id}`)}
-                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-              >
-                Editar Anúncio
-              </button>
-              <button onClick={handleDelete} className="flex-1 btn-critical">
-                Deletar Anúncio
-              </button>
+              {listing.status === "vendido" ? (
+                <button onClick={handleDelete} className="flex-1 btn-critical">
+                  Deletar o Anúncio do Histórico
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                    className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+                  >
+                    Editar Anúncio
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex-1 btn-critical"
+                  >
+                    Deletar Anúncio
+                  </button>
 
-              <button
-                onClick={handleMarkAsSold}
-                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-              >
-                Marcar como Vendido
-              </button>
+                  <button
+                    onClick={handleMarkAsSold}
+                    disabled={isMarkingSold}
+                    className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+                  >
+                    <Handbag className="w-5 h-5 inline-block mr-2" />
+                    {isMarkingSold ? "Processando..." : "Marcar como Vendido"}
+                  </button>
+                </>
+              )}
             </div>
           ) : user ? (
             <div className="flex gap-3 mt-6">
+              {listing.status === "vendido" ? (
+                <button
+                  disabled
+                  className="flex-1 bg-gray-400 text-white font-semibold py-3 rounded-xl cursor-not-allowed shadow"
+                >
+                  Produto Indisponivel (Vendido)
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleChat}
+                    className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
+                  >
+                    Conversar com o vendedor
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!user) return;
+                      setIsFavorite(!isFavorite);
+                      toggleFavorite(user.id, listing.id);
+                    }}
+                    className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
+                    title={
+                      isFavorite
+                        ? "Remover dos favoritos"
+                        : "Adicionar aos favoritos"
+                    }
+                  >
+                    <Heart
+                      className={`w-6 h-6 transition-colors ${
+                        isFavorite
+                          ? "fill-red-500 text-red-500"
+                          : "text-gray-600 group-hover:text-red-500"
+                      }`}
+                    />
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleChat}
                 className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"

@@ -31,6 +31,20 @@ const productController = {
     }
   },
 
+  markAsSold: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updatedProduct = await productService.markAsSold(id, req.user.id);
+
+      res.status(200).json({
+        message: "Produto marcado como vendido com sucesso!",
+        product: updatedProduct,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   getProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -67,14 +81,16 @@ const productController = {
 
   updateProductById: async (req, res, next) => {
     try {
-      
-      const prodData = await productService.updateProductById(req.user.id, req.params.id, req.body);
+      const prodData = await productService.updateProductById(
+        req.user.id,
+        req.params.id,
+        req.body,
+      );
       console.log(prodData);
       res.status(200).json({
-        message: 'Produto atualizado com sucesso!',
+        message: "Produto atualizado com sucesso!",
         product: prodData,
       });
-
     } catch (error) {
       console.error("❌ Erro ao atualizar produto:", error);
       next(error);
