@@ -109,11 +109,32 @@ export default function ListingDetails() {
     try {
       const response = await api.get(`/reviews/seller/${profileId}`);
 
-      // Mapeando do formato do backend para o estado do frontend
-      setSellerStats({
-        averageRating: response.data.stats.average || 0,
-        totalReviews: response.data.stats.total || 0,
-      });
+      console.log(
+        "⭐ DADOS DA AVALIAÇÃO QUE CHEGARAM DO BACKEND:",
+        response.data,
+      );
+
+      // Cenário 1: Se o backend mandou bonitinho com a propriedade "stats"
+      if (response.data && response.data.stats) {
+        setSellerStats({
+          averageRating: response.data.stats.average || 0,
+          totalReviews: response.data.stats.total || 0,
+        });
+      }
+      // Cenário 2: Se o backend mandou direto uma lista (Array) com as avaliações
+      else if (Array.isArray(response.data)) {
+        const total = response.data.length;
+        // Calcula a média na mão se o backend não mandou calculada
+        const average =
+          total > 0
+            ? response.data.reduce((acc, curr) => acc + curr.rating, 0) / total
+            : 0;
+
+        setSellerStats({
+          averageRating: average,
+          totalReviews: total,
+        });
+      }
     } catch (error) {
       console.error("Erro ao buscar estatísticas do vendedor:", error);
     }
