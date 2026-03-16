@@ -315,7 +315,6 @@ export default function ChatModal() {
 
   const messageGroups = groupMessagesByDate(messages);
   const isBuyer = user && productData && user.id !== productData.profile_id;
-  const isSold = productData?.status === "vendido";
 
   return (
     <AnimatePresence>

@@ -108,16 +108,6 @@ export default function ListingDetails() {
     setShowDeleteModal(true);
   }
 
-  async function sellerReviews() {
-    try {
-      const response = await fetch(`/reviews/${listing?.profiles.id}`);
-      const data = await response.json();
-      setSellerStats(data);
-    } catch (error) {
-      console.error("Erro ao buscar avaliação do vendedor", error);
-    }
-  }
-
   async function handleMarkAsSold() {
     if (!id || !listing || listing.status === "vendido") return;
 
