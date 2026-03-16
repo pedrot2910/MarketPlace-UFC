@@ -1,4 +1,4 @@
-import { reviewService } from "../services/review.service";
+import { reviewService } from "../services/review.service.js";
 import supabase from "../supabase.js";
 
 const reviewController = {
@@ -20,3 +20,5 @@ const reviewController = {
     }
   },
 };
+
+export { reviewController };

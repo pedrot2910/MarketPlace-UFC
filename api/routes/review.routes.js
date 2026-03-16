@@ -18,3 +18,5 @@ reviewRoutes.get(
   validateSchema(reviewSchema.getSellerReviews),
   reviewController.getSellerReviews,
 );
+
+export { reviewRoutes };
