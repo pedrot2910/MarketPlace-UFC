@@ -10,32 +10,36 @@ productRoutes.post(
   "/",
   authMiddleware,
   validateSchema(productSchema.create),
-  productController.createProduct
+  productController.createProduct,
 );
-productRoutes.get(
-  "/",
-   productController.getAllProducts
-  );
+productRoutes.get("/", productController.getAllProducts);
 productRoutes.get(
   "/profile/:profileId",
-  productController.getProductsByProfileId
+  productController.getProductsByProfileId,
 );
 productRoutes.get(
   "/:id",
   validateSchema(productSchema.getProductById),
-  productController.getProductById
+  productController.getProductById,
 );
 productRoutes.delete(
   "/:id",
   authMiddleware,
   validateSchema(productSchema.delete),
-  productController.deleteProductById
+  productController.deleteProductById,
 );
 productRoutes.put(
   "/:id",
   authMiddleware, 
   validateSchema(productSchema.update),
-  productController.updateProductById
+  productController.updateProductById,
+);
+
+productRoutes.patch(
+  "/:id/sold",
+  authMiddleware,
+  validateSchema(productSchema.markAsSold),
+  productController.markAsSold,
 );
 
 export { productRoutes };

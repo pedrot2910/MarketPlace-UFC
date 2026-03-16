@@ -7,12 +7,14 @@ const productController = {
     try {
       const { product_images } = req.body;
 
-      const newProduct = await productService.createProduct(req.body, req.user.id);
+      const newProduct = await productService.createProduct(
+        req.body,
+        req.user.id,
+      );
 
       res.status(201).json({
         message: "Produto criado com sucesso!",
         product: newProduct,
-        
       });
     } catch (error) {
       next(error);
@@ -23,6 +25,20 @@ const productController = {
     try {
       const products = await productService.getAllProducts(req.query);
       res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  markAsSold: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updatedProduct = await productService.markAsSold(id, req.user.id);
+
+      res.status(200).json({
+        message: "Produto marcado como vendido com sucesso!",
+        product: updatedProduct,
+      });
     } catch (error) {
       next(error);
     }
@@ -54,12 +70,12 @@ const productController = {
   deleteProductById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      
+
       const data = await productService.deleteProductById(id, req.user.id);
       res.status(200).json({ message: "Produto deletado com sucesso!", data });
-      console.log('Produto deletado:', {data });
+      console.log("Produto deletado:", { data });
       //
-     // res.status(200).json({ message: "Produto deletado com sucesso!" });
+      // res.status(200).json({ message: "Produto deletado com sucesso!" });
     } catch (error) {
       next(error);
     }
@@ -67,14 +83,24 @@ const productController = {
 
   updateProductById: async (req, res, next) => {
     try {
-      console.log('🔍 Atualizando produto - ID:', req.params.id, 'User ID:', req.user.id, 'Payload:', req.body);
-      const prodData = await productService.updateProductById(req.user.id, req.params.id, req.body);
+      console.log(
+        "🔍 Atualizando produto - ID:",
+        req.params.id,
+        "User ID:",
+        req.user.id,
+        "Payload:",
+        req.body,
+      );
+      const prodData = await productService.updateProductById(
+        req.user.id,
+        req.params.id,
+        req.body,
+      );
       console.log(prodData);
       res.status(200).json({
-        message: 'Produto atualizado com sucesso!',
+        message: "Produto atualizado com sucesso!",
         product: prodData,
       });
-
     } catch (error) {
       console.error("❌ Erro ao atualizar produto:", error);
       next(error);

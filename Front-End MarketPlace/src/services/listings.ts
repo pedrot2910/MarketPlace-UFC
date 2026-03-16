@@ -69,6 +69,11 @@ export async function updateListing(
   return response.data;
 }
 
+export async function markAsSold(id: string) {
+  const response = await api.patch(`/products/${id}/sold`);
+  return response.data;
+}
+
 export async function deleteListing(id: string) {
   const response = await api.delete(`/products/${id}`);
   return response.data;

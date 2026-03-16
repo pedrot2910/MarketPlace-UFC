@@ -1,22 +1,25 @@
 import supabase from "../supabase.js";
 import { productsImagesService } from "./productsImages.service.js";
 import { appError } from "../utils/appError.utils.js";
+import { notificationsService } from "./notifications.service.js";
 const productService = {
 
   createProduct: async (body, userId) => {
-
-    const { lat, lng, product_images, images_to_remove, cover_image_url, ...rest } = body;
+    const {
+      lat,
+      lng,
+      product_images,
+      images_to_remove,
+      cover_image_url,
+      ...rest
+    } = body;
 
     // Formata a localização para o padrão PostGIS se as coordenadas existirem
     const payload = {
       ...rest,
       profile_id: userId,
+      location: lat && lng ? `POINT(${lng} ${lat})` : null,
     };
-
-    // Só inclui location se as coordenadas forem fornecidas
-    if (lat && lng) {
-      payload.location = `POINT(${lng} ${lat})`;
-    }
 
     const { data: newProduct, error } = await supabase
       .from("products")
@@ -26,22 +29,26 @@ const productService = {
 
     if (error) throw new appError(error.message);
 
-    if (product_images && Array.isArray(product_images) && product_images.length > 0) {
-      await Promise.all(
-        product_images.map((image, index) =>
-          productsImagesService.createProdImages({
-            product_id: newProduct.id,
-            image_url: image,
-            is_cover: index === 0,
-          }),
-        ),
-      );
+  if (product_images && Array.isArray(product_images) && product_images.length > 0) {
+    await Promise.all(
+      product_images.map((image, index) =>
+        productsImagesService.createProdImages({
+          product_id: newProduct.id,
+          image_url: image,
+          is_cover: index === 0,
+        }),
+      ),
+    );
 
-    }
+  }
     return newProduct;
   },
 
   getAllProducts: async (filters = {}) => {
+    let query = supabase
+      .from("products")
+      .select(
+        `
     let query = supabase
       .from("products")
       .select(
@@ -51,6 +58,8 @@ const productService = {
           categories ( namecategories ),
           product_images ( image_url, is_cover )
         `,
+      )
+      .eq("status", "ativo");
       )
       .eq("status", "ativo");
 
@@ -65,12 +74,30 @@ const productService = {
           radius_meters: parseFloat(filters.radius || 5000),
         },
       );
+    // --- LÓGICA DE LOCALIZAÇÃO ---
+    if (filters.lat && filters.lng) {
+      // 1. Chama sua função RPC para pegar os IDs próximos
+      const { data: nearbyIds, error: rpcError } = await supabase.rpc(
+        "get_nearby_product_ids",
+        {
+          user_lat: parseFloat(filters.lat),
+          user_lng: parseFloat(filters.lng),
+          radius_meters: parseFloat(filters.radius || 5000),
+        },
+      );
 
+      if (rpcError) throw new appError(rpcError.message, 500);
       if (rpcError) throw new appError(rpcError.message, 500);
 
       // Se não encontrou nada perto, retorna array vazio imediatamente
       if (!nearbyIds || nearbyIds.length === 0) return [];
+      // Se não encontrou nada perto, retorna array vazio imediatamente
+      if (!nearbyIds || nearbyIds.length === 0) return [];
 
+      // 2. Filtra a query principal para trazer apenas esses IDs
+      const ids = nearbyIds.map((item) => item.id);
+      query = query.in("id", ids);
+    }
       // 2. Filtra a query principal para trazer apenas esses IDs
       const ids = nearbyIds.map((item) => item.id);
       query = query.in("id", ids);
@@ -136,7 +163,6 @@ const productService = {
 
     // Buscar foto de perfil do vendedor
     if (data && data.profile_id) {
-
       const { data: profileImage, error: profileImageError } = await supabase
         .from("profile_images")
         .select("image_url")
@@ -144,13 +170,76 @@ const productService = {
         .maybeSingle();
 
       if (profileImageError) {
-        throw new appError("Erro ao buscar foto de perfil do vendedor: " + profileImageError.message, 500);
+        throw new appError(
+          "Erro ao buscar foto de perfil do vendedor: " +
+            profileImageError.message,
+          500,
+        );
       }
 
       data.profile_images = profileImage ? [profileImage] : null;
     }
 
     return data;
+  },
+
+  markAsSold: async (id, userId) => {
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id, profile_id, title, status")
+      .eq("id", id)
+      .single();
+
+    if (productError) throw new appError("Produto não encontrado: ", 404);
+    if (product.profile_id !== userId)
+      throw new appError("Não autorizado", 403);
+    if (product.status === "vendido")
+      throw new appError("Produto já está marcado como vendido", 400);
+
+    const { data: updatedProduct, error: updateError } = await supabase
+      .from("products")
+      .update({ status: "vendido" })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError)
+      throw new appError(
+        "Erro ao marcar como vendido: " + updateError.message,
+        500,
+      );
+
+    const { data: favorites, error: favoritesError } = await supabase
+      .from("favorites")
+      .select("user_id")
+      .eq("product_id", id);
+
+    if (favoritesError)
+      throw new appError(
+        "Erro ao buscar favoritos para notificações: " + favoritesError.message,
+        500,
+      );
+
+    // Criar notificações para os usuários que favoritaram o produto
+    if (favorites && favorites.length > 0) {
+      const notifications = await notificationsService.createNotification({
+        userId: favorites.map((fav) => fav.user_id),
+        message: `O produto ${product.title} foi marcado como vendido!`,
+        is_read: false,
+      });
+
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert(notifications);
+
+      if (notificationError)
+        throw new appError(
+          "Erro ao criar notificações: " + notificationError.message,
+          500,
+        );
+    }
+
+    return updatedProduct;
   },
 
   getProductsByProfileId: async (profileId) => {
@@ -197,17 +286,24 @@ const productService = {
       console.error("Erro ao deletar produto:", error);
       throw new appError(`Erro ao deletar produto: ${error.message}`, 500);
     }
+    if (error) {
+      console.error("Erro ao deletar produto:", error);
+      throw new appError(`Erro ao deletar produto: ${error.message}`, 500);
+    }
 
     return data;
   },
 
   // 5. Atualizar
   updateProductById: async (userId, id, body) => {
-    const { lat, lng,
+    const {
+      lat,
+      lng,
       product_images,
       images_to_remove,
       cover_image_url,
-      ...rest } = body;
+      ...rest
+    } = body;
 
     const payload = { ...rest };
 
@@ -229,24 +325,25 @@ const productService = {
       throw new appError(existingProductError.message, 404);
     }
 
-    if (!existingProduct) { // <--- Verifique se o objeto existe
-      throw new appError("Produto não encontrado ou não pertence ao usuário", 404);
+    if (existingProduct.profile_id !== userId) {
+      throw new appError(
+        "Usuário não autorizado para atualizar este produto",
+        403,
+      );
     }
-
-    let prodData = existingProduct; // Inicia com os dados existentes
-
+    let prodData;
     if (Object.keys(payload).length > 0) {
-
-      const { data, error } = await supabase.from("products")
+      const { data, error } = await supabase
+        .from("products")
         .update(payload)
         .eq("id", id)
         .eq("profile_id", userId)
-        .select();
+        .select()
+        .single();
 
       if (error) throw new appError(error.message);
-      if (!data || data.length === 0) throw new appError("Produto não encontrado ou não pertence ao usuário", 404);
 
-      prodData = data[0]; // Atualiza com os dados do update, se houver
+      prodData = data;
     }
 
 
@@ -333,7 +430,7 @@ const productService = {
     console.log('Produto atualizado com sucesso:', prodData);
 
     return prodData;
+    return prodData;
   },
-
 };
 export { productService };
