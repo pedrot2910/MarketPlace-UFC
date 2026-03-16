@@ -11,7 +11,7 @@ const baseSchema = z.object({
 const favoritesSchema = {
     toggle: z.object({
         body: baseSchema,
-        params: params
+        
     }),
 
     getFavoritesByUser: z.object({
