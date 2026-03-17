@@ -4,11 +4,12 @@ import {
   Send,
   ArrowLeft,
   User,
+  Star,
   Phone,
   Video,
   MoreVertical,
 } from "lucide-react";
-
+import { ReviewModal } from "../components/ReviewModal";
 import { chatService } from "../services/chatservice";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal, getOtherUser } from "../hooks/useChatModal";
@@ -27,6 +28,8 @@ export default function ChatModal() {
   const { openInbox } = useInboxModal();
   const { user, token } = useAuth();
   const [otherUser, setOtherUser] = useState<any>(null);
+  const [productData, setProductData] = useState<any>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [otherUserPhoto, setOtherUserPhoto] = useState<string>("");
   const [productTitle, setProductTitle] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -201,6 +204,7 @@ export default function ChatModal() {
       try {
         const product = await getListingById(String(productId));
         setProductTitle(product.title);
+        setProductData(product);
         console.log("📦 PRODUTO CARREGADO:", product.title);
       } catch (err) {
         console.error("Erro ao buscar produto:", err);
@@ -310,6 +314,7 @@ export default function ChatModal() {
   }
 
   const messageGroups = groupMessagesByDate(messages);
+  const isBuyer = user && productData && user.id !== productData.profile_id;
 
   return (
     <AnimatePresence>
@@ -383,6 +388,18 @@ export default function ChatModal() {
 
                 {/* Ações do header */}
                 <div className="flex items-center gap-1">
+                  {isBuyer && (
+                    <button
+                      onClick={() => setShowReviewModal(true)}
+                      className="hover:bg-white/20 rounded-full p-2 transition-colors flex items-center gap-1 group"
+                      title="Avaliar Vendedor"
+                    >
+                      <Star
+                        size={18}
+                        className="group-hover:fill-yellow-400 group-hover:text-yellow-400 transition-colors"
+                      />
+                    </button>
+                  )}
                   <button className="hover:bg-white/20 rounded-full p-2 transition-colors">
                     <Phone size={18} />
                   </button>
@@ -532,6 +549,16 @@ export default function ChatModal() {
               </div>
             </div>
           </motion.div>
+
+          {/* MODAL DE AVALIAÇÃO */}
+          {showReviewModal && productData && (
+            <ReviewModal
+              sellerId={productData.profile_id}
+              productId={productData.id}
+              sellerName={otherUser?.name}
+              onClose={() => setShowReviewModal(false)}
+            />
+          )}
         </>
       )}
     </AnimatePresence>

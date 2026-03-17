@@ -22,6 +22,8 @@ import { useAuth } from "../hooks/auth/useAuth";
 import { useChatModal } from "../hooks/useChatModal";
 import { toggleFavorite, checkIsFavorite } from "../services/favorites.service";
 import type { Profile } from "../types/profile";
+import { StarRating } from "../components/StarRating";
+import api from "@/services/api";
 
 type ProductDetails = {
   id: string;
@@ -54,6 +56,10 @@ export default function ListingDetails() {
   const [listing, setListing] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [Sold, setSold] = useState(false);
+  const [sellerStats, setSellerStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+  });
   const [isMarkingSold, setIsMarkingSold] = useState(false);
   const [showSuccessMarkAsSold, setShowSuccessMarkAsSold] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -98,6 +104,47 @@ export default function ListingDetails() {
 
     fetchData();
   }, [id, user]);
+
+  async function getSellerStats(profileId: string) {
+    try {
+      const response = await api.get(`/reviews/seller/${profileId}`);
+
+      console.log(
+        "⭐ DADOS DA AVALIAÇÃO QUE CHEGARAM DO BACKEND:",
+        response.data,
+      );
+
+      // Cenário 1: Se o backend mandou bonitinho com a propriedade "stats"
+      if (response.data && response.data.stats) {
+        setSellerStats({
+          averageRating: response.data.stats.average || 0,
+          totalReviews: response.data.stats.total || 0,
+        });
+      }
+      // Cenário 2: Se o backend mandou direto uma lista (Array) com as avaliações
+      else if (Array.isArray(response.data)) {
+        const total = response.data.length;
+        // Calcula a média na mão se o backend não mandou calculada
+        const average =
+          total > 0
+            ? response.data.reduce((acc, curr) => acc + curr.rating, 0) / total
+            : 0;
+
+        setSellerStats({
+          averageRating: average,
+          totalReviews: total,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas do vendedor:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (listing?.profile_id) {
+      getSellerStats(listing.profile_id);
+    }
+  }, [listing?.profile_id]);
 
   async function handleDelete() {
     setShowDeleteModal(true);
@@ -557,33 +604,6 @@ export default function ListingDetails() {
                   </button>
                 </>
               )}
-              <button
-                onClick={handleChat}
-                className="flex-1 bg-[var(--color-secondary-dark)] hover:bg-[var(--color-secondary)] text-[var(--color-text-invert)] font-semibold py-3 rounded-xl shadow transition-all duration-200"
-              >
-                Conversar com o vendedor
-              </button>
-              <button
-                onClick={() => {
-                  if (!user) return;
-                  setIsFavorite(!isFavorite);
-                  toggleFavorite(user.id, listing.id);
-                }}
-                className="p-3 bg-white/90 backdrop-blur-sm hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 cursor-pointer group"
-                title={
-                  isFavorite
-                    ? "Remover dos favoritos"
-                    : "Adicionar aos favoritos"
-                }
-              >
-                <Heart
-                  className={`w-6 h-6 transition-colors ${
-                    isFavorite
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-600 group-hover:text-red-500"
-                  }`}
-                />
-              </button>
             </div>
           ) : null}
 
@@ -615,6 +635,10 @@ export default function ListingDetails() {
                 <p className="text-sm text-[var(--color-text-muted)]">
                   {listing.profiles?.email ?? ""}
                 </p>
+                <StarRating
+                  rating={sellerStats.averageRating}
+                  totalReviews={sellerStats.totalReviews}
+                />
               </div>
             </div>
 
