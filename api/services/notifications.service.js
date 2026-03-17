@@ -23,7 +23,8 @@ createNotification: async (body) => {
     .select()
     .single();
 
-  if (error) throw new appError(error.message);
+  if (error) throw new appError("Erro ao criar notificação:" + error.message);
+  
   return notification;
 },
 

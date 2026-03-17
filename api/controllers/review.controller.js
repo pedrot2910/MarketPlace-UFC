@@ -1,5 +1,4 @@
 import { reviewService } from "../services/review.service.js";
-import supabase from "../supabase.js";
 
 const reviewController = {
   createReview: async (req, res, next) => {
@@ -13,7 +12,7 @@ const reviewController = {
 
   getSellerReviews: async (req, res, next) => {
     try {
-      const reviews = await reviewService.getSellerReviews(req.params.sellerId);
+      const reviews = await reviewService.getSellerReviews(req.params.id);
       res.status(200).json(reviews);
     } catch (error) {
       next(error);
