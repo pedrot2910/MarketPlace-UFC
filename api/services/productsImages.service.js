@@ -1,4 +1,3 @@
-import { url } from 'zod';
 import supabase from '../supabase.js'; 
 import { appError } from '../utils/appError.utils.js';
 

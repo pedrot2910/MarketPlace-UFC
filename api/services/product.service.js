@@ -26,6 +26,11 @@ const productService = {
 
   if (error) throw new appError(error.message);
 
+  const newImages = product_images.map( () =>{
+    product_id: newProduct.id
+    
+  } )
+
   if (product_images && Array.isArray(product_images) && product_images.length > 0) {
     await Promise.all(
       product_images.map((image, index) =>
