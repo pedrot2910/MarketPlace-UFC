@@ -9,7 +9,7 @@ const notificationsSchema = {
     body: z.object({
 
       userId: z.string().uuid(),
-      type: z.enum(["message", "purchase", "favorite", "system"]),
+      type: z.enum(["message", "purchase", "favorite", "system", "review"]),
       title: z.string().min(1),
       content: z.string().min(1),
       link: z.string().optional(),

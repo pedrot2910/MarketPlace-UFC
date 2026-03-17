@@ -14,7 +14,7 @@ reviewRoutes.post(
 );
 
 reviewRoutes.get(
-  "/seller/:sellerId",
+  "/seller/:id",
   validateSchema(reviewSchema.getBySellerId),
   reviewController.getSellerReviews,
 );

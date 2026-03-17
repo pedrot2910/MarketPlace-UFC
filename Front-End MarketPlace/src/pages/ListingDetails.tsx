@@ -146,6 +146,20 @@ export default function ListingDetails() {
     }
   }, [listing?.profile_id]);
 
+  // Atualização dinâmica: escuta evento quando uma nova avaliação é enviada
+  useEffect(() => {
+    function handleReviewSubmitted() {
+      if (listing?.profile_id) {
+        getSellerStats(listing.profile_id);
+      }
+    }
+
+    window.addEventListener("review-submitted", handleReviewSubmitted);
+    return () => {
+      window.removeEventListener("review-submitted", handleReviewSubmitted);
+    };
+  }, [listing?.profile_id]);
+
   async function handleDelete() {
     setShowDeleteModal(true);
   }

@@ -9,6 +9,18 @@ const reviewService = {
       throw appError(400, "Você não pode avaliar a si mesmo");
     }
 
+    // Verificar se o usuário já avaliou este produto
+    const { data: existingReview } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("reviewer_id", reviewerId)
+      .eq("product_id", body.product_id)
+      .maybeSingle();
+
+    if (existingReview) {
+      throw new appError("Você já avaliou este produto", 400);
+    }
+
     const { data: review, error } = await supabase
       .from("reviews")
       .insert([
@@ -21,8 +33,10 @@ const reviewService = {
       .single();
 
     if (error) {
+      if (error.code === "23505")
+        throw new appError("Você já avaliou este vendedor neste produto", 400);
       if (error.code === "23503")
-        throw new appError("Você já avaliou este produto", 400);
+        throw new appError("Vendedor ou produto não encontrado", 400);
       throw new appError("Erro ao fazer review: " + error.message);
     }
 
@@ -34,9 +48,11 @@ const reviewService = {
       link: `/product/${body.product_id}`,
     }
 
-    const notification = await notificationsService.createNotification(notificationBody);
-
-    if (!notification) throw new appError("Erro ao criar notificação de review!");
+    try {
+      await notificationsService.createNotification(notificationBody);
+    } catch (notifError) {
+      console.error("Erro ao criar notificação de review (não bloqueante):", notifError.message);
+    }
 
     return review;
   },
