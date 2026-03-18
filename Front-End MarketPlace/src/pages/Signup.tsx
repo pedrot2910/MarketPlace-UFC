@@ -1,16 +1,21 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, CheckCircle } from "lucide-react";
 import { authService } from "../services/auth.service";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [confirmModal, setConfirmModal] = useState(false);
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
+
+  const handleConfirmModal = async () => {
+    setConfirmModal(true)
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +28,58 @@ export default function Signup() {
         role: "student",
       });
 
-      navigate("/login");
+      handleConfirmModal();
     } catch (error: any) {
       alert(error.response?.data?.error || "Erro ao cadastrar");
     }
   };
 
   return (
+    <>
+      {/* Modal de confirmação de email */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-black/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center"
+          >
+            <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ background: 'linear-gradient(135deg, #7C3AED, #A78BFA)' }}>
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-[#1E1333] mb-2">
+              Verifique seu e-mail
+            </h2>
+
+            <p className="text-[#6B7280] mb-1">
+              Enviamos um link de confirmação para:
+            </p>
+            <p className="text-[#7C3AED] font-semibold mb-6">
+              {email}
+            </p>
+
+            <p className="text-sm text-[#9CA3AF] mb-6">
+              Acesse sua caixa de entrada e clique no link para ativar sua conta no <strong className="text-[#2D1B4D]">Marketplace ReUse</strong>.
+            </p>
+
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full py-3 rounded-xl text-white font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #7C3AED, #6B46E5)' }}
+            >
+              Ir para o Login
+            </button>
+
+            <p className="text-xs text-[#9CA3AF] mt-4">
+              Não recebeu? Verifique sua pasta de spam.
+            </p>
+          </motion.div>
+        </div>
+      )}
+
+
     <BackgroundGradientAnimation>
       <div className="absolute z-50 inset-0 flex items-center justify-center p-6">
         <motion.div
@@ -135,5 +185,6 @@ export default function Signup() {
         </motion.div>
       </div>
     </BackgroundGradientAnimation>
+    </>
   );
 }
