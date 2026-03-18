@@ -92,7 +92,6 @@ export default function Navbar() {
         </h1>
       </div>
 
-      {/* ÁREA DA DIREITA (Ações do Usuário / Autenticação) */}
       <div className="flex items-center gap-4">
 
         {!user?.id ? (
