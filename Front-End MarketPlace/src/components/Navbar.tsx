@@ -96,10 +96,6 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
 
         {!user?.id ? (
-          /* ==========================================
-             ESTADO 1: USUÁRIO DESLOGADO 
-             Mostra apenas os botões de Login e Cadastro
-             ========================================== */
           <div className="flex items-center gap-4 mr-2">
             <Link
               to="/login"
@@ -115,10 +111,6 @@ export default function Navbar() {
             </Link>
           </div>
         ) : (
-          /* ==========================================
-             ESTADO 2: USUÁRIO LOGADO 
-             Mostra Mensagens, Notificações e Perfil
-             ========================================== */
           <>
             {/* Botão de mensagens */}
             <div className="relative">
