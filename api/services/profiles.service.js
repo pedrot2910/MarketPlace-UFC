@@ -10,7 +10,7 @@ const profilesService = {
       .select();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao criar perfil: " + error.message, error.code);
     }
 
     return data;
@@ -20,7 +20,7 @@ const profilesService = {
     const { data, error } = await supabase.from('profiles').select('*');
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao buscar todos os perfis: " + error.message, 404);
     }
 
     return data;
@@ -34,7 +34,7 @@ const profilesService = {
       .single();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao buscar perfil por id: " + error.message, 404);
     }
 
     // Buscar foto de perfil separadamente
@@ -53,12 +53,27 @@ const profilesService = {
     return data;
   },
 
+  getProfileMat: async (matricula) => {
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('matricula', matricula)
+      .maybeSingle();
+
+    if (error) {
+      throw new appError("Erro ao procurar matricula existente no banco: " + error.message, 500);
+    }
+
+    return data;
+  },
+
   deleteProfileById: async (params) => {
     const { id } = params;
     const { error } = await supabase.from('profiles').delete().eq('id', id);
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao deletar perfil: " + error.message, 500);
     }
 
     return true;
@@ -84,7 +99,7 @@ const profilesService = {
       .eq('profile_id', profile_id);
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao buscar produtos do perfil: " + error.message, 500);
     }
 
     return data;
@@ -98,7 +113,7 @@ const profilesService = {
       .select();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao atualizar perfil: " + error.message, 500);
     }
 
     return data;
@@ -113,7 +128,7 @@ const profilesService = {
       .single();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao buscar imagem do perfil: " + error.message, 500);
     }
 
     return data;
@@ -128,7 +143,7 @@ const profilesService = {
       .select();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao criar imagem do perfil: " + error.message, 500);
     }
 
     return data[0];
@@ -144,7 +159,7 @@ const profilesService = {
       .select();
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao atualizar imagem do perfil: " + error.message, 500);
     }
 
     return data[0];
@@ -157,7 +172,7 @@ const profilesService = {
       .eq('id', id);
 
     if (error) {
-      throw new appError(error.message, 500);
+      throw new appError("Erro ao deletar imagem do perfil: " + error.message, 500);
     }
 
     return true;

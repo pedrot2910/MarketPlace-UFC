@@ -3,20 +3,22 @@ import { appError } from "../utils/appError.utils.js";
 import { notificationsService } from "./notifications.service.js";
 
 const reviewService = {
+  
   createReview: async (body, reviewerId) => {
 
     if (body.seller_id === reviewerId) {
       throw appError(400, "Você não pode avaliar a si mesmo");
     }
+    const payload = {
+      ...body,
+      reviewer_id: reviewerId,
+    }
+
+    console.log(payload);
 
     const { data: review, error } = await supabase
       .from("reviews")
-      .insert([
-        {
-          ...body,
-          reviewer_id: reviewerId,
-        },
-      ])
+      .insert([payload])
       .select(`*, profiles!reviewer_id (name)`)
       .single();
 
@@ -70,6 +72,37 @@ const reviewService = {
       },
     };
   },
+
+  getUserReview: async (body, userId) => {
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(`*`)
+      .eq("reviewer_id", userId)
+      .eq("seller_id", body.seller_id)
+      .single();
+
+    if (error) throw appError(error.message, 500);
+
+    return data;
+  },
+
+  updateReview: async (body, userId) => {
+
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .update(body)
+      .eq("reviewer_id", userId)
+      .eq("seller_id", body.seller_id)
+      .select(`*`)
+      .single();
+
+    if (error) throw appError(error.message, 500);
+
+    return data;
+  },
+
 };
 
 export { reviewService };

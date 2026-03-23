@@ -1,5 +1,6 @@
 import supabase from "../supabase.js";
 import { appError } from "../utils/appError.utils.js";
+import { profilesService } from "./profiles.service.js";
 
 function generateMatricula() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -9,11 +10,7 @@ async function generateUniqueMatricula() {
   for (let i = 0; i < 5; i++) {
     const matricula = generateMatricula();
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("matricula", matricula)
-      .maybeSingle();
+    const { data } = await profilesService.getProfileMat(matricula);
 
     if (!data) return matricula;
   }
