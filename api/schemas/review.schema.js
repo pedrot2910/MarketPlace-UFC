@@ -4,7 +4,7 @@ const params = z.object({ id: z.uuid("ID do vendedor invalido") })
 
 const baseSchema = z.object({
   seller_id: z.string().uuid("ID do vendedor inválido"),
-  product_id: z.string().uuid("ID do produto inválido").optional(),
+  product_id: z.string().uuid("ID do produto inválido"),
   rating: z
     .number()
     .int()

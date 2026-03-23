@@ -557,6 +557,9 @@ export default function ChatModal() {
               productId={productData.id}
               sellerName={otherUser?.name}
               onClose={() => setShowReviewModal(false)}
+              onReviewSubmitted={() => {
+                window.dispatchEvent(new Event("review-submitted"));
+              }}
             />
           )}
         </>

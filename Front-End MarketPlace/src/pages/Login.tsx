@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Lock, Mail, User } from "lucide-react"; // Adicionei o User para o ícone
+import { Lock, Mail, User, CheckCircle } from "lucide-react"; // Adicionei o User para o ícone
 import { useAuth } from "../hooks/auth/useAuth"; // Ajuste o caminho se necessário
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
@@ -10,6 +10,11 @@ export default function Login() {
 
   // Pegamos a função loginAsGuest do contexto
   const { login, loginAsGuest } = useAuth();
+  const [loginConcluido, setloginConcluido] = useState(false);
+
+  const handleConfirmModal = async () => {
+    setloginConcluido(true)
+  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +26,33 @@ export default function Login() {
   };
 
   return (
+    <>
+    {loginConcluido && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-black/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center"
+          >
+            <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ background: 'linear-gradient(135deg, #7C3AED, #A78BFA)' }}>
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-[#1E1333] mb-2">
+              Login realizado com sucesso!!
+            </h2>
+
+            <p className="text-[#6B7280] mb-1">
+              Estamos te Redirecionando para
+            </p>
+            <p className="text-[#7C3AED] font-semibold mb-6">
+              MarketPlace ReUse
+            </p>
+          </motion.div>
+        </div>
+    )}
+
     <BackgroundGradientAnimation>
       <div className="absolute z-50 inset-0 flex items-center justify-center p-6">
         <motion.div
@@ -84,6 +116,7 @@ export default function Login() {
             <div className="flex flex-col gap-3 pt-2">
               {/* Botão de Login Principal */}
               <motion.button
+                onClick={handleConfirmModal}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -126,5 +159,6 @@ export default function Login() {
         </motion.div>
       </div>
     </BackgroundGradientAnimation>
+    </>
   );
 }

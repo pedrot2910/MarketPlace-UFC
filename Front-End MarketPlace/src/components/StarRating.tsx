@@ -1,10 +1,10 @@
 import { Star } from "lucide-react";
 
 interface StarRatingProps {
-  rating: number; // Valor entre 0 e 5
+  rating: number;
   totalReviews: number;
-  interactive?: boolean; // Se for true, as estrelas podem ser clicadas para avaliar
-  onRate?: (rating: number) => void; // Função chamada quando o usuário clica para avaliar
+  interactive?: boolean;
+  onRate?: (rating: number) => void;
 }
 
 export function StarRating({
@@ -20,11 +20,10 @@ export function StarRating({
           <Star
             key={star}
             onClick={() => interactive && onRate && onRate(star)}
-            className={`w-5 h-5 ${interactive ? "cursor-pointer transition-transform hover:scale-110" : ""} ${
-              star <= rating
+            className={`w-5 h-5 ${interactive ? "cursor-pointer transition-transform hover:scale-110" : ""} ${star <= rating
                 ? "fill-yellow-400 text-yellow-400"
                 : "fill-transparent text-gray-300"
-            }`}
+              }`}
           />
         ))}
       </div>

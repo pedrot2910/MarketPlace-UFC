@@ -7,6 +7,7 @@ interface ReviewModalProps {
   productId: string;
   sellerName?: string;
   onClose: () => void;
+  onReviewSubmitted?: () => void;
 }
 
 export function ReviewModal({
@@ -14,6 +15,7 @@ export function ReviewModal({
   productId,
   sellerName,
   onClose,
+  onReviewSubmitted,
 }: ReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -32,6 +34,7 @@ export function ReviewModal({
         comment,
       });
       alert("Avaliação enviada com sucesso!");
+      onReviewSubmitted?.();
       onClose();
     } catch (error: any) {
       alert(error.response?.data?.message || "Erro ao avaliar vendedor.");
