@@ -3,6 +3,12 @@ import { appError } from "../utils/appError.utils.js";
 import { notificationsService } from "./notifications.service.js";
 
 const reviewService = {
+
+  // newReview: async (body, reviewerId) => {
+
+  //   if (body.seller_id === reviewerId) {
+  //     throw appError(400, "Você não pode avaliar a si mesmo");
+  //   }
   
   createReview: async (body, reviewerId) => {
 

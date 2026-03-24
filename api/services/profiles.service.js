@@ -1,5 +1,6 @@
 import supabase from '../supabase.js';
 import { appError } from '../utils/appError.utils.js';
+import { profilesImagesService } from './profilesImages.service.js';
 
 const profilesService = {
   createProfile: async (profileData) => {
@@ -39,11 +40,14 @@ const profilesService = {
 
     // Buscar foto de perfil separadamente
     if (data) {
-      const { data: profileImage } = await supabase
-        .from('profile_images')
-        .select('image_url')
-        .eq('id', id)
-        .single();
+
+      const { data: profileImage } = await profilesImagesService.getProfileImage(id);
+
+      if (!profileImage) {
+        data.profile_images = [];
+        
+        console.log("⚠️ Nenhuma imagem de perfil encontrada para o usuário com id:", id);
+      }
 
       if (profileImage) {
         data.profile_images = [profileImage];
@@ -84,17 +88,9 @@ const profilesService = {
     const { data, error } = await supabase
       .from('products')
       .select(
-        `
-      *,
-      profiles (
-        id,
-        name
-      ),
-      product_images (
-        image_url,
-        is_cover
-      )
-    `,
+        `*,
+        profiles (id, name),
+        product_images (image_url, is_cover)`,
       )
       .eq('profile_id', profile_id);
 
@@ -118,65 +114,7 @@ const profilesService = {
 
     return data;
   },
-
-  getProfileImage: async (params) => {
-    const { id } = params;
-    const { data, error } = await supabase
-      .from('profile_images')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      throw new appError("Erro ao buscar imagem do perfil: " + error.message, 500);
-    }
-
-    return data;
-  },
-
-  createProfileImage: async (id, body) => {
-    const { image_url } = body;
-    
-    const { data, error } = await supabase
-      .from('profile_images')
-      .insert([{ id: id, image_url: image_url }])
-      .select();
-
-    if (error) {
-      throw new appError("Erro ao criar imagem do perfil: " + error.message, 500);
-    }
-
-    return data[0];
-  },
-
-  updateProfileImage: async (id, body) => {
-    const { image_url } = body;
-
-    const { data, error } = await supabase
-      .from('profile_images')
-      .update({ image_url: image_url })
-      .eq('id', id)
-      .select();
-
-    if (error) {
-      throw new appError("Erro ao atualizar imagem do perfil: " + error.message, 500);
-    }
-
-    return data[0];
-  },
-
-  deleteProfileImage: async (id) => {
-    const { error } = await supabase
-      .from('profile_images')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      throw new appError("Erro ao deletar imagem do perfil: " + error.message, 500);
-    }
-
-    return true;
-  },
+  
 };
 
 export { profilesService };

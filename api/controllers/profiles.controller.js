@@ -40,59 +40,8 @@ const profilesController = {
     }
   },
 
-  getProfileImage: async (req, res, next) => {
-    try {
-      const image = await profilesService.getProfileImage(req.params);
-
-      if (!image) {
-        return res.status(200).json({ imageUrl: null });
-      }
-      res.status(200).json({ imageUrl: image.image_url });
-    } catch (error) {
-      if (
-        error.message &&
-        (error.message.includes("JSON object requested") ||
-          error.message.includes("Not found"))
-      ) {
-        return res.status(200).json({ imageUrl: null });
-      }
-
-      next(error);
-    }
-  },
-
-  createProfileImage: async (req, res, next) => {
-    try {
-      const image = await profilesService.createProfileImage(
-        req.user.id,
-        req.body,
-      );
-      res.status(201).json(image);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  updateProfileImage: async (req, res, next) => {
-    try {
-      const image = await profilesService.updateProfileImage(
-        req.user.id,
-        req.body,
-      );
-      res.status(200).json(image);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  deleteProfileImage: async (req, res, next) => {
-    try {
-      await profilesService.deleteProfileImage(req.user.id);
-      res.status(200).json({ message: "Imagem deletada com sucesso" });
-    } catch (error) {
-      next(error);
-    }
-  },
 };
+
+  
 
 export { profilesController };
