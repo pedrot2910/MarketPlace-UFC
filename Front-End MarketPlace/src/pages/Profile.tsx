@@ -51,20 +51,22 @@ export default function Profile() {
         setLoading(true);
 
         const profileData = await fetchProfileById(user.id);
+
+        console.log("PROFILE DATA:", profileData);
+
         setProfile(profileData);
+
         setForm({
           name: profileData.name,
           email: profileData.email,
         });
 
-        // Carregar foto de perfil
-        try {
-          const imageData = await getProfileImage(user.id);
-          if (imageData?.imageUrl) {
-            setProfileImageUrl(imageData.imageUrl);
-          }
-        } catch (err) {
-          console.log("Sem foto de perfil");
+        const imageUrl = profileData?.profile_images?.[0]?.image_url;
+
+        console.log("URL DA FOTO:", imageUrl);
+
+        if (imageUrl) {
+          setProfileImageUrl(imageUrl);
         }
 
         const userListings = await productsService.getByProfile(user.id);

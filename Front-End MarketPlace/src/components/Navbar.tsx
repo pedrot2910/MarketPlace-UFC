@@ -8,7 +8,7 @@ import { useInboxModal } from "../hooks/useInboxModal";
 import { useNotifications } from "../hooks/useNotifications";
 import { useUnreadMessages } from "../hooks/useUnreadMessages";
 import { NotificationCenter } from "./NotificationDropdown";
-import { getProfileImage } from "../services/profile";
+import { fetchProfileById } from "../services/profile";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -18,41 +18,50 @@ export default function Navbar() {
   const ref = useRef<HTMLDivElement>(null);
   const notRef = useRef<HTMLDivElement>(null);
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { openInbox } = useInboxModal();
   const { unreadCount } = useNotifications();
   const { unreadCount: unreadMessagesCount } = useUnreadMessages();
 
   useEffect(() => {
     async function loadProfileImage() {
-      if (user?.id) {
-        try {
-          const imageData = await getProfileImage(user.id);
-          if (imageData?.imageUrl) {
-            setProfileImageUrl(imageData.imageUrl);
-          } else {
-            setProfileImageUrl(null);
-          }
-        } catch (err) {
-          console.log("Sem foto de perfil");
+      if (!user?.id) {
+        setProfileImageUrl(null);
+        return;
+      }
+
+      try {
+        const profileData = await fetchProfileById(user.id);
+
+        console.log("PROFILE DATA NAVBAR:", profileData);
+
+        const imageUrl = profileData?.profile_images?.[0]?.image_url;
+
+        console.log("URL DA FOTO NAVBAR:", imageUrl);
+
+        if (imageUrl) {
+          setProfileImageUrl(imageUrl);
+        } else {
           setProfileImageUrl(null);
         }
+      } catch (err) {
+        console.log("Sem foto de perfil na navbar:", err);
+        setProfileImageUrl(null);
       }
     }
+
     loadProfileImage();
 
     const handleProfileImageUpdate = () => {
       loadProfileImage();
     };
+
     window.addEventListener("profileImageUpdated", handleProfileImageUpdate);
 
     return () => {
       window.removeEventListener(
         "profileImageUpdated",
-        handleProfileImageUpdate
+        handleProfileImageUpdate,
       );
     };
   }, [user?.id]);
@@ -93,7 +102,6 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-4">
-
         {!user?.id ? (
           <div className="flex items-center gap-4 mr-2">
             <Link
@@ -164,8 +172,11 @@ export default function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[var(--color-secundary-dark)]">
-                    <User size={24} className="text-[var(--color-text-invert)]" />
+                  <div className="w-full h-full flex items-center justify-center bg-[var(--color-secondary-dark)]">
+                    <User
+                      size={24}
+                      className="text-[var(--color-text-invert)]"
+                    />
                   </div>
                 )}
               </button>

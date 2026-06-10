@@ -18,18 +18,19 @@ export async function updateProfile(
   return response.data;
 }
 
+
 export async function getProfileImage(profileId: string) {
   const response = await api.get(`/profiles/${profileId}/image`);
   return response.data;
 }
 
 export async function uploadProfileImage(profileId: string, imageUrl: string) {
-  const response = await api.post(`/profiles/${profileId}/image`, { imageUrl });
+  const response = await api.post(`/profiles/${profileId}/image`, { image_url: imageUrl });
   return response.data;
 }
 
 export async function updateProfileImage(profileId: string, imageUrl: string) {
-  const response = await api.put(`/profiles/${profileId}/image`, { imageUrl });
+  const response = await api.put(`/profiles/${profileId}/image`, { image_url: imageUrl });
   return response.data;
 }
 
