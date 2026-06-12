@@ -41,8 +41,8 @@ const profilesService = {
     // Buscar foto de perfil separadamente
     if (data) {
 
-      const { data: profileImage } = await profilesImagesService.getProfileImage(id);
-
+      const profileImage = await profilesImagesService.getProfileImage(id);
+      
       if (!profileImage) {
         data.profile_images = [];
         

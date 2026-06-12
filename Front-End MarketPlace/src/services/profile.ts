@@ -20,21 +20,21 @@ export async function updateProfile(
 
 
 export async function getProfileImage(profileId: string) {
-  const response = await api.get(`/profiles/${profileId}/image`);
+  const response = await api.get(`/profiles-images/${profileId}/image`);
   return response.data;
 }
 
 export async function uploadProfileImage(profileId: string, imageUrl: string) {
-  const response = await api.post(`/profiles/${profileId}/image`, { image_url: imageUrl });
+  const response = await api.post(`/profiles-images/${profileId}/image`, { image_url: imageUrl });
   return response.data;
 }
 
 export async function updateProfileImage(profileId: string, imageUrl: string) {
-  const response = await api.put(`/profiles/${profileId}/image`, { image_url: imageUrl });
+  const response = await api.put(`/profiles-images/${profileId}/image`, { image_url: imageUrl });
   return response.data;
 }
 
 export async function deleteProfileImage(profileId: string) {
-  const response = await api.delete(`/profiles/${profileId}/image`);
+  const response = await api.delete(`/profiles-images/${profileId}/image`);
   return response.data;
 }

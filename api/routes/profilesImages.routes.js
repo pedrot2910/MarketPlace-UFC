@@ -22,11 +22,13 @@ profilesImagesRoutes.put(
 profilesImagesRoutes.delete(
   '/:id/image',
   authMiddleware,
-
   profilesImagesController.deleteProfileImage,
 );
 
-profilesImagesRoutes.get('/:id/image', profilesImagesController.getProfileImage);
+profilesImagesRoutes.get(
+  '/:id/image', 
+  profilesImagesController.getProfileImage
+);
 
 
 

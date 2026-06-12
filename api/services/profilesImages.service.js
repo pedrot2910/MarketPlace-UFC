@@ -25,16 +25,17 @@ const profilesImagesService = {
   },
 
     getProfileImage: async (id) => {
+      
     const { data, error } = await supabase
       .from('profile_images')
       .select('*')
       .eq('id', id)
       .single();
-
+      
     if (error) {
       throw new appError("Erro ao buscar imagem do perfil: " + error.message, 500);
     }
-
+    
     return data;
   },
 
@@ -55,7 +56,7 @@ const profilesImagesService = {
   },
 
   deleteProfileImage: async (id) => {
-    const { data: profileImage } = await profilesImagesService.getProfileImage(id);
+    const profileImage = await profilesImagesService.getProfileImage(id);
 
     if (!profileImage) {
       throw new appError("Imagem do perfil não encontrada.", 404);
