@@ -83,7 +83,7 @@ const productSchema = {
       categoryId: params.shape.id.optional(),
     }),
   }),
-  markAsSold: z.object({
+  toggleAsSold: z.object({
     params: params,
   }),
 };

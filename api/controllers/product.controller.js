@@ -30,13 +30,13 @@ const productController = {
     }
   },
 
-  markAsSold: async (req, res, next) => {
+  toggleAsSold: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const updatedProduct = await productService.markAsSold(id, req.user.id);
+      const updatedProduct = await productService.toggleAsSold(id, req.user.id);
 
       res.status(200).json({
-        message: "Produto marcado como vendido com sucesso!",
+        message: "Estatus do produto atualizado com sucesso!",
         product: updatedProduct,
       });
     } catch (error) {

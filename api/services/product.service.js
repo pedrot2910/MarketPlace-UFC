@@ -340,5 +340,36 @@ const productService = {
       return prodData;
   },
 
+  toggleAsSold: async (id, userId) => {
+    
+    const {status} = await productService.getProductById(id);
+
+    if (status === "vendido") {
+
+      const { data, error } = await supabase
+        .from("products")
+        .update({ status: "ativo" })
+        .eq("id", id)
+        .eq("profile_id", userId)
+        .select();
+
+      if (error) throw new appError(error.message);
+
+      return data[0];
+    } else {
+
+      const { data, error } = await supabase
+        .from("products")
+        .update({ status: "vendido" })
+        .eq("id", id)
+        .eq("profile_id", userId)
+        .select();
+
+      if (error) throw new appError(error.message);
+
+      return data[0];
+    }
+  },
+
 };
 export { productService };

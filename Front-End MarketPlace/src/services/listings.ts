@@ -69,7 +69,7 @@ export async function updateListing(
   return response.data;
 }
 
-export async function markAsSold(id: string) {
+export async function toggleAsSold(id: string) {
   const response = await api.patch(`/products/${id}/sold`);
   return response.data;
 }

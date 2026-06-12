@@ -66,6 +66,30 @@ const favoritesService = {
 
         if (error) throw new appError(error.message);
         return true;
+    },
+
+    toggleFavorite: async (body, user_id) => {
+        const existingFavorite = await favoritesService.getByUserAndProduct(body, user_id);
+
+        if (existingFavorite) {
+
+            await favoritesService.deleteByUserAndProduct(body, user_id);
+
+            return { 
+                    message: 'Produto removido dos favoritos.', 
+                    action: 'removed'
+                };
+
+        } else {
+            const [newFavorite] = await favoritesService.createFavorite(body, user_id);
+
+            return { 
+                    message: 'Produto adicionado aos favoritos.', 
+                    action: 'created',
+                    data: newFavorite
+                };
+
+        }
     }
     
 };

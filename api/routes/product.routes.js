@@ -38,8 +38,8 @@ productRoutes.put(
 productRoutes.patch(
   "/:id/sold",
   authMiddleware,
-  validateSchema(productSchema.markAsSold),
-  productController.markAsSold,
+  validateSchema(productSchema.toggleAsSold),
+  productController.toggleAsSold,
 );
 
 export { productRoutes };
